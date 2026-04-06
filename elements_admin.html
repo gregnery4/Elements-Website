@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELEMENTS — Coach Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold:       #C9A86C;
+  --gold-mid:   #A8813A;
+  --gold-dark:  #7D5C20;
+  --gold-dim:   rgba(201,168,108,0.12);
+  --black:      #060606;
+  --c1:         #0E0E0E;
+  --c2:         #141414;
+  --c3:         #1A1A1A;
+  --c4:         #222222;
+  --c5:         #2A2A2A;
+  --white:      #F0EDE8;
+  --muted:      #7A746C;
+  --border:     rgba(201,168,108,0.13);
+  --borderw:    rgba(255,255,255,0.06);
+  --green:      #4CAF82;
+  --red:        #CF6679;
+  --blue:       #5B8FD4;
+  --yellow:     #D4A843;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  background:var(--black);color:var(--white);
+  font-family:'Montserrat',sans-serif;font-weight:300;
+  overflow:hidden;
+}
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9999;
+}
+
+/* ── LOGIN ── */
+#login{
+  position:fixed;inset:0;z-index:500;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--black);
+  transition:opacity .6s,transform .6s;
+}
+#login.gone{opacity:0;pointer-events:none;transform:scale(1.03);}
+.login-bg{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 55% 55% at 65% 50%,rgba(100,65,10,.14) 0%,transparent 70%);
+}
+.login-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(to right,rgba(201,168,108,.04) 1px,transparent 1px),
+    linear-gradient(to bottom,rgba(201,168,108,.04) 1px,transparent 1px);
+  background-size:64px 64px;
+}
+.lbox{
+  position:relative;z-index:2;width:420px;
+  background:var(--c1);border:1px solid var(--border);
+  padding:52px 48px 48px;
+  animation:fup .8s ease both;
+}
+@keyframes fup{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:translateY(0);}}
+.llogo{display:flex;align-items:center;margin-bottom:36px;}
+.llogo-icon{
+  width:40px;height:40px;border:2px solid var(--white);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.llogo-icon span{
+  font-family:'Bebas Neue',sans-serif;font-size:24px;
+  background:linear-gradient(145deg,#D4A853,#8B6020,#C9893A);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.llogo-text{margin-left:3px;}
+.llogo-name{
+  font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;
+  background:linear-gradient(90deg,#D4A853,#8B6020,#C9893A);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  display:block;line-height:1;
+}
+.llogo-sub{font-size:7px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-top:3px;display:block;}
+.admin-badge{
+  display:inline-block;padding:4px 12px;
+  background:rgba(207,102,121,.1);border:1px solid rgba(207,102,121,.25);
+  color:var(--red);font-size:8px;letter-spacing:3px;text-transform:uppercase;
+  margin-bottom:28px;
+}
+.ltitle{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;margin-bottom:4px;}
+.lsub{font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:32px;}
+.lfield{margin-bottom:18px;}
+.lfield label{display:block;font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;}
+.lfield input{
+  width:100%;background:var(--c3);border:1px solid var(--borderw);
+  color:var(--white);padding:12px 16px;
+  font-family:'Montserrat',sans-serif;font-size:13px;font-weight:300;
+  outline:none;transition:border-color .3s;
+}
+.lfield input:focus{border-color:var(--gold-mid);}
+.lfield input::placeholder{color:var(--muted);}
+.lbtn{
+  width:100%;padding:14px;
+  background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));
+  color:var(--white);border:none;cursor:pointer;
+  font-family:'Montserrat',sans-serif;
+  font-size:10px;letter-spacing:3.5px;text-transform:uppercase;font-weight:600;
+  transition:all .3s;margin-top:6px;
+}
+.lbtn:hover{background:linear-gradient(135deg,var(--gold),var(--gold-mid));}
+
+/* ── SHELL ── */
+#app{display:flex;height:100vh;opacity:0;transition:opacity .5s;}
+#app.vis{opacity:1;}
+
+/* ── SIDEBAR ── */
+.sb{
+  width:220px;flex-shrink:0;
+  background:var(--c1);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.sb-logo{
+  display:flex;align-items:center;
+  padding:24px 22px 20px;border-bottom:1px solid var(--border);
+}
+.sb-logo-icon{
+  width:32px;height:32px;border:1.5px solid var(--white);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.sb-logo-icon span{
+  font-family:'Bebas Neue',sans-serif;font-size:19px;
+  background:linear-gradient(145deg,#D4A853,#8B6020,#C9893A);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.sb-logo-text{margin-left:3px;}
+.sb-logo-name{
+  font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:2px;
+  background:linear-gradient(90deg,#D4A853,#8B6020,#C9893A);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  display:block;line-height:1;
+}
+.sb-logo-sub{font-size:6px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-top:2px;display:block;}
+.sb-coach{
+  padding:18px 22px;border-bottom:1px solid var(--border);
+}
+.coach-av{
+  width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(135deg,#8B3050,#CF6679);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--white);
+  margin-bottom:10px;
+}
+.coach-name{font-size:12px;font-weight:500;margin-bottom:2px;}
+.coach-role{
+  font-size:8px;letter-spacing:2px;text-transform:uppercase;
+  padding:3px 8px;background:rgba(207,102,121,.1);
+  border:1px solid rgba(207,102,121,.2);color:var(--red);
+  display:inline-block;
+}
+.sb-nav{flex:1;padding:14px 0;overflow-y:auto;}
+.sb-section{font-size:8px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;padding:12px 22px 6px;}
+.sb-item{
+  display:flex;align-items:center;gap:11px;
+  padding:10px 22px;cursor:pointer;
+  font-size:11px;letter-spacing:1px;color:var(--muted);
+  transition:all .25s;border-left:2px solid transparent;
+  text-transform:uppercase;
+}
+.sb-item svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;flex-shrink:0;}
+.sb-item:hover{color:var(--white);background:rgba(255,255,255,.03);}
+.sb-item.on{color:var(--gold);border-left-color:var(--gold-mid);background:var(--gold-dim);}
+.sb-item .count{
+  margin-left:auto;font-size:9px;padding:1px 7px;
+  background:var(--c4);color:var(--muted);border-radius:8px;
+}
+.sb-item.on .count{background:rgba(201,168,108,.2);color:var(--gold);}
+.sb-footer{padding:18px 22px;border-top:1px solid var(--border);}
+.sb-logout{
+  display:flex;align-items:center;gap:9px;
+  font-size:10px;letter-spacing:2px;color:var(--muted);
+  text-transform:uppercase;cursor:pointer;transition:color .25s;
+  background:none;border:none;
+}
+.sb-logout svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.6;}
+.sb-logout:hover{color:var(--red);}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;overflow-x:hidden;background:var(--black);}
+.main::-webkit-scrollbar{width:4px;}
+.main::-webkit-scrollbar-track{background:var(--c1);}
+.main::-webkit-scrollbar-thumb{background:var(--c4);}
+.main::-webkit-scrollbar-thumb:hover{background:var(--gold-dark);}
+
+/* ── TOPBAR ── */
+.topbar{
+  padding:18px 36px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--c1);position:sticky;top:0;z-index:10;
+}
+.tb-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;}
+.tb-right{display:flex;align-items:center;gap:14px;}
+.tb-date{font-size:10px;color:var(--muted);letter-spacing:1.5px;}
+.tag{padding:4px 12px;font-size:8.5px;letter-spacing:2px;text-transform:uppercase;font-weight:600;}
+.tag-red{background:rgba(207,102,121,.1);color:var(--red);border:1px solid rgba(207,102,121,.25);}
+.tag-gold{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(201,168,108,.3);}
+.tag-green{background:rgba(76,175,130,.1);color:var(--green);border:1px solid rgba(76,175,130,.25);}
+.tag-blue{background:rgba(91,143,212,.1);color:var(--blue);border:1px solid rgba(91,143,212,.25);}
+
+/* ── PAGES ── */
+.page{display:none;padding:32px 36px 60px;animation:fi .35s ease;}
+.page.on{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── SHARED ── */
+.pg-head{margin-bottom:28px;}
+.pg-head h2{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(28px,3vw,42px);letter-spacing:2px;line-height:1;
+}
+.pg-head h2 span{
+  background:linear-gradient(135deg,#D4A853,#8B6020,#C9893A);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.pg-head p{font-size:11px;color:var(--muted);margin-top:6px;letter-spacing:.5px;}
+
+.card{background:var(--c2);border:1px solid var(--border);padding:24px;}
+.card-hd{
+  font-size:9px;letter-spacing:2.5px;color:var(--gold);
+  text-transform:uppercase;margin-bottom:18px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.card-hd-act{font-size:9px;color:var(--muted);cursor:pointer;letter-spacing:1px;transition:color .2s;}
+.card-hd-act:hover{color:var(--gold);}
+
+.krow{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:28px;}
+.kcard{
+  background:var(--c2);border:1px solid var(--border);
+  padding:24px 22px;transition:border-color .3s;
+}
+.kcard:hover{border-color:rgba(201,168,108,.35);}
+.klbl{font-size:8.5px;letter-spacing:2.5px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
+.kval{
+  font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:1px;
+  background:linear-gradient(135deg,#D4A853,#8B6020);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  line-height:1;
+}
+.ksub{font-size:10px;color:var(--muted);margin-top:5px;}
+.ktrend{font-size:9px;margin-top:6px;}
+.ktrend.up{color:var(--green);}.ktrend.dn{color:var(--red);}
+
+/* ── OVERVIEW ALERTS ── */
+.alert-row{display:flex;gap:2px;margin-bottom:28px;}
+.alert-card{
+  flex:1;background:var(--c2);border:1px solid var(--border);
+  padding:20px 22px;display:flex;align-items:flex-start;gap:14px;
+  transition:border-color .3s;
+}
+.alert-card:hover{border-color:rgba(201,168,108,.3);}
+.alert-dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;
+}
+.alert-dot.red{background:var(--red);}
+.alert-dot.gold{background:var(--gold);}
+.alert-dot.green{background:var(--green);}
+.alert-title{font-size:12px;font-weight:500;margin-bottom:3px;}
+.alert-sub{font-size:10px;color:var(--muted);}
+
+/* ── CLIENT TABLE ── */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead tr{border-bottom:1px solid var(--border);}
+thead th{
+  text-align:left;padding:10px 14px;
+  font-size:8.5px;letter-spacing:2px;color:var(--muted);
+  text-transform:uppercase;font-weight:400;white-space:nowrap;
+}
+tbody tr{
+  border-bottom:1px solid var(--borderw);
+  transition:background .2s;cursor:pointer;
+}
+tbody tr:hover{background:rgba(255,255,255,.025);}
+tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
+.av{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--white);
+  flex-shrink:0;
+}
+.client-cell{display:flex;align-items:center;gap:12px;}
+.client-cell-name{font-size:12px;font-weight:500;}
+.client-cell-sub{font-size:10px;color:var(--muted);}
+.sparkline{width:70px;height:24px;}
+.prog-bar{height:3px;background:var(--c5);}
+.prog-fill{height:3px;background:linear-gradient(90deg,var(--gold-dark),var(--gold));}
+
+/* ── CLIENT DETAIL PANEL ── */
+#detail-overlay{
+  position:fixed;inset:0;z-index:50;
+  background:rgba(0,0,0,.6);backdrop-filter:blur(4px);
+  opacity:0;pointer-events:none;transition:opacity .35s;
+}
+#detail-overlay.open{opacity:1;pointer-events:all;}
+#detail-panel{
+  position:fixed;top:0;right:0;bottom:0;width:min(96vw,740px);
+  background:var(--c1);border-left:1px solid var(--border);
+  overflow-y:auto;transform:translateX(100%);
+  transition:transform .4s cubic-bezier(.16,1,.3,1);
+  z-index:51;
+}
+#detail-overlay.open #detail-panel{transform:translateX(0);}
+#detail-panel::-webkit-scrollbar{width:3px;}
+#detail-panel::-webkit-scrollbar-thumb{background:var(--c5);}
+
+.dp-header{
+  padding:24px 28px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;background:var(--c1);z-index:5;
+}
+.dp-header-left{display:flex;align-items:center;gap:16px;}
+.dp-av{
+  width:48px;height:48px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white);
+}
+.dp-name{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;}
+.dp-meta{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:1px;}
+.dp-close{
+  background:none;border:none;cursor:pointer;
+  color:var(--muted);font-size:10px;letter-spacing:2px;
+  text-transform:uppercase;font-family:'Montserrat',sans-serif;
+  display:flex;align-items:center;gap:8px;transition:color .2s;padding:6px;
+}
+.dp-close:hover{color:var(--white);}
+.dp-close svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;}
+
+.dp-tabs{
+  display:flex;border-bottom:1px solid var(--border);
+  padding:0 28px;background:var(--c1);
+  position:sticky;top:73px;z-index:4;
+}
+.dp-tab{
+  padding:14px 20px;font-size:10px;letter-spacing:2px;
+  text-transform:uppercase;color:var(--muted);cursor:pointer;
+  border-bottom:2px solid transparent;transition:all .25s;
+}
+.dp-tab.on{color:var(--gold);border-bottom-color:var(--gold-mid);}
+.dp-tab:hover{color:var(--white);}
+
+.dp-body{padding:28px;}
+.dp-section{margin-bottom:24px;}
+.dp-section-title{
+  font-size:9px;letter-spacing:2.5px;color:var(--gold);
+  text-transform:uppercase;margin-bottom:14px;
+  padding-bottom:10px;border-bottom:1px solid var(--border);
+}
+
+/* editable fields */
+.edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.edit-field{}
+.edit-field label{display:block;font-size:8.5px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
+.edit-field input,
+.edit-field select,
+.edit-field textarea{
+  width:100%;background:var(--c3);border:1px solid var(--borderw);
+  color:var(--white);padding:10px 14px;
+  font-family:'Montserrat',sans-serif;font-size:12px;font-weight:300;
+  outline:none;transition:border-color .3s;
+}
+.edit-field input:focus,
+.edit-field select:focus,
+.edit-field textarea:focus{border-color:var(--gold-mid);}
+.edit-field select option{background:var(--c2);}
+.edit-field textarea{height:90px;resize:vertical;}
+
+.save-btn{
+  padding:11px 28px;
+  background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));
+  color:var(--white);border:none;cursor:pointer;
+  font-family:'Montserrat',sans-serif;
+  font-size:9px;letter-spacing:3px;text-transform:uppercase;font-weight:600;
+  transition:all .3s;
+}
+.save-btn:hover{background:linear-gradient(135deg,var(--gold),var(--gold-mid));}
+.cancel-btn{
+  padding:11px 22px;background:transparent;
+  border:1px solid var(--borderw);color:var(--muted);
+  font-family:'Montserrat',sans-serif;
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;
+  transition:all .3s;margin-right:8px;
+}
+.cancel-btn:hover{border-color:var(--muted);color:var(--white);}
+
+/* supp toggle */
+.supp-toggle-row{
+  display:flex;align-items:center;gap:14px;
+  padding:11px 0;border-bottom:1px solid var(--borderw);
+}
+.supp-toggle-row:last-child{border-bottom:none;}
+.st-icon{font-size:18px;width:28px;text-align:center;flex-shrink:0;}
+.st-info{flex:1;}
+.st-name{font-size:12px;font-weight:500;}
+.st-dose{font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:2px;}
+.toggle{
+  width:36px;height:19px;border-radius:10px;
+  background:var(--c5);border:1px solid var(--borderw);
+  cursor:pointer;position:relative;transition:background .3s;flex-shrink:0;
+}
+.toggle.on{background:var(--gold-dark);border-color:var(--gold-mid);}
+.toggle::after{
+  content:'';position:absolute;top:2px;left:2px;
+  width:13px;height:13px;border-radius:50%;
+  background:var(--muted);transition:all .3s;
+}
+.toggle.on::after{left:19px;background:var(--gold);}
+
+/* session list in panel */
+.sess-row{
+  display:flex;align-items:center;gap:14px;
+  padding:12px 0;border-bottom:1px solid var(--borderw);
+}
+.sess-row:last-child{border-bottom:none;}
+.sess-date{font-size:10px;color:var(--muted);letter-spacing:1px;width:120px;flex-shrink:0;}
+.sess-name{flex:1;font-size:12px;}
+.sess-tag{
+  font-size:8px;letter-spacing:1.5px;text-transform:uppercase;
+  padding:3px 10px;
+}
+.sess-tag.done{background:rgba(76,175,130,.08);color:var(--green);border:1px solid rgba(76,175,130,.25);}
+.sess-tag.up{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(201,168,108,.25);}
+
+/* note textarea */
+.note-box{
+  width:100%;background:var(--c3);border:1px solid var(--borderw);
+  color:var(--white);padding:14px;
+  font-family:'Montserrat',sans-serif;font-size:12px;font-weight:300;
+  outline:none;transition:border-color .3s;
+  height:120px;resize:none;display:block;margin-bottom:10px;
+}
+.note-box:focus{border-color:var(--gold-mid);}
+.note-prev{
+  background:var(--c3);border:1px solid var(--borderw);
+  padding:14px;margin-bottom:8px;
+}
+.note-prev-date{font-size:9px;color:var(--gold);letter-spacing:1.5px;margin-bottom:5px;}
+.note-prev-text{font-size:11px;color:var(--muted);line-height:1.8;}
+
+/* ── SCHEDULE PAGE ── */
+.sched-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:24px;}
+.sched-day-hd{
+  text-align:center;font-size:8px;letter-spacing:2px;color:var(--muted);
+  text-transform:uppercase;padding:8px 0;
+}
+.sched-day{
+  background:var(--c2);border:1px solid var(--borderw);
+  padding:10px 8px;min-height:100px;
+  transition:border-color .25s;
+}
+.sched-day.today{border-color:var(--gold-mid);background:var(--gold-dim);}
+.sched-day-num{
+  font-size:11px;color:var(--muted);margin-bottom:8px;
+  font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;
+}
+.sched-day.today .sched-day-num{color:var(--gold);}
+.sched-event{
+  background:var(--c4);border-left:2px solid var(--gold-mid);
+  padding:5px 7px;margin-bottom:4px;font-size:9px;cursor:pointer;
+  transition:background .2s;
+}
+.sched-event:hover{background:var(--c5);}
+.sched-event-name{color:var(--white);font-weight:500;margin-bottom:1px;}
+.sched-event-time{color:var(--muted);font-size:8px;}
+
+/* ── MESSAGES PAGE ── */
+.msg-grid{display:grid;grid-template-columns:280px 1fr;gap:2px;height:calc(100vh - 140px);}
+.msg-list{background:var(--c2);border:1px solid var(--border);overflow-y:auto;}
+.msg-list::-webkit-scrollbar{width:3px;}
+.msg-list::-webkit-scrollbar-thumb{background:var(--c5);}
+.msg-item{
+  padding:16px 18px;border-bottom:1px solid var(--borderw);
+  cursor:pointer;transition:background .2s;display:flex;align-items:center;gap:12px;
+}
+.msg-item:hover{background:rgba(255,255,255,.03);}
+.msg-item.on{background:var(--gold-dim);border-left:2px solid var(--gold-mid);}
+.msg-av{
+  width:34px;height:34px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--white);flex-shrink:0;
+}
+.msg-info{flex:1;min-width:0;}
+.msg-name{font-size:11px;font-weight:500;}
+.msg-preview{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.msg-time{font-size:9px;color:var(--muted);}
+.unread{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--gold);flex-shrink:0;
+}
+
+.msg-thread{
+  background:var(--c2);border:1px solid var(--border);
+  display:flex;flex-direction:column;
+}
+.msg-thread-hd{
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.msg-thread-hd-right{font-size:10px;color:var(--muted);letter-spacing:1px;font-family:'Montserrat',sans-serif;}
+.msg-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px;}
+.msg-body::-webkit-scrollbar{width:3px;}
+.msg-bubble{max-width:75%;}
+.msg-bubble.coach{align-self:flex-end;}
+.msg-bubble.client{align-self:flex-start;}
+.bubble-text{
+  padding:11px 16px;font-size:12px;line-height:1.7;
+}
+.msg-bubble.coach .bubble-text{
+  background:linear-gradient(135deg,var(--gold-dark),#5A3D10);
+  color:var(--white);
+}
+.msg-bubble.client .bubble-text{background:var(--c3);color:var(--white);}
+.bubble-time{font-size:9px;color:var(--muted);margin-top:4px;letter-spacing:1px;}
+.msg-bubble.coach .bubble-time{text-align:right;}
+.msg-input-row{
+  padding:16px 20px;border-top:1px solid var(--border);
+  display:flex;gap:10px;
+}
+.msg-input{
+  flex:1;background:var(--c3);border:1px solid var(--borderw);
+  color:var(--white);padding:11px 16px;
+  font-family:'Montserrat',sans-serif;font-size:12px;font-weight:300;
+  outline:none;transition:border-color .3s;
+}
+.msg-input:focus{border-color:var(--gold-mid);}
+.msg-input::placeholder{color:var(--muted);}
+.msg-send{
+  padding:11px 22px;
+  background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));
+  color:var(--white);border:none;cursor:pointer;
+  font-family:'Montserrat',sans-serif;
+  font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600;
+  transition:all .3s;
+}
+.msg-send:hover{background:linear-gradient(135deg,var(--gold),var(--gold-mid));}
+
+/* ── SETTINGS PAGE ── */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px;}
+.set-card{background:var(--c2);border:1px solid var(--border);padding:26px;}
+.set-title{font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--borderw);}
+.set-row:last-child{border-bottom:none;}
+.set-label{font-size:11px;}
+.set-val{font-size:11px;color:var(--muted);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){
+  .krow{grid-template-columns:1fr 1fr;}
+  .sched-grid{grid-template-columns:repeat(4,1fr);}
+}
+@media(max-width:800px){
+  .sb{width:190px;}
+  .page{padding:24px 20px 50px;}
+  .topbar{padding:16px 20px;}
+  .msg-grid{grid-template-columns:1fr;}
+  .settings-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="login">
+  <div class="login-bg"></div>
+  <div class="login-grid"></div>
+  <div class="lbox">
+    <div class="llogo">
+      <div class="llogo-icon"><span>E</span></div>
+      <div class="llogo-text">
+        <span class="llogo-name">LEMENTS</span>
+        <span class="llogo-sub">Admin Portal</span>
+      </div>
+    </div>
+    <div class="admin-badge">Coach / Admin Access</div>
+    <div class="ltitle">Coach Sign In</div>
+    <div class="lsub">Restricted access — authorized personnel only</div>
+    <div class="lfield">
+      <label>Email</label>
+      <input type="email" value="gavin@elements-pt.com" placeholder="coach@elements-pt.com">
+    </div>
+    <div class="lfield">
+      <label>Password</label>
+      <input type="password" value="••••••••" placeholder="••••••••">
+    </div>
+    <button class="lbtn" onclick="doLogin()">Access Dashboard →</button>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sb">
+    <div class="sb-logo">
+      <div class="sb-logo-icon"><span>E</span></div>
+      <div class="sb-logo-text">
+        <span class="sb-logo-name">LEMENTS</span>
+        <span class="sb-logo-sub">Admin Dashboard</span>
+      </div>
+    </div>
+    <div class="sb-coach">
+      <div class="coach-av">GR</div>
+      <div class="coach-name">Gavin Regnery</div>
+      <span class="coach-role">Head Coach</span>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-section">Overview</div>
+      <div class="sb-item on" onclick="showPage('overview',this)">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Overview
+      </div>
+      <div class="sb-section">Clients</div>
+      <div class="sb-item" onclick="showPage('clients',this)">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        All Clients
+        <span class="count">12</span>
+      </div>
+      <div class="sb-item" onclick="showPage('schedule',this)">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Schedule
+      </div>
+      <div class="sb-item" onclick="showPage('messages',this)">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Messages
+        <span class="count">3</span>
+      </div>
+      <div class="sb-section">Business</div>
+      <div class="sb-item" onclick="showPage('analytics',this)">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytics
+      </div>
+      <div class="sb-item" onclick="showPage('settings',this)">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </div>
+    </nav>
+    <div class="sb-footer">
+      <button class="sb-logout" onclick="doLogout()">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="main">
+    <div class="topbar">
+      <div class="tb-title" id="tb-title">Overview</div>
+      <div class="tb-right">
+        <span class="tb-date" id="tb-date"></span>
+        <span class="tag tag-red">Admin</span>
+        <span class="tag tag-gold">12 Active Clients</span>
+      </div>
+    </div>
+
+    <!-- ── OVERVIEW ── -->
+    <div class="page on" id="page-overview">
+      <div class="pg-head">
+        <h2>Good Morning, <span>Gavin.</span></h2>
+        <p>Here's your practice at a glance — April 9, 2025</p>
+      </div>
+
+      <div class="krow">
+        <div class="kcard">
+          <div class="klbl">Active Clients</div>
+          <div class="kval">12</div>
+          <div class="ktrend up">▲ +2 this quarter</div>
+        </div>
+        <div class="kcard">
+          <div class="klbl">Sessions This Week</div>
+          <div class="kval">18</div>
+          <div class="ksub">6 remaining</div>
+        </div>
+        <div class="kcard">
+          <div class="klbl">Avg Client Progress</div>
+          <div class="kval">74<span style="font-size:18px">%</span></div>
+          <div class="ktrend up">▲ vs last month</div>
+        </div>
+        <div class="kcard">
+          <div class="klbl">Unread Messages</div>
+          <div class="kval">3</div>
+          <div class="ksub">2 need response</div>
+        </div>
+      </div>
+
+      <div class="alert-row">
+        <div class="alert-card">
+          <div class="alert-dot red"></div>
+          <div>
+            <div class="alert-title">Marcus T. — Missed 2 Sessions</div>
+            <div class="alert-sub">Last check-in was 12 days ago · Reach out</div>
+          </div>
+        </div>
+        <div class="alert-card">
+          <div class="alert-dot gold"></div>
+          <div>
+            <div class="alert-title">Sarah K. — Nutrition Review Due</div>
+            <div class="alert-sub">8-week check-in overdue · Schedule call</div>
+          </div>
+        </div>
+        <div class="alert-card">
+          <div class="alert-dot green"></div>
+          <div>
+            <div class="alert-title">Alex J. — Hit Squat PR Today</div>
+            <div class="alert-sub">285 lb — up 30 lbs from program start</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px">
+        <div class="card">
+          <div class="card-hd">Today's Sessions
+            <span class="card-hd-act" onclick="showPage('schedule',document.querySelector('[onclick*=schedule]'))">View schedule →</span>
+          </div>
+          <div class="sess-row"><div class="sess-date">6:30 AM</div><div class="sess-name">Alex Johnson — Lower Body</div><span class="sess-tag up">Upcoming</span></div>
+          <div class="sess-row"><div class="sess-date">8:00 AM</div><div class="sess-name">Sarah Kim — Full Body</div><span class="sess-tag up">Upcoming</span></div>
+          <div class="sess-row"><div class="sess-date">9:30 AM</div><div class="sess-name">David Park — Upper Body</div><span class="sess-tag up">Upcoming</span></div>
+          <div class="sess-row"><div class="sess-date">11:00 AM</div><div class="sess-name">Rachel Moore — Mobility</div><span class="sess-tag done">Completed</span></div>
+          <div class="sess-row"><div class="sess-date">4:00 PM</div><div class="sess-name">James Lee — Strength Assessment</div><span class="sess-tag up">Upcoming</span></div>
+        </div>
+        <div class="card">
+          <div class="card-hd">Client Progress Snapshot</div>
+          <table style="width:100%">
+            <thead><tr>
+              <th>Client</th><th>BF%</th><th>Sessions</th><th>Status</th>
+            </tr></thead>
+            <tbody>
+              <tr onclick="openClient('Alex Johnson','AJ','#7B6A4A')">
+                <td><div class="client-cell"><div class="av" style="background:linear-gradient(135deg,#7B6A4A,#4A3D26)">AJ</div><div><div class="client-cell-name">Alex J.</div></div></div></td>
+                <td>16.4%</td><td>9 / mo</td><td><span class="tag tag-green">On Track</span></td>
+              </tr>
+              <tr onclick="openClient('Sarah Kim','SK','#4A6A7B')">
+                <td><div class="client-cell"><div class="av" style="background:linear-gradient(135deg,#2A5060,#1A3A4A)">SK</div><div><div class="client-cell-name">Sarah K.</div></div></div></td>
+                <td>22.1%</td><td>6 / mo</td><td><span class="tag tag-gold">Review Due</span></td>
+              </tr>
+              <tr onclick="openClient('Marcus Torres','MT','#6A4A7B')">
+                <td><div class="client-cell"><div class="av" style="background:linear-gradient(135deg,#5A3060,#3A1A4A)">MT</div><div><div class="client-cell-name">Marcus T.</div></div></div></td>
+                <td>19.8%</td><td>2 / mo</td><td><span class="tag tag-red">At Risk</span></td>
+              </tr>
+              <tr onclick="openClient('David Park','DP','#4A7B5A')">
+                <td><div class="client-cell"><div class="av" style="background:linear-gradient(135deg,#2A5040,#1A3A28)">DP</div><div><div class="client-cell-name">David P.</div></div></div></td>
+                <td>14.2%</td><td>10 / mo</td><td><span class="tag tag-green">On Track</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ALL CLIENTS ── -->
+    <div class="page" id="page-clients">
+      <div class="pg-head">
+        <h2>All <span>Clients</span></h2>
+        <p>12 active clients · Click any row to view and edit</p>
+      </div>
+      <div class="card">
+        <div class="card-hd">Client Roster
+          <button onclick="alert('Add new client form — connect to your backend auth system')" style="padding:7px 18px;background:var(--gold-dim);border:1px solid rgba(201,168,108,.3);color:var(--gold);font-family:Montserrat,sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">+ Add Client</button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>Client</th><th>Coach</th><th>Start Date</th><th>Sessions/Mo</th>
+              <th>Body Fat</th><th>Weight</th><th>Last Seen</th><th>Status</th>
+            </tr></thead>
+            <tbody id="client-tbody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCHEDULE ── -->
+    <div class="page" id="page-schedule">
+      <div class="pg-head">
+        <h2>Session <span>Schedule</span></h2>
+        <p>Week of April 7–13, 2025 · MindBody sync active</p>
+      </div>
+      <div class="card" style="margin-bottom:3px">
+        <div class="card-hd">April 2025 — Weekly View</div>
+        <div class="sched-grid">
+          <div class="sched-day-hd">Mon</div><div class="sched-day-hd">Tue</div>
+          <div class="sched-day-hd">Wed</div><div class="sched-day-hd">Thu</div>
+          <div class="sched-day-hd">Fri</div><div class="sched-day-hd">Sat</div>
+          <div class="sched-day-hd">Sun</div>
+
+          <div class="sched-day">
+            <div class="sched-day-num">7</div>
+            <div class="sched-event"><div class="sched-event-name">Alex J.</div><div class="sched-event-time">7:00 AM</div></div>
+            <div class="sched-event"><div class="sched-event-name">Rachel M.</div><div class="sched-event-time">9:00 AM</div></div>
+          </div>
+          <div class="sched-day">
+            <div class="sched-day-num">8</div>
+            <div class="sched-event"><div class="sched-event-name">David P.</div><div class="sched-event-time">6:30 AM</div></div>
+            <div class="sched-event"><div class="sched-event-name">James L.</div><div class="sched-event-time">11:00 AM</div></div>
+            <div class="sched-event"><div class="sched-event-name">Priya S.</div><div class="sched-event-time">5:00 PM</div></div>
+          </div>
+          <div class="sched-day today">
+            <div class="sched-day-num">9</div>
+            <div class="sched-event"><div class="sched-event-name">Alex J.</div><div class="sched-event-time">6:30 AM</div></div>
+            <div class="sched-event"><div class="sched-event-name">Sarah K.</div><div class="sched-event-time">8:00 AM</div></div>
+            <div class="sched-event"><div class="sched-event-name">David P.</div><div class="sched-event-time">9:30 AM</div></div>
+            <div class="sched-event"><div class="sched-event-name">James L.</div><div class="sched-event-time">4:00 PM</div></div>
+          </div>
+          <div class="sched-day">
+            <div class="sched-day-num">10</div>
+            <div class="sched-event"><div class="sched-event-name">Marcus T.</div><div class="sched-event-time">7:00 AM</div></div>
+            <div class="sched-event"><div class="sched-event-name">Tom W.</div><div class="sched-event-time">9:00 AM</div></div>
+          </div>
+          <div class="sched-day">
+            <div class="sched-day-num">11</div>
+            <div class="sched-event"><div class="sched-event-name">Rachel M.</div><div class="sched-event-time">7:30 AM</div></div>
+            <div class="sched-event"><div class="sched-event-name">Priya S.</div><div class="sched-event-time">10:00 AM</div></div>
+          </div>
+          <div class="sched-day">
+            <div class="sched-day-num">12</div>
+            <div class="sched-event"><div class="sched-event-name">Alex J.</div><div class="sched-event-time">8:30 AM</div></div>
+            <div class="sched-event"><div class="sched-event-name">Sarah K.</div><div class="sched-event-time">10:00 AM</div></div>
+            <div class="sched-event"><div class="sched-event-name">David P.</div><div class="sched-event-time">11:30 AM</div></div>
+          </div>
+          <div class="sched-day">
+            <div class="sched-day-num">13</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MESSAGES ── -->
+    <div class="page" id="page-messages">
+      <div class="pg-head">
+        <h2>Client <span>Messages</span></h2>
+        <p>3 unread messages</p>
+      </div>
+      <div class="msg-grid">
+        <div class="msg-list">
+          <div class="msg-item on">
+            <div class="msg-av" style="background:linear-gradient(135deg,#7B6A4A,#4A3D26)">AJ</div>
+            <div class="msg-info">
+              <div class="msg-name">Alex Johnson</div>
+              <div class="msg-preview">Hey Gavin, should I eat more carbs on...</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+              <div class="msg-time">9:14 AM</div>
+              <div class="unread"></div>
+            </div>
+          </div>
+          <div class="msg-item">
+            <div class="msg-av" style="background:linear-gradient(135deg,#2A5060,#1A3A4A)">SK</div>
+            <div class="msg-info">
+              <div class="msg-name">Sarah Kim</div>
+              <div class="msg-preview">Thanks for the updated meal plan!</div>
+            </div>
+            <div class="msg-time">Yesterday</div>
+          </div>
+          <div class="msg-item">
+            <div class="msg-av" style="background:linear-gradient(135deg,#5A3060,#3A1A4A)">MT</div>
+            <div class="msg-info">
+              <div class="msg-name">Marcus Torres</div>
+              <div class="msg-preview">Sorry I missed last week, travel came up</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+              <div class="msg-time">Mon</div>
+              <div class="unread"></div>
+            </div>
+          </div>
+          <div class="msg-item">
+            <div class="msg-av" style="background:linear-gradient(135deg,#2A5040,#1A3A28)">DP</div>
+            <div class="msg-info">
+              <div class="msg-name">David Park</div>
+              <div class="msg-preview">Hit a new PR on deadlift today 🔥</div>
+            </div>
+            <div class="msg-time">Mon</div>
+          </div>
+          <div class="msg-item">
+            <div class="msg-av" style="background:linear-gradient(135deg,#604A2A,#3A2A14)">JL</div>
+            <div class="msg-info">
+              <div class="msg-name">James Lee</div>
+              <div class="msg-preview">Can we move Thursday to 5pm?</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+              <div class="msg-time">Sun</div>
+              <div class="unread"></div>
+            </div>
+          </div>
+        </div>
+        <div class="msg-thread">
+          <div class="msg-thread-hd">
+            Alex Johnson
+            <span class="msg-thread-hd-right">Active client · Week 14</span>
+          </div>
+          <div class="msg-body">
+            <div class="msg-bubble client">
+              <div class="bubble-text">Hey Gavin! Quick question — should I be eating more carbs on training days vs rest days?</div>
+              <div class="bubble-time">Today, 9:14 AM</div>
+            </div>
+            <div class="msg-bubble coach">
+              <div class="bubble-text">Good question Alex. Yes — on training days aim for 280-300g carbs, rest days drop to 180-200g. Keep protein the same both days at 200g.</div>
+              <div class="bubble-time">Today, 9:22 AM · Gavin</div>
+            </div>
+            <div class="msg-bubble client">
+              <div class="bubble-text">Perfect, that makes sense. Should the extra carbs be pre or post workout?</div>
+              <div class="bubble-time">Today, 9:25 AM</div>
+            </div>
+          </div>
+          <div class="msg-input-row">
+            <input class="msg-input" id="msg-input" placeholder="Reply to Alex..." onkeydown="if(event.key==='Enter')sendMsg()">
+            <button class="msg-send" onclick="sendMsg()">Send →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ANALYTICS ── -->
+    <div class="page" id="page-analytics">
+      <div class="pg-head">
+        <h2>Practice <span>Analytics</span></h2>
+        <p>Business performance · January – April 2025</p>
+      </div>
+      <div class="krow">
+        <div class="kcard">
+          <div class="klbl">Monthly Revenue</div>
+          <div class="kval">$24k</div>
+          <div class="ktrend up">▲ +18% vs Q1</div>
+        </div>
+        <div class="kcard">
+          <div class="klbl">Sessions Delivered</div>
+          <div class="kval">186</div>
+          <div class="ksub">This quarter</div>
+        </div>
+        <div class="kcard">
+          <div class="klbl">Client Retention</div>
+          <div class="kval">92<span style="font-size:18px">%</span></div>
+          <div class="ktrend up">▲ Industry avg: 74%</div>
+        </div>
+        <div class="kcard">
+          <div class="klbl">Avg Client LTV</div>
+          <div class="kval">$8.4k</div>
+          <div class="ktrend up">▲ +$1.2k vs last yr</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px">
+        <div class="card">
+          <div class="card-hd">Revenue by Month</div>
+          <svg viewBox="0 0 400 120" style="width:100%;height:120px">
+            <defs>
+              <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#A8813A" stop-opacity="0.4"/>
+                <stop offset="100%" stop-color="#A8813A" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="M0,90 C30,85 60,80 90,72 C120,64 150,58 180,50 C210,42 240,38 270,30 C300,22 330,18 360,14 C380,12 395,10 400,10"
+              stroke="#A8813A" stroke-width="2" fill="none"/>
+            <path d="M0,90 C30,85 60,80 90,72 C120,64 150,58 180,50 C210,42 240,38 270,30 C300,22 330,18 360,14 C380,12 395,10 400,10 L400,120 L0,120Z"
+              fill="url(#rev)"/>
+            <text x="0" y="115" fill="#7A746C" font-size="9" font-family="Montserrat">Jan</text>
+            <text x="90" y="115" fill="#7A746C" font-size="9" font-family="Montserrat">Feb</text>
+            <text x="180" y="115" fill="#7A746C" font-size="9" font-family="Montserrat">Mar</text>
+            <text x="270" y="115" fill="#7A746C" font-size="9" font-family="Montserrat">Apr</text>
+          </svg>
+        </div>
+        <div class="card">
+          <div class="card-hd">Client Acquisition Sources</div>
+          <div class="sess-row"><div class="sess-date">Word of Mouth</div><div style="flex:1"><div style="height:3px;background:var(--c5)"><div style="height:3px;width:52%;background:linear-gradient(90deg,var(--gold-dark),var(--gold))"></div></div></div><div style="font-size:11px;color:var(--gold);margin-left:12px">52%</div></div>
+          <div class="sess-row"><div class="sess-date">Physician Referral</div><div style="flex:1"><div style="height:3px;background:var(--c5)"><div style="height:3px;width:28%;background:linear-gradient(90deg,var(--gold-dark),var(--gold))"></div></div></div><div style="font-size:11px;color:var(--gold);margin-left:12px">28%</div></div>
+          <div class="sess-row"><div class="sess-date">Website / Direct</div><div style="flex:1"><div style="height:3px;background:var(--c5)"><div style="height:3px;width:13%;background:linear-gradient(90deg,var(--gold-dark),var(--gold))"></div></div></div><div style="font-size:11px;color:var(--gold);margin-left:12px">13%</div></div>
+          <div class="sess-row"><div class="sess-date">Executive Network</div><div style="flex:1"><div style="height:3px;background:var(--c5)"><div style="height:3px;width:7%;background:linear-gradient(90deg,var(--gold-dark),var(--gold))"></div></div></div><div style="font-size:11px;color:var(--gold);margin-left:12px">7%</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SETTINGS ── -->
+    <div class="page" id="page-settings">
+      <div class="pg-head">
+        <h2>Admin <span>Settings</span></h2>
+        <p>Manage practice settings and integrations</p>
+      </div>
+      <div class="settings-grid">
+        <div class="set-card">
+          <div class="set-title">Coach Profile</div>
+          <div class="set-row"><div class="set-label">Name</div><div class="set-val">Gavin Regnery</div></div>
+          <div class="set-row"><div class="set-label">Role</div><div class="set-val">Head Coach · Co-Owner</div></div>
+          <div class="set-row"><div class="set-label">Email</div><div class="set-val">gavin@elements-pt.com</div></div>
+          <div class="set-row"><div class="set-label">Location</div><div class="set-val">Santa Monica, CA</div></div>
+        </div>
+        <div class="set-card">
+          <div class="set-title">Notifications</div>
+          <div class="set-row"><div class="set-label">New client messages</div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="set-row"><div class="set-label">Missed session alerts</div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="set-row"><div class="set-label">Client progress reports</div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="set-row"><div class="set-label">New client signup</div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+        <div class="set-card" style="grid-column:1/-1">
+          <div class="set-title">Integrations</div>
+          <div class="set-row"><div class="set-label">MindBody Online</div><span class="tag tag-green">Connected</span></div>
+          <div class="set-row"><div class="set-label">Nutridyn Supplements</div><span class="tag tag-green">Connected</span></div>
+          <div class="set-row"><div class="set-label">Stripe Billing</div><span class="tag tag-green">Connected</span></div>
+          <div class="set-row"><div class="set-label">Apple Health / Garmin</div><span class="tag tag-gold">Partial</span></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── CLIENT DETAIL PANEL ── -->
+<div id="detail-overlay" onclick="handleOverlay(event)">
+  <div id="detail-panel">
+    <div class="dp-header">
+      <div class="dp-header-left">
+        <div class="dp-av" id="dp-av"></div>
+        <div>
+          <div class="dp-name" id="dp-name"></div>
+          <div class="dp-meta" id="dp-meta"></div>
+        </div>
+      </div>
+      <button class="dp-close" onclick="closeDetail()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Close
+      </button>
+    </div>
+    <div class="dp-tabs">
+      <div class="dp-tab on" onclick="dpTab('overview',this)">Overview</div>
+      <div class="dp-tab" onclick="dpTab('program',this)">Program</div>
+      <div class="dp-tab" onclick="dpTab('nutrition',this)">Nutrition</div>
+      <div class="dp-tab" onclick="dpTab('supplements',this)">Supplements</div>
+      <div class="dp-tab" onclick="dpTab('sessions',this)">Sessions</div>
+      <div class="dp-tab" onclick="dpTab('notes',this)">Notes</div>
+    </div>
+    <div class="dp-body">
+
+      <!-- TAB: overview -->
+      <div id="dptab-overview">
+        <div class="dp-section">
+          <div class="dp-section-title">Client Info</div>
+          <div class="edit-grid">
+            <div class="edit-field"><label>Full Name</label><input type="text" value="Alex Johnson"></div>
+            <div class="edit-field"><label>Email</label><input type="text" value="alex@example.com"></div>
+            <div class="edit-field"><label>Phone</label><input type="text" value="(310) 555-0142"></div>
+            <div class="edit-field"><label>Age</label><input type="text" value="38"></div>
+            <div class="edit-field"><label>Occupation</label><input type="text" value="Tech Founder"></div>
+            <div class="edit-field"><label>Start Date</label><input type="text" value="Jan 6, 2025"></div>
+          </div>
+        </div>
+        <div class="dp-section">
+          <div class="dp-section-title">Current Metrics</div>
+          <div class="edit-grid">
+            <div class="edit-field"><label>Body Weight (lb)</label><input type="number" value="183"></div>
+            <div class="edit-field"><label>Body Fat %</label><input type="number" value="16.4" step="0.1"></div>
+            <div class="edit-field"><label>Lean Mass (lb)</label><input type="number" value="153.5"></div>
+            <div class="edit-field"><label>Height</label><input type="text" value="5'11&quot;"></div>
+            <div class="edit-field"><label>Sleep Score Avg</label><input type="number" value="82"></div>
+            <div class="edit-field"><label>Status</label>
+              <select><option>On Track</option><option>Review Due</option><option>At Risk</option><option>Inactive</option></select>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="cancel-btn">Cancel</button>
+          <button class="save-btn" onclick="savedFlash(this)">Save Changes →</button>
+        </div>
+      </div>
+
+      <!-- TAB: program -->
+      <div id="dptab-program" style="display:none">
+        <div class="dp-section">
+          <div class="dp-section-title">Training Program</div>
+          <div class="edit-grid">
+            <div class="edit-field"><label>Program Phase</label>
+              <select><option>Hypertrophy</option><option>Strength</option><option>Power</option><option>Maintenance</option><option>Fat Loss</option></select>
+            </div>
+            <div class="edit-field"><label>Sessions Per Week</label>
+              <select><option>2</option><option selected>3</option><option>4</option><option>5</option></select>
+            </div>
+            <div class="edit-field"><label>Primary Focus</label><input type="text" value="Lower body strength + fat loss"></div>
+            <div class="edit-field"><label>Secondary Focus</label><input type="text" value="Mobility & injury prevention"></div>
+          </div>
+        </div>
+        <div class="dp-section">
+          <div class="dp-section-title">Strength Goals</div>
+          <div class="edit-grid">
+            <div class="edit-field"><label>Target Squat (lb)</label><input type="number" value="315"></div>
+            <div class="edit-field"><label>Target Bench (lb)</label><input type="number" value="225"></div>
+            <div class="edit-field"><label>Target Deadlift (lb)</label><input type="number" value="365"></div>
+            <div class="edit-field"><label>Target BF%</label><input type="number" value="14" step="0.5"></div>
+          </div>
+        </div>
+        <div class="dp-section">
+          <div class="dp-section-title">Program Notes</div>
+          <div class="edit-field" style="grid-column:1/-1">
+            <textarea>Alex responds well to higher volume lower body work. Monitor left knee — slight discomfort at high hip flexion depths. Keep squats to parallel until resolved. Excellent recovery — can handle 3x/week frequency with current sleep optimization protocol.</textarea>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="cancel-btn">Cancel</button>
+          <button class="save-btn" onclick="savedFlash(this)">Save Changes →</button>
+        </div>
+      </div>
+
+      <!-- TAB: nutrition -->
+      <div id="dptab-nutrition" style="display:none">
+        <div class="dp-section">
+          <div class="dp-section-title">Daily Nutrition Targets</div>
+          <div class="edit-grid">
+            <div class="edit-field"><label>Calories</label><input type="number" value="2500"></div>
+            <div class="edit-field"><label>Protein (g)</label><input type="number" value="200"></div>
+            <div class="edit-field"><label>Carbs (g)</label><input type="number" value="250"></div>
+            <div class="edit-field"><label>Fat (g)</label><input type="number" value="80"></div>
+            <div class="edit-field"><label>Water Target (L)</label><input type="number" value="3.5" step="0.5"></div>
+            <div class="edit-field"><label>Meal Timing</label>
+              <select><option>3 meals</option><option selected>4 meals</option><option>5 meals</option><option>Intermittent fasting</option></select>
+            </div>
+          </div>
+        </div>
+        <div class="dp-section">
+          <div class="dp-section-title">Coach Nutrition Notes</div>
+          <div class="edit-field">
+            <textarea>Protein intake is tracking well. Prioritize whole food sources over shakes. Add pre-bed casein on training days for overnight recovery. Carb timing is good — most carbs around training window. Water slightly below target; aim for 3.5L daily.</textarea>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="cancel-btn">Cancel</button>
+          <button class="save-btn" onclick="savedFlash(this)">Save Changes →</button>
+        </div>
+      </div>
+
+      <!-- TAB: supplements -->
+      <div id="dptab-supplements" style="display:none">
+        <div class="dp-section">
+          <div class="dp-section-title">Supplement Protocol — Toggle On/Off</div>
+          <div class="supp-toggle-row">
+            <div class="st-icon">🥛</div>
+            <div class="st-info"><div class="st-name">Whey Protein — Nutridyn Pure Whey</div><div class="st-dose">1 scoop · post-workout</div></div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="supp-toggle-row">
+            <div class="st-icon">💊</div>
+            <div class="st-info"><div class="st-name">Omega-3 Fish Oil — Nutridyn Ultra Omega</div><div class="st-dose">2 capsules · with meals</div></div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="supp-toggle-row">
+            <div class="st-icon">🌙</div>
+            <div class="st-info"><div class="st-name">Magnesium Glycinate — Nutridyn Calm Mag</div><div class="st-dose">400mg · 30 min before bed</div></div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="supp-toggle-row">
+            <div class="st-icon">☀️</div>
+            <div class="st-info"><div class="st-name">Vitamin D3/K2 — Nutridyn D3 Elite</div><div class="st-dose">5,000 IU · with fat-containing meal</div></div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="supp-toggle-row">
+            <div class="st-icon">⚡</div>
+            <div class="st-info"><div class="st-name">Creatine Monohydrate — Nutridyn Creatine Pure</div><div class="st-dose">5g · daily with water</div></div>
+            <div class="toggle" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="supp-toggle-row">
+            <div class="st-icon">🧠</div>
+            <div class="st-info"><div class="st-name">Collagen Peptides — Nutridyn Collagen Pro</div><div class="st-dose">10g · morning with vitamin C</div></div>
+            <div class="toggle" onclick="this.classList.toggle('on')"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="cancel-btn">Cancel</button>
+          <button class="save-btn" onclick="savedFlash(this)">Save Protocol →</button>
+        </div>
+      </div>
+
+      <!-- TAB: sessions -->
+      <div id="dptab-sessions" style="display:none">
+        <div class="dp-section">
+          <div class="dp-section-title">Session History</div>
+          <div class="sess-row"><div class="sess-date">Thu Apr 10 · 7AM</div><div class="sess-name">Lower Body Strength</div><span class="sess-tag up">Upcoming</span></div>
+          <div class="sess-row"><div class="sess-date">Sat Apr 5 · 8:30AM</div><div class="sess-name">Upper Body Strength</div><span class="sess-tag done">Completed</span></div>
+          <div class="sess-row"><div class="sess-date">Wed Apr 2 · 7AM</div><div class="sess-name">Full Body + PR Test</div><span class="sess-tag done">Completed</span></div>
+          <div class="sess-row"><div class="sess-date">Mon Mar 31 · 6:30AM</div><div class="sess-name">Lower Body Hypertrophy</div><span class="sess-tag done">Completed</span></div>
+          <div class="sess-row"><div class="sess-date">Thu Mar 27 · 7AM</div><div class="sess-name">Upper Body Power</div><span class="sess-tag done">Completed</span></div>
+          <div class="sess-row"><div class="sess-date">Tue Mar 25 · 7AM</div><div class="sess-name">Full Body Conditioning</div><span class="sess-tag done">Completed</span></div>
+        </div>
+      </div>
+
+      <!-- TAB: notes -->
+      <div id="dptab-notes" style="display:none">
+        <div class="dp-section">
+          <div class="dp-section-title">Add Coach Note</div>
+          <textarea class="note-box" placeholder="Add a private coaching note — visible only to you and other coaches..."></textarea>
+          <button class="save-btn" onclick="savedFlash(this)">Save Note →</button>
+        </div>
+        <div class="dp-section" style="margin-top:24px">
+          <div class="dp-section-title">Previous Notes</div>
+          <div class="note-prev">
+            <div class="note-prev-date">Apr 5, 2025 · Gavin Regnery</div>
+            <div class="note-prev-text">Great session today. Alex hit a new squat PR at 285lb. Left knee is feeling better — will gradually increase depth over next 2-3 sessions. Motivation is high. Discussed increasing session frequency to 4x/week starting May.</div>
+          </div>
+          <div class="note-prev">
+            <div class="note-prev-date">Mar 26, 2025 · Gavin Regnery</div>
+            <div class="note-prev-text">Updated nutrition targets — bumped protein to 200g and adjusted carbs down slightly on rest days. Alex has been consistent with supplement protocol. Sleep scores improving noticeably over last 3 weeks.</div>
+          </div>
+          <div class="note-prev">
+            <div class="note-prev-date">Mar 12, 2025 · Mark Bloice</div>
+            <div class="note-prev-text">Covered session while Gavin was away. Alex worked on overhead press — hit 145lb. Technique is solid. Mentioned increased work stress this week — kept session intensity moderate.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('tb-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+
+// ── LOGIN ──
+function doLogin(){
+  document.getElementById('login').classList.add('gone');
+  setTimeout(()=>{
+    document.getElementById('login').style.display='none';
+    document.getElementById('app').classList.add('vis');
+    document.body.style.overflow='';
+  },600);
+}
+
+function doLogout(){
+  const l=document.getElementById('login');
+  l.style.display='flex';l.style.opacity='0';
+  document.getElementById('app').classList.remove('vis');
+  setTimeout(()=>{l.classList.remove('gone');l.style.opacity='';},50);
+}
+
+// ── PAGES ──
+const titles={overview:'Overview',clients:'All Clients',schedule:'Schedule',messages:'Messages',analytics:'Analytics',settings:'Settings'};
+function showPage(name,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('on'));
+  document.getElementById('page-'+name).classList.add('on');
+  if(el)el.classList.add('on');
+  document.getElementById('tb-title').textContent=titles[name]||name;
+  document.getElementById('main').scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── CLIENT TABLE ──
+const clients=[
+  {name:'Alex Johnson',   initials:'AJ', bg:'linear-gradient(135deg,#7B6A4A,#4A3D26)', coach:'Gavin',since:'Jan 2025',sessions:9,bf:'16.4%',weight:'183',last:'Today',   status:'On Track',   stag:'tag-green'},
+  {name:'Sarah Kim',      initials:'SK', bg:'linear-gradient(135deg,#2A5060,#1A3A4A)', coach:'Gavin',since:'Nov 2024',sessions:6,bf:'22.1%',weight:'138',last:'Yesterday',status:'Review Due', stag:'tag-gold'},
+  {name:'Marcus Torres',  initials:'MT', bg:'linear-gradient(135deg,#5A3060,#3A1A4A)', coach:'Mark', since:'Feb 2025',sessions:2,bf:'19.8%',weight:'198',last:'12 days',  status:'At Risk',    stag:'tag-red'},
+  {name:'David Park',     initials:'DP', bg:'linear-gradient(135deg,#2A5040,#1A3A28)', coach:'Gavin',since:'Oct 2024',sessions:10,bf:'14.2%',weight:'172',last:'Today',   status:'On Track',   stag:'tag-green'},
+  {name:'Rachel Moore',   initials:'RM', bg:'linear-gradient(135deg,#603040,#3A1A28)', coach:'Mark', since:'Jan 2025',sessions:8,bf:'24.5%',weight:'142',last:'Today',    status:'On Track',   stag:'tag-green'},
+  {name:'James Lee',      initials:'JL', bg:'linear-gradient(135deg,#604A2A,#3A2A14)', coach:'Gavin',since:'Mar 2025',sessions:5,bf:'21.0%',weight:'185',last:'2 days',   status:'On Track',   stag:'tag-green'},
+  {name:'Priya Sharma',   initials:'PS', bg:'linear-gradient(135deg,#4A2A60,#2A1440)', coach:'Mark', since:'Dec 2024',sessions:7,bf:'26.3%',weight:'128',last:'3 days',   status:'On Track',   stag:'tag-green'},
+  {name:'Tom Wilson',     initials:'TW', bg:'linear-gradient(135deg,#2A4060,#1A2840)', coach:'Gavin',since:'Sep 2024',sessions:9,bf:'18.5%',weight:'210',last:'Yesterday',status:'On Track',   stag:'tag-green'},
+  {name:'Nina Patel',     initials:'NP', bg:'linear-gradient(135deg,#604A2A,#402A10)', coach:'Mark', since:'Feb 2025',sessions:4,bf:'28.1%',weight:'135',last:'5 days',   status:'Review Due', stag:'tag-gold'},
+  {name:'Carlos Rivera',  initials:'CR', bg:'linear-gradient(135deg,#2A6040,#1A3A28)', coach:'Gavin',since:'Jan 2025',sessions:8,bf:'17.2%',weight:'176',last:'Today',    status:'On Track',   stag:'tag-green'},
+  {name:'Yuki Tanaka',    initials:'YT', bg:'linear-gradient(135deg,#602A40,#3A1426)', coach:'Mark', since:'Mar 2025',sessions:3,bf:'20.4%',weight:'148',last:'4 days',   status:'On Track',   stag:'tag-green'},
+  {name:'Michael Chen',   initials:'MC', bg:'linear-gradient(135deg,#2A4A60,#1A2A3A)', coach:'Gavin',since:'Aug 2024',sessions:11,bf:'13.8%',weight:'168',last:'Yesterday',status:'On Track',  stag:'tag-green'},
+];
+
+const tbody=document.getElementById('client-tbody');
+clients.forEach(c=>{
+  const tr=document.createElement('tr');
+  tr.onclick=()=>openClient(c.name,c.initials,c.bg);
+  tr.innerHTML=`
+    <td><div class="client-cell">
+      <div class="av" style="background:${c.bg}">${c.initials}</div>
+      <div><div class="client-cell-name">${c.name}</div><div class="client-cell-sub">Since ${c.since}</div></div>
+    </div></td>
+    <td>${c.coach}</td>
+    <td>${c.since}</td>
+    <td>${c.sessions} / mo</td>
+    <td>${c.bf}</td>
+    <td>${c.weight} lb</td>
+    <td>${c.last}</td>
+    <td><span class="tag ${c.stag}">${c.status}</span></td>
+  `;
+  tbody.appendChild(tr);
+});
+
+// ── DETAIL PANEL ──
+function openClient(name,initials,bg){
+  document.getElementById('dp-name').textContent=name;
+  document.getElementById('dp-meta').textContent='Active Client · Elements Personal Training';
+  const av=document.getElementById('dp-av');
+  av.textContent=initials;
+  av.style.background=bg;
+  document.getElementById('detail-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  dpTab('overview',document.querySelector('.dp-tab'));
+}
+function closeDetail(){
+  document.getElementById('detail-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function handleOverlay(e){
+  if(e.target===document.getElementById('detail-overlay'))closeDetail();
+}
+function dpTab(name,el){
+  document.querySelectorAll('[id^="dptab-"]').forEach(t=>t.style.display='none');
+  document.querySelectorAll('.dp-tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('dptab-'+name).style.display='block';
+  if(el)el.classList.add('on');
+}
+
+// ── SAVE FLASH ──
+function savedFlash(btn){
+  const orig=btn.textContent;
+  btn.textContent='✓ Saved!';
+  btn.style.background='linear-gradient(135deg,#2A5040,#1A3A28)';
+  setTimeout(()=>{
+    btn.textContent=orig;
+    btn.style.background='';
+  },2000);
+}
+
+// ── MESSAGES ──
+function sendMsg(){
+  const inp=document.getElementById('msg-input');
+  const val=inp.value.trim();
+  if(!val)return;
+  const body=document.querySelector('.msg-body');
+  const div=document.createElement('div');
+  div.className='msg-bubble coach';
+  div.innerHTML=`<div class="bubble-text">${val}</div><div class="bubble-time">Just now · Gavin</div>`;
+  body.appendChild(div);
+  inp.value='';
+  body.scrollTop=body.scrollHeight;
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDetail();});
+</script>
+</body>
+</html>
