@@ -594,8 +594,10 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       <label>Password</label>
       <input type="password" id="admin-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
-    <div style="font-size:11px;color:var(--red);margin-top:8px;min-height:16px;" id="admin-err"></div>
-    <button class="lbtn" onclick="doLogin()">Access Dashboard →</button>
+    <div style="font-size:11px;color:var(--red);margin-top:8px;min-height:16px;word-break:break-word;" id="admin-err"></div>
+    <div style="font-size:10px;color:var(--gold);margin-top:6px;min-height:16px;" id="admin-debug"></div>
+    <button class="lbtn" id="admin-btn" onclick="doLogin()">Access Dashboard →</button>
+    <button class="lbtn" style="margin-top:8px;background:var(--c3);font-size:9px;" onclick="testConnection()">Test Connection</button>
   </div>
 </div>
 
@@ -1134,42 +1136,43 @@ async function init(){
   }
 }
 
+function setDebug(msg){ const el=document.getElementById('admin-debug'); if(el)el.textContent=msg; }
+function setErr(msg){ const el=document.getElementById('admin-err'); if(el)el.textContent=msg; }
+
+async function testConnection(){
+  setDebug('Testing...');
+  try {
+    if(typeof supabase === 'undefined'){ setErr('ERROR: Supabase library not loaded. Check internet connection.'); return; }
+    setDebug('Supabase loaded ✓ — testing database...');
+    const{data,error}=await sb.from('profiles').select('count').limit(1);
+    if(error){ setErr('DB Error: '+error.message); return; }
+    setDebug('Database connected ✓ — everything looks good. Try logging in.');
+  } catch(e){ setErr('Exception: '+e.message); }
+}
+
 async function doLogin(){
-  const email=document.getElementById('admin-email').value.trim();
-  const pass=document.getElementById('admin-pass').value;
-  const btn=document.querySelector('#login .lbtn');
-  const err=document.getElementById('admin-err');
-  err.textContent='';
-  if(!email||!pass){err.textContent='Please enter your email and password.';return;}
-  btn.disabled=true;btn.textContent='Signing in...';
-
-  const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
-  if(error){
-    err.textContent=error.message;
-    btn.disabled=false;btn.textContent='Access Dashboard →';
-    return;
-  }
-
-  btn.textContent='Checking access...';
-  const{data:p,error:profileError}=await sb.from('profiles').select('role,full_name').eq('id',data.user.id).single();
-
-  if(profileError){
-    console.warn('Profile check failed:',profileError.message);
-    showApp(data.user.email);
+  const emailEl=document.getElementById('admin-email');
+  const passEl=document.getElementById('admin-pass');
+  const btn=document.getElementById('admin-btn');
+  if(!emailEl||!passEl){ setErr('ERROR: Input fields not found on page.'); return; }
+  const email=emailEl.value.trim();
+  const pass=passEl.value;
+  setErr('');setDebug('');
+  if(!email||!pass){ setErr('Please enter your email and password.'); return; }
+  if(typeof supabase==='undefined'){ setErr('ERROR: Supabase not loaded. Try refreshing the page.'); return; }
+  btn.disabled=true; btn.textContent='Signing in...';
+  setDebug('Authenticating...');
+  try {
+    const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
+    if(error){ setErr('Login failed: '+error.message); btn.disabled=false; btn.textContent='Access Dashboard →'; setDebug(''); return; }
+    setDebug('Signed in ✓ — checking role...');
+    const{data:p,error:pe}=await sb.from('profiles').select('role,full_name').eq('id',data.user.id).single();
+    if(pe){ setDebug('Profile error: '+pe.message+' — entering anyway'); showApp(data.user.email); loadClients(); return; }
+    if(!p||p.role!=='admin'){ setErr('Access denied. Role is "'+(p?.role||'none')+'" — needs to be "admin".'); await sb.auth.signOut(); btn.disabled=false; btn.textContent='Access Dashboard →'; setDebug(''); return; }
+    setDebug('Admin verified ✓ — loading dashboard...');
+    showApp(p.full_name||data.user.email);
     loadClients();
-    return;
-  }
-
-  if(!p||p.role!=='admin'){
-    err.textContent='Access denied. Your role is "'+( p?.role||'unknown')+'" — needs to be "admin". Update in Supabase → Table Editor → profiles.';
-    await sb.auth.signOut();
-    btn.disabled=false;
-    btn.textContent='Access Dashboard →';
-    return;
-  }
-
-  showApp(p.full_name||data.user.email);
-  loadClients();
+  } catch(e){ setErr('Unexpected error: '+e.message); btn.disabled=false; btn.textContent='Access Dashboard →'; setDebug(''); }
 }
 
 function showApp(name){
