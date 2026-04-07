@@ -1429,6 +1429,20 @@
 </footer>
 
 <script>
+  // ── SUPABASE INVITE/RESET REDIRECT ──
+  (function() {
+    const hash = window.location.hash.replace('#', '');
+    const query = window.location.search.replace('?', '');
+    const params = new URLSearchParams(hash || query);
+    const type = params.get('type');
+    const accessToken = params.get('access_token');
+    const tokenHash = params.get('token_hash');
+    // Redirect to set-password page if ANY auth token is present
+    if (accessToken || tokenHash) {
+      window.location.replace('set-password.html' + window.location.hash + window.location.search);
+    }
+  })();
+
   const nav = document.getElementById('nav');
   window.addEventListener('scroll', () => {
     nav.classList.toggle('scrolled', window.scrollY > 60);
