@@ -598,6 +598,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
     <div style="font-size:10px;color:var(--gold);margin-top:6px;min-height:16px;" id="admin-debug"></div>
     <button class="lbtn" id="admin-btn" onclick="doLogin()">Access Dashboard →</button>
     <button class="lbtn" style="margin-top:8px;background:var(--c3);font-size:9px;" onclick="testConnection()">Test Connection</button>
+    <button class="lbtn" style="margin-top:8px;background:#2A3A2A;font-size:9px;" onclick="document.getElementById('admin-debug').textContent='JavaScript is working ✓'">Test JavaScript</button>
   </div>
 </div>
 
@@ -1335,4 +1336,13 @@ function sendMsg(){
   const body=document.querySelector('.msg-body');
   const div=document.createElement('div');
   div.className='msg-bubble coach';
-  div.innerHTML=`<div class="bubble-text">${val}</div><di
+  div.innerHTML=`<div class="bubble-text">${val}</div><di  div.innerHTML=`<div class="bubble-text">${val}</div><div class="bubble-time">Just now · Coach</div>`;
+  body.appendChild(div);
+  inp.value='';
+  body.scrollTop=body.scrollHeight;
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDetail();});
+</script>
+</body>
+</html>
