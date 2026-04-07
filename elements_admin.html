@@ -588,12 +588,13 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
     <div class="lsub">Restricted access — authorized personnel only</div>
     <div class="lfield">
       <label>Email</label>
-      <input type="email" value="gavin@elements-pt.com" placeholder="coach@elements-pt.com">
+      <input type="email" id="admin-email" placeholder="coach@elements-pt.com" autocomplete="email">
     </div>
     <div class="lfield">
       <label>Password</label>
-      <input type="password" value="••••••••" placeholder="••••••••">
+      <input type="password" id="admin-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
+    <div style="font-size:11px;color:var(--red);margin-top:8px;min-height:16px;" id="admin-err"></div>
     <button class="lbtn" onclick="doLogin()">Access Dashboard →</button>
   </div>
 </div>
@@ -1134,35 +1135,33 @@ async function init(){
 }
 
 async function doLogin(){
-  const email=document.querySelector('#login input[type=email]').value.trim();
-  const pass=document.querySelector('#login input[type=password]').value;
+  const email=document.getElementById('admin-email').value.trim();
+  const pass=document.getElementById('admin-pass').value;
   const btn=document.querySelector('#login .lbtn');
-  if(!email||!pass){alert('Enter your email and password.');return;}
+  const err=document.getElementById('admin-err');
+  err.textContent='';
+  if(!email||!pass){err.textContent='Please enter your email and password.';return;}
   btn.disabled=true;btn.textContent='Signing in...';
 
-  // Step 1: sign in
   const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
   if(error){
-    alert('Login error: '+error.message);
+    err.textContent=error.message;
     btn.disabled=false;btn.textContent='Access Dashboard →';
     return;
   }
 
-  // Step 2: check profile/role — with fallback if table doesn't exist yet
   btn.textContent='Checking access...';
-  const{data:p, error:profileError}=await sb.from('profiles').select('role,full_name').eq('id',data.user.id).single();
+  const{data:p,error:profileError}=await sb.from('profiles').select('role,full_name').eq('id',data.user.id).single();
 
   if(profileError){
-    // profiles table may not exist yet — let admin in anyway and show warning
-    console.warn('Profile check failed:', profileError.message);
-    alert('⚠️ Warning: Could not verify your role (the profiles table may not be set up yet). Letting you in — please run the SQL setup file in Supabase.');
+    console.warn('Profile check failed:',profileError.message);
     showApp(data.user.email);
     loadClients();
     return;
   }
 
-  if(!p || p.role !== 'admin'){
-    alert('Access denied. Your account role is "' + (p?.role||'unknown') + '" — it needs to be "admin". Go to Supabase → Table Editor → profiles → find your row → change role to admin.');
+  if(!p||p.role!=='admin'){
+    err.textContent='Access denied. Your role is "'+( p?.role||'unknown')+'" — needs to be "admin". Update in Supabase → Table Editor → profiles.';
     await sb.auth.signOut();
     btn.disabled=false;
     btn.textContent='Access Dashboard →';
