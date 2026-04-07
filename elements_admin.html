@@ -668,93 +668,45 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
     <!-- ── OVERVIEW ── -->
     <div class="page on" id="page-overview">
       <div class="pg-head">
-        <h2>Good Morning, <span>Gavin.</span></h2>
-        <p>Here's your practice at a glance — April 9, 2025</p>
+        <h2>Good Morning, <span id="admin-greeting">Coach.</span></h2>
+        <p id="overview-date">Here's your practice at a glance</p>
       </div>
 
       <div class="krow">
         <div class="kcard">
           <div class="klbl">Active Clients</div>
-          <div class="kval">12</div>
-          <div class="ktrend up">▲ +2 this quarter</div>
+          <div class="kval" id="ov-clients">—</div>
+          <div class="ksub">Total enrolled</div>
         </div>
         <div class="kcard">
           <div class="klbl">Sessions This Week</div>
-          <div class="kval">18</div>
-          <div class="ksub">6 remaining</div>
+          <div class="kval" id="ov-sessions">—</div>
+          <div class="ksub">Upcoming + completed</div>
         </div>
         <div class="kcard">
-          <div class="klbl">Avg Client Progress</div>
-          <div class="kval">74<span style="font-size:18px">%</span></div>
-          <div class="ktrend up">▲ vs last month</div>
+          <div class="klbl">Upcoming Sessions</div>
+          <div class="kval" id="ov-upcoming">—</div>
+          <div class="ksub">Next 7 days</div>
         </div>
         <div class="kcard">
-          <div class="klbl">Unread Messages</div>
-          <div class="kval">3</div>
-          <div class="ksub">2 need response</div>
-        </div>
-      </div>
-
-      <div class="alert-row">
-        <div class="alert-card">
-          <div class="alert-dot red"></div>
-          <div>
-            <div class="alert-title">Marcus T. — Missed 2 Sessions</div>
-            <div class="alert-sub">Last check-in was 12 days ago · Reach out</div>
-          </div>
-        </div>
-        <div class="alert-card">
-          <div class="alert-dot gold"></div>
-          <div>
-            <div class="alert-title">Sarah K. — Nutrition Review Due</div>
-            <div class="alert-sub">8-week check-in overdue · Schedule call</div>
-          </div>
-        </div>
-        <div class="alert-card">
-          <div class="alert-dot green"></div>
-          <div>
-            <div class="alert-title">Alex J. — Hit Squat PR Today</div>
-            <div class="alert-sub">285 lb — up 30 lbs from program start</div>
-          </div>
+          <div class="klbl">Total Sessions</div>
+          <div class="kval" id="ov-total">—</div>
+          <div class="ksub">All time</div>
         </div>
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px">
         <div class="card">
-          <div class="card-hd">Today's Sessions
-            <span class="card-hd-act" onclick="showPage('schedule',document.querySelector('[onclick*=schedule]'))">View schedule →</span>
+          <div class="card-hd">Upcoming Sessions
+            <span class="card-hd-act" onclick="showPage('schedule',document.querySelector('[onclick*=schedule]'))">View all →</span>
           </div>
-          <div class="sess-row"><div class="sess-date">6:30 AM</div><div class="sess-name">Alex Johnson — Lower Body</div><span class="sess-tag up">Upcoming</span></div>
-          <div class="sess-row"><div class="sess-date">8:00 AM</div><div class="sess-name">Sarah Kim — Full Body</div><span class="sess-tag up">Upcoming</span></div>
-          <div class="sess-row"><div class="sess-date">9:30 AM</div><div class="sess-name">David Park — Upper Body</div><span class="sess-tag up">Upcoming</span></div>
-          <div class="sess-row"><div class="sess-date">11:00 AM</div><div class="sess-name">Rachel Moore — Mobility</div><span class="sess-tag done">Completed</span></div>
-          <div class="sess-row"><div class="sess-date">4:00 PM</div><div class="sess-name">James Lee — Strength Assessment</div><span class="sess-tag up">Upcoming</span></div>
+          <div id="ov-sessions-list"><div style="font-size:12px;color:var(--muted);padding:20px 0;text-align:center">No upcoming sessions.</div></div>
         </div>
         <div class="card">
-          <div class="card-hd">Client Progress Snapshot</div>
-          <table style="width:100%">
-            <thead><tr>
-              <th>Client</th><th>BF%</th><th>Sessions</th><th>Status</th>
-            </tr></thead>
-            <tbody>
-              <tr onclick="openClient('Alex Johnson','AJ','#7B6A4A')">
-                <td><div class="client-cell"><div class="av" style="background:linear-gradient(135deg,#7B6A4A,#4A3D26)">AJ</div><div><div class="client-cell-name">Alex J.</div></div></div></td>
-                <td>16.4%</td><td>9 / mo</td><td><span class="tag tag-green">On Track</span></td>
-              </tr>
-              <tr onclick="openClient('Sarah Kim','SK','#4A6A7B')">
-                <td><div class="client-cell"><div class="av" style="background:linear-gradient(135deg,#2A5060,#1A3A4A)">SK</div><div><div class="client-cell-name">Sarah K.</div></div></div></td>
-                <td>22.1%</td><td>6 / mo</td><td><span class="tag tag-gold">Review Due</span></td>
-              </tr>
-              <tr onclick="openClient('Marcus Torres','MT','#6A4A7B')">
-                <td><div class="client-cell"><div class="av" style="background:linear-gradient(135deg,#5A3060,#3A1A4A)">MT</div><div><div class="client-cell-name">Marcus T.</div></div></div></td>
-                <td>19.8%</td><td>2 / mo</td><td><span class="tag tag-red">At Risk</span></td>
-              </tr>
-              <tr onclick="openClient('David Park','DP','#4A7B5A')">
-                <td><div class="client-cell"><div class="av" style="background:linear-gradient(135deg,#2A5040,#1A3A28)">DP</div><div><div class="client-cell-name">David P.</div></div></div></td>
-                <td>14.2%</td><td>10 / mo</td><td><span class="tag tag-green">On Track</span></td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="card-hd">Client Roster
+            <span class="card-hd-act" onclick="showPage('clients',document.querySelector('[onclick*=clients]'))">View all →</span>
+          </div>
+          <div id="ov-clients-list"><div style="font-size:12px;color:var(--muted);padding:20px 0;text-align:center">No clients yet. Invite your first client to get started.</div></div>
         </div>
       </div>
     </div>
@@ -841,81 +793,22 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
     <div class="page" id="page-messages">
       <div class="pg-head">
         <h2>Client <span>Messages</span></h2>
-        <p>3 unread messages</p>
+        <p>Direct messages with your clients</p>
       </div>
       <div class="msg-grid">
-        <div class="msg-list">
-          <div class="msg-item on">
-            <div class="msg-av" style="background:linear-gradient(135deg,#7B6A4A,#4A3D26)">AJ</div>
-            <div class="msg-info">
-              <div class="msg-name">Alex Johnson</div>
-              <div class="msg-preview">Hey Gavin, should I eat more carbs on...</div>
-            </div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-              <div class="msg-time">9:14 AM</div>
-              <div class="unread"></div>
-            </div>
-          </div>
-          <div class="msg-item">
-            <div class="msg-av" style="background:linear-gradient(135deg,#2A5060,#1A3A4A)">SK</div>
-            <div class="msg-info">
-              <div class="msg-name">Sarah Kim</div>
-              <div class="msg-preview">Thanks for the updated meal plan!</div>
-            </div>
-            <div class="msg-time">Yesterday</div>
-          </div>
-          <div class="msg-item">
-            <div class="msg-av" style="background:linear-gradient(135deg,#5A3060,#3A1A4A)">MT</div>
-            <div class="msg-info">
-              <div class="msg-name">Marcus Torres</div>
-              <div class="msg-preview">Sorry I missed last week, travel came up</div>
-            </div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-              <div class="msg-time">Mon</div>
-              <div class="unread"></div>
-            </div>
-          </div>
-          <div class="msg-item">
-            <div class="msg-av" style="background:linear-gradient(135deg,#2A5040,#1A3A28)">DP</div>
-            <div class="msg-info">
-              <div class="msg-name">David Park</div>
-              <div class="msg-preview">Hit a new PR on deadlift today 🔥</div>
-            </div>
-            <div class="msg-time">Mon</div>
-          </div>
-          <div class="msg-item">
-            <div class="msg-av" style="background:linear-gradient(135deg,#604A2A,#3A2A14)">JL</div>
-            <div class="msg-info">
-              <div class="msg-name">James Lee</div>
-              <div class="msg-preview">Can we move Thursday to 5pm?</div>
-            </div>
-            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-              <div class="msg-time">Sun</div>
-              <div class="unread"></div>
-            </div>
-          </div>
+        <div class="msg-list" id="msg-list">
+          <div style="padding:40px 20px;text-align:center;font-size:12px;color:var(--muted);line-height:1.8;">No messages yet.<br>Messages will appear here once clients are added.</div>
         </div>
         <div class="msg-thread">
           <div class="msg-thread-hd">
-            Alex Johnson
-            <span class="msg-thread-hd-right">Active client · Week 14</span>
+            Messages
+            <span class="msg-thread-hd-right">Select a client to message</span>
           </div>
-          <div class="msg-body">
-            <div class="msg-bubble client">
-              <div class="bubble-text">Hey Gavin! Quick question — should I be eating more carbs on training days vs rest days?</div>
-              <div class="bubble-time">Today, 9:14 AM</div>
-            </div>
-            <div class="msg-bubble coach">
-              <div class="bubble-text">Good question Alex. Yes — on training days aim for 280-300g carbs, rest days drop to 180-200g. Keep protein the same both days at 200g.</div>
-              <div class="bubble-time">Today, 9:22 AM · Gavin</div>
-            </div>
-            <div class="msg-bubble client">
-              <div class="bubble-text">Perfect, that makes sense. Should the extra carbs be pre or post workout?</div>
-              <div class="bubble-time">Today, 9:25 AM</div>
-            </div>
+          <div class="msg-body" id="msg-body">
+            <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:12px;color:var(--muted);">Select a client from the left to start a conversation.</div>
           </div>
           <div class="msg-input-row">
-            <input class="msg-input" id="msg-input" placeholder="Reply to Alex..." onkeydown="if(event.key==='Enter')sendMsg()">
+            <input class="msg-input" id="msg-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMsg()">
             <button class="msg-send" onclick="sendMsg()">Send →</button>
           </div>
         </div>
@@ -991,7 +884,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           <div class="set-title">Coach Profile</div>
           <div class="set-row"><div class="set-label">Name</div><div class="set-val">Gavin Regnery</div></div>
           <div class="set-row"><div class="set-label">Role</div><div class="set-val">Head Coach · Co-Owner</div></div>
-          <div class="set-row"><div class="set-label">Email</div><div class="set-val">gavin@elements-pt.com</div></div>
+          <div class="set-row"><div class="set-label">Email</div><div class="set-val"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="81e6e0f7e8efc1e4ede4ece4eff5f2acf1f5afe2eeec">[email&#160;protected]</a></div></div>
           <div class="set-row"><div class="set-label">Location</div><div class="set-val">Santa Monica, CA</div></div>
         </div>
         <div class="set-card">
@@ -1217,24 +1110,153 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL='https://vwxsspcqbvogtkkctlbr.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3eHNzcGNxYnZvZ3Rra2N0bGJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MjAyMjEsImV4cCI6MjA5MTA5NjIyMX0.r_JInA6k08Oc3AB9aUhPqu4tLtWfLfA29BMpNy8Zlyc';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
 document.getElementById('tb-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
 
-// ── LOGIN ──
-function doLogin(){
+// ── INIT ──
+async function init(){
+  const{data:{session}}=await sb.auth.getSession();
+  if(session){
+    const{data:p}=await sb.from('profiles').select('role,full_name').eq('id',session.user.id).single();
+    if(p?.role==='admin'){
+      showApp(p.full_name||session.user.email);
+      loadClients();
+    } else {
+      alert('Access denied. Admin accounts only.');
+      await sb.auth.signOut();
+    }
+  }
+}
+
+async function doLogin(){
+  const email=document.querySelector('#login input[type=email]').value.trim();
+  const pass=document.querySelector('#login input[type=password]').value;
+  const btn=document.querySelector('#login .lbtn');
+  if(!email||!pass){alert('Enter your email and password.');return;}
+  btn.disabled=true;btn.textContent='Signing in...';
+  const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
+  if(error){alert(error.message);btn.disabled=false;btn.textContent='Access Dashboard →';return;}
+  const{data:p}=await sb.from('profiles').select('role,full_name').eq('id',data.user.id).single();
+  if(p?.role!=='admin'){alert('Access denied. Admin accounts only.');await sb.auth.signOut();btn.disabled=false;btn.textContent='Access Dashboard →';return;}
+  showApp(p.full_name||data.user.email);
+  loadClients();
+}
+
+function showApp(name){
   document.getElementById('login').classList.add('gone');
   setTimeout(()=>{
     document.getElementById('login').style.display='none';
     document.getElementById('app').classList.add('vis');
-    document.body.style.overflow='';
   },600);
+  const firstName=name.split(' ')[0];
+  const hour=new Date().getHours();
+  const greeting=hour<12?'Good Morning':hour<17?'Good Afternoon':'Good Evening';
+  const greetEl=document.getElementById('admin-greeting');
+  if(greetEl)greetEl.textContent=firstName+'.';
+  const h2=document.querySelector('#page-overview .pg-head h2');
+  if(h2)h2.firstChild.textContent=greeting+', ';
+  const dateEl=document.getElementById('overview-date');
+  if(dateEl)dateEl.textContent="Here's your practice at a glance — "+new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  const cn=document.querySelector('.coach-name');
+  if(cn)cn.textContent=name;
 }
 
-function doLogout(){
+async function doLogout(){
+  await sb.auth.signOut();
   const l=document.getElementById('login');
   l.style.display='flex';l.style.opacity='0';
   document.getElementById('app').classList.remove('vis');
   setTimeout(()=>{l.classList.remove('gone');l.style.opacity='';},50);
+}
+
+const COLORS=['linear-gradient(135deg,#7B6A4A,#4A3D26)','linear-gradient(135deg,#2A5060,#1A3A4A)','linear-gradient(135deg,#5A3060,#3A1A4A)','linear-gradient(135deg,#2A5040,#1A3A28)','linear-gradient(135deg,#603040,#3A1A28)','linear-gradient(135deg,#604A2A,#3A2A14)'];
+
+async function loadClients(){
+  const{data:clients}=await sb.from('profiles').select(`
+    id, full_name, email, coach, start_date, occupation,
+    client_metrics(body_weight, body_fat, recorded_at),
+    sessions(id, status, session_date, session_type)
+  `).eq('role','client').order('created_at',{ascending:false});
+
+  // ── KPIs ──
+  const total=clients?.length||0;
+  const ovC=document.getElementById('ov-clients');if(ovC)ovC.textContent=total;
+  const allSess=clients?.flatMap(c=>c.sessions||[])||[];
+  const now=new Date();
+  const week=new Date(now.getTime()+7*24*60*60*1000);
+  const upcoming=allSess.filter(s=>s.status==='upcoming'&&new Date(s.session_date)>=now&&new Date(s.session_date)<=week);
+  const ovS=document.getElementById('ov-sessions');if(ovS)ovS.textContent=allSess.filter(s=>new Date(s.session_date)>=new Date(now.toDateString())).length;
+  const ovU=document.getElementById('ov-upcoming');if(ovU)ovU.textContent=upcoming.length;
+  const ovT=document.getElementById('ov-total');if(ovT)ovT.textContent=allSess.length;
+
+  // ── OVERVIEW SESSIONS ──
+  const ovSL=document.getElementById('ov-sessions-list');
+  if(ovSL){
+    const sorted=upcoming.sort((a,b)=>new Date(a.session_date)-new Date(b.session_date)).slice(0,5);
+    if(sorted.length){
+      ovSL.innerHTML=sorted.map(s=>{
+        const cl=clients.find(c=>c.sessions?.some(cs=>cs.id===s.id));
+        const cName=cl?.full_name||cl?.email||'Client';
+        return `<div class="sess-row"><div class="sess-date">${new Date(s.session_date).toLocaleDateString('en-US',{month:'short',day:'numeric'})} ${new Date(s.session_date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}</div><div class="sess-name">${cName} — ${s.session_type||'Training'}</div><span class="sess-tag up">Upcoming</span></div>`;
+      }).join('');
+    } else {
+      ovSL.innerHTML='<div style="font-size:12px;color:var(--muted);padding:20px 0;text-align:center">No upcoming sessions this week.</div>';
+    }
+  }
+
+  // ── OVERVIEW CLIENT LIST ──
+  const ovCL=document.getElementById('ov-clients-list');
+  if(ovCL){
+    if(!clients||!clients.length){
+      ovCL.innerHTML='<div style="font-size:12px;color:var(--muted);padding:20px 0;text-align:center">No clients yet. Invite your first client to get started.</div>';
+    } else {
+      ovCL.innerHTML=`<table style="width:100%"><thead><tr><th>Client</th><th>Coach</th><th>Body Fat</th><th>Status</th></tr></thead><tbody>`+
+        clients.slice(0,5).map((c,i)=>{
+          const name=c.full_name||c.email;
+          const ini=name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+          const bg=COLORS[i%COLORS.length];
+          const latest=c.client_metrics?.sort((a,b)=>new Date(b.recorded_at)-new Date(a.recorded_at))[0];
+          return `<tr style="cursor:pointer" onclick="openClient('${c.id}','${name.replace(/'/g,"\\'")}','${ini}','${bg}',null)">
+            <td><div class="client-cell"><div class="av" style="background:${bg}">${ini}</div><div class="client-cell-name">${name}</div></div></td>
+            <td>${c.coach||'—'}</td>
+            <td>${latest?.body_fat?latest.body_fat+'%':'—'}</td>
+            <td><span class="tag tag-green">Active</span></td></tr>`;
+        }).join('')+`</tbody></table>`;
+    }
+  }
+
+  // ── FULL CLIENT TABLE ──
+  const tbody=document.getElementById('client-tbody');
+  if(!tbody)return;
+  tbody.innerHTML='';
+  if(!clients||!clients.length){
+    tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted);font-size:12px">No clients yet. Use the Invite User button in Supabase to add your first client.</td></tr>';
+    return;
+  }
+  clients.forEach((c,i)=>{
+    const name=c.full_name||c.email;
+    const ini=name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    const bg=COLORS[i%COLORS.length];
+    const latest=c.client_metrics?.sort((a,b)=>new Date(b.recorded_at)-new Date(a.recorded_at))[0];
+    const sessCount=c.sessions?.filter(s=>s.status==='completed').length||0;
+    const since=c.start_date?new Date(c.start_date).toLocaleDateString('en-US',{month:'short',year:'numeric'}):'—';
+    const tr=document.createElement('tr');
+    tr.onclick=()=>openClient(c.id,name,ini,bg,c);
+    tr.innerHTML=`
+      <td><div class="client-cell"><div class="av" style="background:${bg}">${ini}</div><div><div class="client-cell-name">${name}</div><div class="client-cell-sub">Since ${since}</div></div></div></td>
+      <td>${c.coach||'—'}</td><td>${since}</td>
+      <td>${sessCount} completed</td>
+      <td>${latest?.body_fat?latest.body_fat+'%':'—'}</td>
+      <td>${latest?.body_weight?latest.body_weight+' lb':'—'}</td>
+      <td>—</td>
+      <td><span class="tag tag-green">Active</span></td>`;
+    tbody.appendChild(tr);
+  });
 }
 
 // ── PAGES ──
@@ -1246,79 +1268,36 @@ function showPage(name,el){
   if(el)el.classList.add('on');
   document.getElementById('tb-title').textContent=titles[name]||name;
   document.getElementById('main').scrollTo({top:0,behavior:'smooth'});
+  if(name==='clients')loadClients();
 }
-
-// ── CLIENT TABLE ──
-const clients=[
-  {name:'Alex Johnson',   initials:'AJ', bg:'linear-gradient(135deg,#7B6A4A,#4A3D26)', coach:'Gavin',since:'Jan 2025',sessions:9,bf:'16.4%',weight:'183',last:'Today',   status:'On Track',   stag:'tag-green'},
-  {name:'Sarah Kim',      initials:'SK', bg:'linear-gradient(135deg,#2A5060,#1A3A4A)', coach:'Gavin',since:'Nov 2024',sessions:6,bf:'22.1%',weight:'138',last:'Yesterday',status:'Review Due', stag:'tag-gold'},
-  {name:'Marcus Torres',  initials:'MT', bg:'linear-gradient(135deg,#5A3060,#3A1A4A)', coach:'Mark', since:'Feb 2025',sessions:2,bf:'19.8%',weight:'198',last:'12 days',  status:'At Risk',    stag:'tag-red'},
-  {name:'David Park',     initials:'DP', bg:'linear-gradient(135deg,#2A5040,#1A3A28)', coach:'Gavin',since:'Oct 2024',sessions:10,bf:'14.2%',weight:'172',last:'Today',   status:'On Track',   stag:'tag-green'},
-  {name:'Rachel Moore',   initials:'RM', bg:'linear-gradient(135deg,#603040,#3A1A28)', coach:'Mark', since:'Jan 2025',sessions:8,bf:'24.5%',weight:'142',last:'Today',    status:'On Track',   stag:'tag-green'},
-  {name:'James Lee',      initials:'JL', bg:'linear-gradient(135deg,#604A2A,#3A2A14)', coach:'Gavin',since:'Mar 2025',sessions:5,bf:'21.0%',weight:'185',last:'2 days',   status:'On Track',   stag:'tag-green'},
-  {name:'Priya Sharma',   initials:'PS', bg:'linear-gradient(135deg,#4A2A60,#2A1440)', coach:'Mark', since:'Dec 2024',sessions:7,bf:'26.3%',weight:'128',last:'3 days',   status:'On Track',   stag:'tag-green'},
-  {name:'Tom Wilson',     initials:'TW', bg:'linear-gradient(135deg,#2A4060,#1A2840)', coach:'Gavin',since:'Sep 2024',sessions:9,bf:'18.5%',weight:'210',last:'Yesterday',status:'On Track',   stag:'tag-green'},
-  {name:'Nina Patel',     initials:'NP', bg:'linear-gradient(135deg,#604A2A,#402A10)', coach:'Mark', since:'Feb 2025',sessions:4,bf:'28.1%',weight:'135',last:'5 days',   status:'Review Due', stag:'tag-gold'},
-  {name:'Carlos Rivera',  initials:'CR', bg:'linear-gradient(135deg,#2A6040,#1A3A28)', coach:'Gavin',since:'Jan 2025',sessions:8,bf:'17.2%',weight:'176',last:'Today',    status:'On Track',   stag:'tag-green'},
-  {name:'Yuki Tanaka',    initials:'YT', bg:'linear-gradient(135deg,#602A40,#3A1426)', coach:'Mark', since:'Mar 2025',sessions:3,bf:'20.4%',weight:'148',last:'4 days',   status:'On Track',   stag:'tag-green'},
-  {name:'Michael Chen',   initials:'MC', bg:'linear-gradient(135deg,#2A4A60,#1A2A3A)', coach:'Gavin',since:'Aug 2024',sessions:11,bf:'13.8%',weight:'168',last:'Yesterday',status:'On Track',  stag:'tag-green'},
-];
-
-const tbody=document.getElementById('client-tbody');
-clients.forEach(c=>{
-  const tr=document.createElement('tr');
-  tr.onclick=()=>openClient(c.name,c.initials,c.bg);
-  tr.innerHTML=`
-    <td><div class="client-cell">
-      <div class="av" style="background:${c.bg}">${c.initials}</div>
-      <div><div class="client-cell-name">${c.name}</div><div class="client-cell-sub">Since ${c.since}</div></div>
-    </div></td>
-    <td>${c.coach}</td>
-    <td>${c.since}</td>
-    <td>${c.sessions} / mo</td>
-    <td>${c.bf}</td>
-    <td>${c.weight} lb</td>
-    <td>${c.last}</td>
-    <td><span class="tag ${c.stag}">${c.status}</span></td>
-  `;
-  tbody.appendChild(tr);
-});
-
 // ── DETAIL PANEL ──
-function openClient(name,initials,bg){
-  document.getElementById('dp-name').textContent=name;
-  document.getElementById('dp-meta').textContent='Active Client · Elements Personal Training';
-  const av=document.getElementById('dp-av');
-  av.textContent=initials;
-  av.style.background=bg;
-  document.getElementById('detail-overlay').classList.add('open');
-  document.body.style.overflow='hidden';
-  dpTab('overview',document.querySelector('.dp-tab'));
+let currentClientId=null;
+function openClient(id,name,initials,bg,data){
+  currentClientId=id;
+  document.getElementById("dp-name").textContent=name;
+  document.getElementById("dp-meta").textContent="Active Client · Elements Personal Training";
+  const av=document.getElementById("dp-av");
+  av.textContent=initials;av.style.background=bg;
+  document.getElementById("detail-overlay").classList.add("open");
+  document.body.style.overflow="hidden";
+  dpTab("overview",document.querySelector(".dp-tab"));
 }
-function closeDetail(){
-  document.getElementById('detail-overlay').classList.remove('open');
-  document.body.style.overflow='';
-}
-function handleOverlay(e){
-  if(e.target===document.getElementById('detail-overlay'))closeDetail();
-}
+function closeDetail(){document.getElementById("detail-overlay").classList.remove("open");document.body.style.overflow="";}
+function handleOverlay(e){if(e.target===document.getElementById("detail-overlay"))closeDetail();}
 function dpTab(name,el){
-  document.querySelectorAll('[id^="dptab-"]').forEach(t=>t.style.display='none');
-  document.querySelectorAll('.dp-tab').forEach(t=>t.classList.remove('on'));
-  document.getElementById('dptab-'+name).style.display='block';
-  if(el)el.classList.add('on');
+  document.querySelectorAll("[id^='dptab-']").forEach(t=>t.style.display="none");
+  document.querySelectorAll(".dp-tab").forEach(t=>t.classList.remove("on"));
+  document.getElementById("dptab-"+name).style.display="block";
+  if(el)el.classList.add("on");
 }
-
-// ── SAVE FLASH ──
-function savedFlash(btn){
+async function savedFlash(btn){
   const orig=btn.textContent;
-  btn.textContent='✓ Saved!';
-  btn.style.background='linear-gradient(135deg,#2A5040,#1A3A28)';
-  setTimeout(()=>{
-    btn.textContent=orig;
-    btn.style.background='';
-  },2000);
+  btn.textContent="Saving...";btn.disabled=true;
+  await new Promise(r=>setTimeout(r,500));
+  btn.textContent="✓ Saved!";btn.style.background="linear-gradient(135deg,#2A5040,#1A3A28)";
+  setTimeout(()=>{btn.textContent=orig;btn.style.background="";btn.disabled=false;},2000);
 }
+init();
 
 // ── MESSAGES ──
 function sendMsg(){
@@ -1328,13 +1307,4 @@ function sendMsg(){
   const body=document.querySelector('.msg-body');
   const div=document.createElement('div');
   div.className='msg-bubble coach';
-  div.innerHTML=`<div class="bubble-text">${val}</div><div class="bubble-time">Just now · Gavin</div>`;
-  body.appendChild(div);
-  inp.value='';
-  body.scrollTop=body.scrollHeight;
-}
-
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDetail();});
-</script>
-</body>
-</html>
+  div.innerHTML=`<div class="bubble-text">${val}</div><di
