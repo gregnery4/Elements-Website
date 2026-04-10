@@ -411,93 +411,308 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
         <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Close
       </button>
     </div>
-    <div class="dp-tabs">
-      <div class="dp-tab on" onclick="dpTab('overview',this)">Overview</div>
-      <div class="dp-tab" onclick="dpTab('program',this)">Program</div>
-      <div class="dp-tab" onclick="dpTab('nutrition',this)">Nutrition</div>
-      <div class="dp-tab" onclick="dpTab('supplements',this)">Supplements</div>
-      <div class="dp-tab" onclick="dpTab('sessions',this)">Sessions</div>
-      <div class="dp-tab" onclick="dpTab('notes',this)">Notes</div>
+    <div class="dp-tabs" style="overflow-x:auto;flex-wrap:nowrap;">
+      <div class="dp-tab on" onclick="dpTab('t1',this)">1. Client Info</div>
+      <div class="dp-tab" onclick="dpTab('t2',this)">2. Overview</div>
+      <div class="dp-tab" onclick="dpTab('t3',this)">3. Goal Setting</div>
+      <div class="dp-tab" onclick="dpTab('t4',this)">4. Calories</div>
+      <div class="dp-tab" onclick="dpTab('t5',this)">5. Meal Design</div>
+      <div class="dp-tab" onclick="dpTab('t6',this)">6. Weekly Data</div>
+      <div class="dp-tab" onclick="dpTab('t7',this)">7. Body Comp</div>
+      <div class="dp-tab" onclick="dpTab('t8',this)">Supplements</div>
+      <div class="dp-tab" onclick="dpTab('t9',this)">Sessions</div>
+      <div class="dp-tab" onclick="dpTab('t10',this)">Notes</div>
     </div>
     <div class="dp-body">
 
-      <div id="dptab-overview">
+      <!-- TAB 1: CLIENT INFORMATION -->
+      <div id="dptab-t1">
         <div class="dp-sec">
-          <div class="dp-sec-title">Client Info</div>
+          <div class="dp-sec-title">Client Information</div>
           <div class="edit-grid">
             <div class="edit-field"><label>Full Name</label><input type="text" id="dp-fullname" placeholder="Full name"></div>
             <div class="edit-field"><label>Email</label><input type="text" id="dp-email" placeholder="Email"></div>
-            <div class="edit-field"><label>Phone</label><input type="text" id="dp-phone" placeholder="Phone"></div>
-            <div class="edit-field"><label>Age</label><input type="number" id="dp-age" placeholder="Age"></div>
-            <div class="edit-field"><label>Occupation</label><input type="text" id="dp-occ" placeholder="Occupation"></div>
-            <div class="edit-field"><label>Start Date</label><input type="date" id="dp-start"></div>
-            <div class="edit-field"><label>Coach</label>
+            <div class="edit-field"><label>Phone</label><input type="text" id="dp-phone" placeholder="602-000-0000"></div>
+            <div class="edit-field"><label>Biological Age</label><input type="number" id="dp-age" placeholder="30"></div>
+            <div class="edit-field"><label>Training Age (years)</label><input type="number" id="dp-training-age" placeholder="0" step="0.5"></div>
+            <div class="edit-field"><label>Sex</label>
+              <select id="dp-sex"><option>Male</option><option>Female</option></select>
+            </div>
+            <div class="edit-field"><label>Training Days</label><input type="text" id="dp-training-days" placeholder="e.g. M/W/F or T/THR"></div>
+            <div class="edit-field"><label>Training Time</label><input type="time" id="dp-training-time"></div>
+            <div class="edit-field"><label>Assigned Coach</label>
               <select id="dp-coach"><option>Gavin Regnery</option><option>Mark Bloice</option></select>
             </div>
-            <div class="edit-field"><label>Status</label>
-              <select id="dp-status"><option>active</option><option>inactive</option></select>
+            <div class="edit-field"><label>Communication Preference</label>
+              <select id="dp-comm"><option>Email</option><option>Phone</option><option>Text</option></select>
             </div>
+            <div class="edit-field"><label>Start Date</label><input type="date" id="dp-start"></div>
+            <div class="edit-field"><label>Occupation</label><input type="text" id="dp-occ" placeholder="e.g. Tech Founder"></div>
           </div>
         </div>
-        <div class="dp-sec">
-          <div class="dp-sec-title">Latest Metrics</div>
-          <div class="edit-grid">
-            <div class="edit-field"><label>Body Weight (lb)</label><input type="number" id="dp-weight" step="0.1"></div>
-            <div class="edit-field"><label>Body Fat %</label><input type="number" id="dp-bf" step="0.1"></div>
-            <div class="edit-field"><label>Lean Mass (lb)</label><input type="number" id="dp-lean" step="0.1"></div>
-            <div class="edit-field"><label>Sleep Score</label><input type="number" id="dp-sleep"></div>
-          </div>
-        </div>
-        <button class="save-btn" onclick="saveClient()">Save Changes →</button>
+        <button class="save-btn" onclick="saveClient()">Save Client Info →</button>
         <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-save-msg"></div>
       </div>
 
-      <div id="dptab-program" style="display:none">
+      <!-- TAB 2: HEALTH SYSTEM OVERVIEW -->
+      <div id="dptab-t2" style="display:none">
         <div class="dp-sec">
-          <div class="dp-sec-title">Training Program</div>
-          <div class="edit-grid">
-            <div class="edit-field"><label>Program Phase</label>
-              <select><option>Hypertrophy</option><option>Strength</option><option>Power</option><option>Maintenance</option><option>Fat Loss</option></select>
+          <div class="dp-sec-title">Elements Health System — Protocol Overview</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+            <div>
+              <div style="font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Protocol 1</div>
+              <div class="edit-grid" style="grid-template-columns:1fr 1fr">
+                <div class="edit-field"><label>Goal</label><select id="ov-goal-1"><option>Fat Loss</option><option>Muscle Gain</option><option>Maintenance</option><option>Performance</option><option>Recomposition</option></select></div>
+                <div class="edit-field"><label>Start Date</label><input type="date" id="ov-start-1"></div>
+                <div class="edit-field"><label>Est. End Date</label><input type="date" id="ov-end-1"></div>
+                <div class="edit-field"><label>Phase Duration (wks)</label><input type="number" id="ov-dur-1" placeholder="13"></div>
+              </div>
             </div>
-            <div class="edit-field"><label>Sessions Per Week</label>
-              <select><option>2</option><option>3</option><option>4</option><option>5</option></select>
+            <div>
+              <div style="font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Protocol 2</div>
+              <div class="edit-grid" style="grid-template-columns:1fr 1fr">
+                <div class="edit-field"><label>Goal</label><select id="ov-goal-2"><option>Fat Loss</option><option>Muscle Gain</option><option>Maintenance</option><option>Performance</option><option>Recomposition</option></select></div>
+                <div class="edit-field"><label>Start Date</label><input type="date" id="ov-start-2"></div>
+                <div class="edit-field"><label>Est. End Date</label><input type="date" id="ov-end-2"></div>
+                <div class="edit-field"><label>Phase Duration (wks)</label><input type="number" id="ov-dur-2" placeholder="13"></div>
+              </div>
             </div>
-            <div class="edit-field"><label>Primary Focus</label><input type="text" placeholder="e.g. Lower body strength"></div>
-            <div class="edit-field"><label>Target Body Fat %</label><input type="number" step="0.5"></div>
           </div>
         </div>
         <div class="dp-sec">
-          <div class="dp-sec-title">Program Notes</div>
-          <div class="edit-field"><textarea id="dp-prog-notes" placeholder="Training notes, injury considerations, etc."></textarea></div>
+          <div class="dp-sec-title">Training Parameters</div>
+          <div class="edit-grid">
+            <div class="edit-field"><label>Training Frequency</label>
+              <select id="ov-freq"><option>2x</option><option>3x</option><option>4x</option><option>5x</option></select>
+            </div>
+            <div class="edit-field"><label>Training Method</label>
+              <select id="ov-method"><option>Total Body</option><option>Upper/Lower</option><option>Push/Pull/Legs</option><option>Body Part Split</option></select>
+            </div>
+            <div class="edit-field"><label>Training Priority</label>
+              <select id="ov-priority"><option>Upper Focus</option><option>Lower Focus</option><option>Balanced</option><option>Athletic</option></select>
+            </div>
+          </div>
         </div>
-        <button class="save-btn" onclick="flashSave(this)">Save Program →</button>
+        <div class="dp-sec">
+          <div class="dp-sec-title">Nutrition Parameters</div>
+          <div class="edit-grid">
+            <div class="edit-field"><label>Nutrition Approach</label>
+              <select id="ov-nut-approach"><option>Portion Control</option><option>Macro Tracking</option><option>Calorie Counting</option><option>Intuitive</option></select>
+            </div>
+            <div class="edit-field"><label>Tracking Responsibility</label>
+              <select id="ov-tracking"><option>Pictures of Meals</option><option>MyFitnessPal</option><option>Cronometer</option><option>Coach Logs</option></select>
+            </div>
+          </div>
+        </div>
+        <div class="dp-sec">
+          <div class="dp-sec-title">Body Composition Assessment Schedule</div>
+          <div class="edit-grid">
+            <div class="edit-field"><label>Bodyweight Recording</label>
+              <select id="ov-bw-freq"><option>2x/Wk (T/S)</option><option>Daily</option><option>Weekly</option></select>
+            </div>
+            <div class="edit-field"><label>Circumference Frequency</label>
+              <select id="ov-circ-freq"><option>1x/Month</option><option>Bi-Weekly</option><option>Weekly</option></select>
+            </div>
+            <div class="edit-field"><label>Caliper Skinfolds Frequency</label>
+              <select id="ov-skin-freq"><option>Bi-Weekly</option><option>Monthly</option><option>Weekly</option></select>
+            </div>
+            <div class="edit-field"><label>DEXA Scan Frequency</label>
+              <select id="ov-dexa-freq"><option>Quarterly</option><option>Every 6 Months</option><option>Annually</option></select>
+            </div>
+          </div>
+        </div>
+        <button class="save-btn" onclick="flashSave(this)">Save Overview →</button>
       </div>
 
-      <div id="dptab-nutrition" style="display:none">
+      <!-- TAB 3: GOAL SETTING CALCULATOR -->
+      <div id="dptab-t3" style="display:none">
         <div class="dp-sec">
-          <div class="dp-sec-title">Daily Nutrition Targets</div>
+          <div class="dp-sec-title">Current Body Composition</div>
           <div class="edit-grid">
-            <div class="edit-field"><label>Calories</label><input type="number" id="dp-cals" placeholder="2500"></div>
-            <div class="edit-field"><label>Protein (g)</label><input type="number" id="dp-protein" placeholder="200"></div>
-            <div class="edit-field"><label>Carbs (g)</label><input type="number" id="dp-carbs" placeholder="250"></div>
-            <div class="edit-field"><label>Fat (g)</label><input type="number" id="dp-fat" placeholder="80"></div>
-            <div class="edit-field"><label>Water (L)</label><input type="number" id="dp-water" step="0.5" placeholder="3.5"></div>
-            <div class="edit-field"><label>Meal Timing</label>
-              <select id="dp-meals"><option>3 meals</option><option>4 meals</option><option>5 meals</option><option>Intermittent fasting</option></select>
-            </div>
+            <div class="edit-field"><label>Body Weight (lbs)</label><input type="number" id="dp-weight" step="0.1" placeholder="200" oninput="calcGoals()"></div>
+            <div class="edit-field"><label>Body Fat % (DEXA)</label><input type="number" id="dp-bf" step="0.1" placeholder="20" oninput="calcGoals()"></div>
+            <div class="edit-field"><label>Fat Mass (lbs)</label><input type="number" id="dp-fat-mass" step="0.1" placeholder="auto" readonly style="opacity:.6"></div>
+            <div class="edit-field"><label>Lean Body Mass (lbs)</label><input type="number" id="dp-lean" step="0.1" placeholder="auto" readonly style="opacity:.6"></div>
           </div>
         </div>
         <div class="dp-sec">
-          <div class="dp-sec-title">Coach Nutrition Notes</div>
-          <div class="edit-field"><textarea id="dp-nut-notes" placeholder="Nutrition coaching notes visible to client"></textarea></div>
+          <div class="dp-sec-title">Goal Setting</div>
+          <div class="edit-grid">
+            <div class="edit-field"><label>Goal Body Fat %</label><input type="number" id="dp-goal-bf" step="0.5" placeholder="15" oninput="calcGoals()"></div>
+            <div class="edit-field"><label>Goal Body Weight (lbs)</label><input type="number" id="dp-goal-weight" step="0.1" placeholder="auto" readonly style="opacity:.6"></div>
+            <div class="edit-field"><label>Required Weight Loss (lbs)</label><input type="number" id="dp-wt-loss" step="0.1" placeholder="auto" readonly style="opacity:.6"></div>
+            <div class="edit-field"><label>Phase Duration (wks)</label><input type="number" id="dp-phase-wks" placeholder="13" oninput="calcGoals()"></div>
+            <div class="edit-field"><label>BW % Reduction / Week</label><input type="number" id="dp-bw-pct" step="0.001" placeholder="auto" readonly style="opacity:.6"></div>
+          </div>
         </div>
-        <button class="save-btn" onclick="saveNutrition()">Save Nutrition →</button>
+        <div class="dp-sec">
+          <div class="dp-sec-title">Sleep Score</div>
+          <div class="edit-grid">
+            <div class="edit-field"><label>Avg Sleep Score</label><input type="number" id="dp-sleep" placeholder="82"></div>
+          </div>
+        </div>
+        <div id="goal-calc-result" style="background:var(--c3);border:1px solid var(--border);padding:16px;margin-bottom:20px;font-size:12px;color:var(--muted);display:none">
+          <div style="color:var(--gold);font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">Calculated Results</div>
+          <div id="goal-calc-text"></div>
+        </div>
+        <button class="save-btn" onclick="saveClient()">Save Goal Data →</button>
+        <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-save-msg2"></div>
+      </div>
+
+      <!-- TAB 4: DAILY CALORIE CALCULATOR -->
+      <div id="dptab-t4" style="display:none">
+        <div class="dp-sec">
+          <div class="dp-sec-title">Daily Calorie Calculator</div>
+          <div class="edit-grid">
+            <div class="edit-field"><label>Referenced Weight (lbs)</label><input type="number" id="dp-ref-weight" step="0.1" placeholder="auto from goals" oninput="calcCalories()"></div>
+            <div class="edit-field"><label>Maintenance Multiplier</label><input type="number" id="dp-maintenance" value="12" step="0.5" oninput="calcCalories()"></div>
+            <div class="edit-field"><label>Daily Calories</label><input type="number" id="dp-cals" placeholder="auto" readonly style="opacity:.6"></div>
+          </div>
+        </div>
+        <div class="dp-sec">
+          <div class="dp-sec-title">Macro Distribution</div>
+          <div class="edit-grid">
+            <div class="edit-field"><label>Protein % of Calories</label><input type="number" id="dp-prot-pct" value="40" step="1" oninput="calcCalories()"></div>
+            <div class="edit-field"><label>Carbs % of Calories</label><input type="number" id="dp-carb-pct" value="18" step="1" oninput="calcCalories()"></div>
+            <div class="edit-field"><label>Fats % of Calories</label><input type="number" id="dp-fat-pct" value="42" step="1" oninput="calcCalories()"></div>
+          </div>
+          <div id="macro-result" style="background:var(--c3);border:1px solid var(--border);padding:16px;margin-top:16px;display:none">
+            <div style="color:var(--gold);font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">Calculated Daily Macros</div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+              <div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Calories</div><div style="font-family:'Bebas Neue',sans-serif;font-size:28px;background:linear-gradient(135deg,#D4A853,#8B6020);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text" id="res-cals">—</div></div>
+              <div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Protein</div><div style="font-family:'Bebas Neue',sans-serif;font-size:28px;background:linear-gradient(135deg,#D4A853,#8B6020);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text" id="res-prot">—</div><div style="font-size:9px;color:var(--muted)">grams</div></div>
+              <div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Carbs</div><div style="font-family:'Bebas Neue',sans-serif;font-size:28px;background:linear-gradient(135deg,#D4A853,#8B6020);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text" id="res-carb">—</div><div style="font-size:9px;color:var(--muted)">grams</div></div>
+              <div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Fats</div><div style="font-family:'Bebas Neue',sans-serif;font-size:28px;background:linear-gradient(135deg,#D4A853,#8B6020);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text" id="res-fat">—</div><div style="font-size:9px;color:var(--muted)">grams</div></div>
+            </div>
+          </div>
+        </div>
+        <button class="save-btn" onclick="saveNutrition()">Save Nutrition Targets →</button>
         <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-nut-msg"></div>
       </div>
 
-      <div id="dptab-supplements" style="display:none">
+      <!-- TAB 5: MEAL DESIGN -->
+      <div id="dptab-t5" style="display:none">
         <div class="dp-sec">
-          <div class="dp-sec-title">Supplement Protocol</div>
+          <div class="dp-sec-title">Daily Totals (from Calculator)</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:8px">
+            <div style="background:var(--c3);border:1px solid var(--border);padding:14px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Calories</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:24px" id="meal-tot-cals">—</div>
+            </div>
+            <div style="background:var(--c3);border:1px solid var(--border);padding:14px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Protein</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:24px" id="meal-tot-prot">—</div>
+            </div>
+            <div style="background:var(--c3);border:1px solid var(--border);padding:14px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Carbs</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:24px" id="meal-tot-carb">—</div>
+            </div>
+            <div style="background:var(--c3);border:1px solid var(--border);padding:14px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Fats</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:24px" id="meal-tot-fat">—</div>
+            </div>
+          </div>
+        </div>
+        <div class="dp-sec">
+          <div class="dp-sec-title">Meal Plan</div>
+          <div class="edit-grid" style="grid-template-columns:1fr;margin-bottom:8px">
+            <div class="edit-field"><label># of Daily Meals</label>
+              <select id="dp-meal-count" onchange="renderMealFields()"><option value="3">3 Meals</option><option value="4" selected>4 Meals</option><option value="5">5 Meals</option><option value="6">6 Meals</option></select>
+            </div>
+          </div>
+          <div id="meal-fields"></div>
+        </div>
+        <button class="save-btn" onclick="flashSave(this)">Save Meal Plan →</button>
+      </div>
+
+      <!-- TAB 6: WEEKLY DATA ENTRY -->
+      <div id="dptab-t6" style="display:none">
+        <div class="dp-sec">
+          <div class="dp-sec-title">Weekly Check-In Log</div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:11px">
+              <thead>
+                <tr style="border-bottom:1px solid var(--border)">
+                  <th style="text-align:left;padding:8px 12px;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;white-space:nowrap">Week</th>
+                  <th style="text-align:left;padding:8px 12px;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;white-space:nowrap">Date</th>
+                  <th style="text-align:left;padding:8px 12px;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;white-space:nowrap">Body Weight (lbs)</th>
+                  <th style="text-align:left;padding:8px 12px;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;white-space:nowrap">Meals Logged</th>
+                  <th style="text-align:left;padding:8px 12px;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;white-space:nowrap">Nutrition Tracked</th>
+                  <th style="text-align:left;padding:8px 12px;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;white-space:nowrap">Notes</th>
+                </tr>
+              </thead>
+              <tbody id="weekly-log-body">
+                <tr><td colspan="6" style="padding:30px;text-align:center;color:var(--muted);font-size:12px">No weekly data yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="dp-sec" style="margin-top:20px">
+          <div class="dp-sec-title">Add Weekly Entry</div>
+          <div class="edit-grid">
+            <div class="edit-field"><label>Week Number</label><input type="number" id="wk-num" placeholder="1"></div>
+            <div class="edit-field"><label>Date</label><input type="date" id="wk-date"></div>
+            <div class="edit-field"><label>Body Weight (lbs)</label><input type="number" id="wk-weight" step="0.1" placeholder="0.0"></div>
+            <div class="edit-field"><label>Meals Logged</label><input type="number" id="wk-meals" placeholder="4"></div>
+            <div class="edit-field"><label>Nutrition Tracked</label>
+              <select id="wk-tracked"><option value="yes">Yes</option><option value="partial">Partial</option><option value="no">No</option></select>
+            </div>
+            <div class="edit-field"><label>Notes</label><input type="text" id="wk-notes" placeholder="Any notes..."></div>
+          </div>
+          <button class="save-btn" style="margin-top:8px" onclick="addWeeklyEntry()">Add Entry →</button>
+          <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="wk-msg"></div>
+        </div>
+      </div>
+
+      <!-- TAB 7: BODY COMPOSITION ASSESSMENT -->
+      <div id="dptab-t7" style="display:none">
+        <div class="dp-sec">
+          <div class="dp-sec-title">DEXA Scan Data</div>
+          <div class="edit-grid">
+            <div class="edit-field"><label>Assessment Date</label><input type="date" id="bc-date"></div>
+            <div class="edit-field"><label>Total Mass (lbs)</label><input type="number" id="bc-total-mass" step="0.1"></div>
+            <div class="edit-field"><label>Body Fat %</label><input type="number" id="bc-bf" step="0.1" oninput="calcBCResult()"></div>
+            <div class="edit-field"><label>Lean Mass (lbs)</label><input type="number" id="bc-lean" step="0.1"></div>
+            <div class="edit-field"><label>Fat Mass (lbs)</label><input type="number" id="bc-fat-mass" step="0.1"></div>
+            <div class="edit-field"><label>Bone Mineral Content (BMC)</label><input type="number" id="bc-bmc" step="0.01"></div>
+            <div class="edit-field"><label>Visceral Fat (lbs)</label><input type="number" id="bc-visc-fat" step="0.01"></div>
+            <div class="edit-field"><label>Visceral Fat Score</label><input type="number" id="bc-visc-score" step="0.1"></div>
+            <div class="edit-field"><label>Resting Metabolic Rate</label><input type="number" id="bc-rmr"></div>
+          </div>
+        </div>
+        <div class="dp-sec">
+          <div class="dp-sec-title">Caliper Skinfolds (mm)</div>
+          <div class="edit-grid">
+            <div class="edit-field"><label>Pectoral</label><input type="number" id="sk-pec" step="0.1"></div>
+            <div class="edit-field"><label>Triceps</label><input type="number" id="sk-tri" step="0.1"></div>
+            <div class="edit-field"><label>Suprailiac-1</label><input type="number" id="sk-sup1" step="0.1"></div>
+            <div class="edit-field"><label>Suprailiac-2</label><input type="number" id="sk-sup2" step="0.1"></div>
+            <div class="edit-field"><label>Umbilical</label><input type="number" id="sk-umb" step="0.1"></div>
+          </div>
+        </div>
+        <div class="dp-sec">
+          <div class="dp-sec-title">Circumference Measurements (inches)</div>
+          <div class="edit-grid">
+            <div class="edit-field"><label>Shoulders</label><input type="number" id="cm-shoulder" step="0.1"></div>
+            <div class="edit-field"><label>Umbilical / Waist</label><input type="number" id="cm-waist" step="0.1"></div>
+            <div class="edit-field"><label>Upper Arm</label><input type="number" id="cm-arm" step="0.1"></div>
+            <div class="edit-field"><label>Hips</label><input type="number" id="cm-hip" step="0.1"></div>
+            <div class="edit-field"><label>Thigh</label><input type="number" id="cm-thigh" step="0.1"></div>
+            <div class="edit-field"><label>Calf</label><input type="number" id="cm-calf" step="0.1"></div>
+          </div>
+        </div>
+        <button class="save-btn" onclick="saveBodyComp()">Save Assessment →</button>
+        <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="bc-msg"></div>
+        <div class="dp-sec" style="margin-top:24px">
+          <div class="dp-sec-title">Assessment History</div>
+          <div id="bc-history"><div style="font-size:12px;color:var(--muted)">No assessments recorded yet.</div></div>
+        </div>
+      </div>
+
+      <!-- TAB 8: SUPPLEMENTS -->
+      <div id="dptab-t8" style="display:none">
+        <div class="dp-sec">
+          <div class="dp-sec-title">Current Supplement Protocol</div>
           <div id="dp-supps-list"><div style="font-size:12px;color:var(--muted)">No supplements assigned yet.</div></div>
         </div>
         <div class="dp-sec" style="margin-top:20px">
@@ -514,7 +729,8 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
         </div>
       </div>
 
-      <div id="dptab-sessions" style="display:none">
+      <!-- TAB 9: SESSIONS -->
+      <div id="dptab-t9" style="display:none">
         <div class="dp-sec">
           <div class="dp-sec-title">Session History</div>
           <div id="dp-sess-list"><div style="font-size:12px;color:var(--muted)">No sessions recorded.</div></div>
@@ -536,7 +752,8 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
         </div>
       </div>
 
-      <div id="dptab-notes" style="display:none">
+      <!-- TAB 10: NOTES -->
+      <div id="dptab-t10" style="display:none">
         <div class="dp-sec">
           <div class="dp-sec-title">Add Coach Note</div>
           <textarea class="note-box" id="new-note" placeholder="Private coaching note — visible to coaches only"></textarea>
@@ -714,33 +931,42 @@ function openClient(id){
   document.getElementById('dp-name').textContent=name;
   document.getElementById('dp-meta').textContent='Active Client · Elements Personal Training';
 
-  // populate overview
+  // Tab 1 — Client Info
   document.getElementById('dp-fullname').value=c.full_name||'';
   document.getElementById('dp-email').value=c.email||'';
   document.getElementById('dp-phone').value=c.phone||'';
   document.getElementById('dp-age').value=c.age||'';
+  document.getElementById('dp-training-age').value=c.training_age||'';
   document.getElementById('dp-occ').value=c.occupation||'';
   document.getElementById('dp-start').value=c.start_date||'';
   document.getElementById('dp-coach').value=c.coach||'Gavin Regnery';
+  if(c.sex)document.getElementById('dp-sex').value=c.sex;
+  if(c.comm_pref)document.getElementById('dp-comm').value=c.comm_pref;
+  if(c.training_days)document.getElementById('dp-training-days').value=c.training_days;
 
+  // Tab 3 — Goal Setting (latest metrics)
   const latest=c.client_metrics?.sort((a,b)=>new Date(b.recorded_at)-new Date(a.recorded_at))[0];
   document.getElementById('dp-weight').value=latest?.body_weight||'';
   document.getElementById('dp-bf').value=latest?.body_fat||'';
   document.getElementById('dp-lean').value=latest?.lean_mass||'';
   document.getElementById('dp-sleep').value=latest?.sleep_score||'';
+  if(latest?.body_weight&&latest?.body_fat)calcGoals();
 
-  // nutrition
+  // Tab 4 — Nutrition
   const nut=c.nutrition_targets?.[0];
   if(nut){
     document.getElementById('dp-cals').value=nut.calories||'';
-    document.getElementById('dp-protein').value=nut.protein_g||'';
-    document.getElementById('dp-carbs').value=nut.carbs_g||'';
-    document.getElementById('dp-fat').value=nut.fat_g||'';
-    document.getElementById('dp-water').value=nut.water_l||'';
-    document.getElementById('dp-nut-notes').value=nut.coach_notes||'';
+    if(nut.calories&&latest?.body_weight){
+      const refWt=parseFloat(document.getElementById('dp-ref-weight').value)||latest.body_weight;
+      document.getElementById('dp-ref-weight').value=refWt;
+    }
+    calcCalories();
   }
 
-  // supplements
+  // Tab 5 — Meal Design
+  renderMealFields();
+
+  // Tab 8 — Supplements
   const supps=c.supplements||[];
   document.getElementById('dp-supps-list').innerHTML=supps.length?supps.map(s=>`
     <div class="supp-row"><div class="supp-icon-sm">${s.icon||'💊'}</div>
@@ -748,7 +974,7 @@ function openClient(id){
     <div class="toggle ${s.active?'on':''}" onclick="toggleSupp('${s.id}',this)"></div></div>`).join('')
     :'<div style="font-size:12px;color:var(--muted)">No supplements assigned yet.</div>';
 
-  // sessions
+  // Tab 9 — Sessions
   const sess=(c.sessions||[]).sort((a,b)=>new Date(b.session_date)-new Date(a.session_date));
   document.getElementById('dp-sess-list').innerHTML=sess.length?sess.map(s=>`
     <div class="sess-row"><div class="sess-date">${new Date(s.session_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})} ${new Date(s.session_date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}</div>
@@ -756,16 +982,19 @@ function openClient(id){
     <span class="sess-tag ${s.status==='completed'?'done':'up'}">${s.status}</span></div>`).join('')
     :'<div style="font-size:12px;color:var(--muted)">No sessions yet.</div>';
 
-  // notes
+  // Tab 10 — Notes
   const notes=(c.coach_notes||[]).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
   document.getElementById('dp-notes-list').innerHTML=notes.length?notes.map(n=>`
     <div class="note-prev"><div class="note-prev-date">${new Date(n.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})} · ${n.coach||'Coach'}</div>
     <div class="note-prev-text">${n.note}</div></div>`).join('')
     :'<div style="font-size:12px;color:var(--muted)">No notes yet.</div>';
 
+  // Weekly data
+  renderWeeklyLog();
+
   document.getElementById('detail-overlay').classList.add('open');
   document.body.style.overflow='hidden';
-  dpTab('overview',document.querySelector('.dp-tab'));
+  dpTab('t1',document.querySelector('.dp-tab'));
 }
 
 function closeDetail(){document.getElementById('detail-overlay').classList.remove('open');document.body.style.overflow='';}
@@ -775,6 +1004,168 @@ function dpTab(name,el){
   document.querySelectorAll('.dp-tab').forEach(t=>t.classList.remove('on'));
   document.getElementById('dptab-'+name).style.display='block';
   if(el)el.classList.add('on');
+  // sync meal totals when switching to meal design tab
+  if(name==='t5')syncMealTotals();
+}
+
+// ── GOAL CALCULATOR ──
+function calcGoals(){
+  const bw=parseFloat(document.getElementById('dp-weight').value);
+  const bf=parseFloat(document.getElementById('dp-bf').value)/100;
+  const goalBF=parseFloat(document.getElementById('dp-goal-bf').value)/100;
+  const wks=parseFloat(document.getElementById('dp-phase-wks').value)||13;
+  if(bw&&bf){
+    const fatMass=bw*bf;
+    const lean=bw-fatMass;
+    document.getElementById('dp-fat-mass').value=fatMass.toFixed(1);
+    document.getElementById('dp-lean').value=lean.toFixed(1);
+    if(goalBF){
+      const goalWt=lean/(1-goalBF);
+      const wtLoss=bw-goalWt;
+      const bwPct=wtLoss>0?((wtLoss/bw)/wks*100).toFixed(2):0;
+      document.getElementById('dp-goal-weight').value=goalWt.toFixed(1);
+      document.getElementById('dp-wt-loss').value=wtLoss.toFixed(1);
+      document.getElementById('dp-bw-pct').value=bwPct;
+      const res=document.getElementById('goal-calc-result');
+      res.style.display='block';
+      document.getElementById('goal-calc-text').innerHTML=
+        `Current: <strong>${bw} lbs @ ${(bf*100).toFixed(1)}% BF</strong> → Goal: <strong>${goalWt.toFixed(1)} lbs @ ${(goalBF*100).toFixed(1)}% BF</strong><br>
+         Weight to lose: <strong>${wtLoss.toFixed(1)} lbs</strong> over <strong>${wks} weeks</strong> (~${bwPct}% BW reduction/week)`;
+      // auto-fill referenced weight in calorie tab
+      const refWt=(bw+goalWt)/2;
+      document.getElementById('dp-ref-weight').value=refWt.toFixed(1);
+      calcCalories();
+    }
+  }
+}
+
+// ── CALORIE CALCULATOR ──
+function calcCalories(){
+  const refWt=parseFloat(document.getElementById('dp-ref-weight').value);
+  const maint=parseFloat(document.getElementById('dp-maintenance').value)||12;
+  const protPct=parseFloat(document.getElementById('dp-prot-pct').value)||40;
+  const carbPct=parseFloat(document.getElementById('dp-carb-pct').value)||18;
+  const fatPct=parseFloat(document.getElementById('dp-fat-pct').value)||42;
+  if(!refWt)return;
+  const cals=Math.round(refWt*maint);
+  const protG=Math.round(cals*(protPct/100)/4);
+  const carbG=Math.round(cals*(carbPct/100)/4);
+  const fatG=Math.round(cals*(fatPct/100)/9);
+  document.getElementById('dp-cals').value=cals;
+  const mr=document.getElementById('macro-result');
+  mr.style.display='block';
+  document.getElementById('res-cals').textContent=cals;
+  document.getElementById('res-prot').textContent=protG+'g';
+  document.getElementById('res-carb').textContent=carbG+'g';
+  document.getElementById('res-fat').textContent=fatG+'g';
+  syncMealTotals(cals,protG,carbG,fatG);
+}
+
+function syncMealTotals(c,p,cb,f){
+  const cals=c||parseInt(document.getElementById('dp-cals').value)||0;
+  const prot=p||Math.round(cals*(parseFloat(document.getElementById('dp-prot-pct').value)||40)/100/4);
+  const carb=cb||Math.round(cals*(parseFloat(document.getElementById('dp-carb-pct').value)||18)/100/4);
+  const fat=f||Math.round(cals*(parseFloat(document.getElementById('dp-fat-pct').value)||42)/100/9);
+  document.getElementById('meal-tot-cals').textContent=cals||'—';
+  document.getElementById('meal-tot-prot').textContent=prot?prot+'g':'—';
+  document.getElementById('meal-tot-carb').textContent=carb?carb+'g':'—';
+  document.getElementById('meal-tot-fat').textContent=fat?fat+'g':'—';
+}
+
+// ── MEAL FIELDS ──
+function renderMealFields(){
+  const count=parseInt(document.getElementById('dp-meal-count').value)||4;
+  const times=['7:00 AM','10:00 AM','1:00 PM','4:00 PM','7:00 PM','9:00 PM'];
+  const types=['Whole Food','Whole Food','Whole Food','Shake','Whole Food','Whole Food'];
+  let html='';
+  for(let i=1;i<=count;i++){
+    html+=`<div style="background:var(--c3);border:1px solid var(--border);padding:16px;margin-bottom:10px">
+      <div style="font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Meal ${i} · ${times[i-1]||''} · ${types[i-1]||'Whole Food'}</div>
+      <div class="edit-grid">
+        <div class="edit-field"><label>Protein (g)</label><input type="number" id="m${i}-prot" placeholder="0" step="1"></div>
+        <div class="edit-field"><label>Carbs (g)</label><input type="number" id="m${i}-carb" placeholder="0" step="1"></div>
+        <div class="edit-field"><label>Fats (g)</label><input type="number" id="m${i}-fat" placeholder="0" step="1"></div>
+        <div class="edit-field"><label>Time</label><input type="text" id="m${i}-time" value="${times[i-1]||''}"></div>
+        <div class="edit-field" style="grid-column:1/-1"><label>Food Preferences</label><input type="text" id="m${i}-foods" placeholder="e.g. chicken breast, sweet potato, olive oil"></div>
+      </div>
+    </div>`;
+  }
+  document.getElementById('meal-fields').innerHTML=html;
+}
+
+// ── BODY COMP SAVE ──
+async function saveBodyComp(){
+  if(!currentClient)return;
+  const msg=document.getElementById('bc-msg');
+  msg.textContent='Saving...';msg.style.color='var(--gold)';
+  const{error}=await sb.from('client_metrics').insert({
+    client_id:currentClient.id,
+    recorded_at:document.getElementById('bc-date').value||new Date().toISOString().split('T')[0],
+    body_weight:parseFloat(document.getElementById('bc-total-mass').value)||null,
+    body_fat:parseFloat(document.getElementById('bc-bf').value)||null,
+    lean_mass:parseFloat(document.getElementById('bc-lean').value)||null,
+    notes:JSON.stringify({
+      fat_mass:document.getElementById('bc-fat-mass').value,
+      bmc:document.getElementById('bc-bmc').value,
+      visceral_fat:document.getElementById('bc-visc-fat').value,
+      visceral_fat_score:document.getElementById('bc-visc-score').value,
+      rmr:document.getElementById('bc-rmr').value,
+      skinfolds:{
+        pectoral:document.getElementById('sk-pec').value,
+        triceps:document.getElementById('sk-tri').value,
+        suprailiac1:document.getElementById('sk-sup1').value,
+        suprailiac2:document.getElementById('sk-sup2').value,
+        umbilical:document.getElementById('sk-umb').value,
+      },
+      circumferences:{
+        shoulders:document.getElementById('cm-shoulder').value,
+        waist:document.getElementById('cm-waist').value,
+        upper_arm:document.getElementById('cm-arm').value,
+        hips:document.getElementById('cm-hip').value,
+        thigh:document.getElementById('cm-thigh').value,
+        calf:document.getElementById('cm-calf').value,
+      }
+    })
+  });
+  if(error){msg.style.color='var(--red)';msg.textContent='Error: '+error.message;return;}
+  msg.style.color='var(--green)';msg.textContent='✓ Assessment saved.';
+  setTimeout(()=>msg.textContent='',3000);
+  await loadAll();
+  openClient(currentClient.id);
+}
+
+// ── WEEKLY ENTRY ──
+const weeklyData={};
+function addWeeklyEntry(){
+  const msg=document.getElementById('wk-msg');
+  const wk=document.getElementById('wk-num').value;
+  const date=document.getElementById('wk-date').value;
+  const weight=document.getElementById('wk-weight').value;
+  const meals=document.getElementById('wk-meals').value;
+  const tracked=document.getElementById('wk-tracked').value;
+  const notes=document.getElementById('wk-notes').value;
+  if(!wk||!date){msg.style.color='var(--red)';msg.textContent='Week number and date are required.';return;}
+  if(!weeklyData[currentClient?.id])weeklyData[currentClient.id]=[];
+  weeklyData[currentClient.id].push({wk,date,weight,meals,tracked,notes});
+  renderWeeklyLog();
+  ['wk-num','wk-date','wk-weight','wk-meals','wk-notes'].forEach(id=>document.getElementById(id).value='');
+  msg.style.color='var(--green)';msg.textContent='✓ Entry added.';
+  setTimeout(()=>msg.textContent='',3000);
+}
+
+function renderWeeklyLog(){
+  const entries=weeklyData[currentClient?.id]||[];
+  const tbody=document.getElementById('weekly-log-body');
+  if(!entries.length){tbody.innerHTML='<tr><td colspan="6" style="padding:30px;text-align:center;color:var(--muted);font-size:12px">No weekly data yet.</td></tr>';return;}
+  tbody.innerHTML=entries.map(e=>`
+    <tr style="border-bottom:1px solid var(--borderw)">
+      <td style="padding:10px 12px">Week ${e.wk}</td>
+      <td style="padding:10px 12px">${e.date}</td>
+      <td style="padding:10px 12px">${e.weight||'—'} lbs</td>
+      <td style="padding:10px 12px">${e.meals||'—'}</td>
+      <td style="padding:10px 12px"><span class="tag ${e.tracked==='yes'?'tag-green':e.tracked==='partial'?'tag-gold':'tag-red'}">${e.tracked}</span></td>
+      <td style="padding:10px 12px;color:var(--muted);font-size:11px">${e.notes||'—'}</td>
+    </tr>`).join('');
 }
 
 async function saveClient(){
