@@ -503,7 +503,13 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             <div>
               <div style="font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Protocol 1</div>
               <div class="edit-grid" style="grid-template-columns:1fr 1fr">
-                <div class="edit-field"><label>Goal</label><select id="ov-goal-1"><option>Fat Loss</option><option>Muscle Gain</option><option>Maintenance</option><option>Performance</option><option>Recomposition</option></select></div>
+                <div class="edit-field"><label>Goal</label>
+                  <select id="ov-goal-1">
+                    <option>Fat Loss</option>
+                    <option>Maintenance</option>
+                    <option>Growth</option>
+                  </select>
+                </div>
                 <div class="edit-field"><label>Start Date</label><input type="date" id="ov-start-1"></div>
                 <div class="edit-field"><label>Est. End Date</label><input type="date" id="ov-end-1"></div>
                 <div class="edit-field"><label>Phase Duration (wks)</label><input type="number" id="ov-dur-1" placeholder="13"></div>
@@ -512,7 +518,13 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             <div>
               <div style="font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Protocol 2</div>
               <div class="edit-grid" style="grid-template-columns:1fr 1fr">
-                <div class="edit-field"><label>Goal</label><select id="ov-goal-2"><option>Fat Loss</option><option>Muscle Gain</option><option>Maintenance</option><option>Performance</option><option>Recomposition</option></select></div>
+                <div class="edit-field"><label>Goal</label>
+                  <select id="ov-goal-2">
+                    <option>Fat Loss</option>
+                    <option>Maintenance</option>
+                    <option>Growth</option>
+                  </select>
+                </div>
                 <div class="edit-field"><label>Start Date</label><input type="date" id="ov-start-2"></div>
                 <div class="edit-field"><label>Est. End Date</label><input type="date" id="ov-end-2"></div>
                 <div class="edit-field"><label>Phase Duration (wks)</label><input type="number" id="ov-dur-2" placeholder="13"></div>
@@ -527,10 +539,25 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
               <select id="ov-freq"><option>2x</option><option>3x</option><option>4x</option><option>5x</option></select>
             </div>
             <div class="edit-field"><label>Training Method</label>
-              <select id="ov-method"><option>Total Body</option><option>Upper/Lower</option><option>Push/Pull/Legs</option><option>Body Part Split</option></select>
+              <select id="ov-method">
+                <option>German Body Composition</option>
+                <option>Total Body</option>
+                <option>U/L - Agonist/Antagonist</option>
+                <option>Single Body Part</option>
+                <option>Hybrid</option>
+              </select>
             </div>
-            <div class="edit-field"><label>Training Priority</label>
-              <select id="ov-priority"><option>Upper Focus</option><option>Lower Focus</option><option>Balanced</option><option>Athletic</option></select>
+            <div class="edit-field"><label>Training Focus</label>
+              <select id="ov-priority">
+                <option>Upper Focus</option>
+                <option>Lower Focus</option>
+                <option>Chest Focus</option>
+                <option>Back Focus</option>
+                <option>Arms Focus</option>
+                <option>Quads Focus</option>
+                <option>Hamstrings Focus</option>
+                <option>Glute Focus</option>
+              </select>
             </div>
           </div>
         </div>
@@ -538,18 +565,44 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           <div class="dp-sec-title">Nutrition Parameters</div>
           <div class="edit-grid">
             <div class="edit-field"><label>Nutrition Approach</label>
-              <select id="ov-nut-approach"><option>Portion Control</option><option>Macro Tracking</option><option>Calorie Counting</option><option>Intuitive</option></select>
+              <select id="ov-nut-approach">
+                <option>Prepare + Portion Control</option>
+                <option>Prepare + Weigh Food</option>
+                <option>Meals Out + Portion Control</option>
+                <option>Meals Out + Elimination</option>
+                <option>Meal Prep Service</option>
+                <option>Hybrid</option>
+              </select>
             </div>
             <div class="edit-field"><label>Tracking Responsibility</label>
-              <select id="ov-tracking"><option>Pictures of Meals</option><option>MyFitnessPal</option><option>Cronometer</option><option>Coach Logs</option></select>
+              <select id="ov-tracking">
+                <option>Full Calorie Counting</option>
+                <option>Pictures of Meals</option>
+                <option>Discussion Based</option>
+              </select>
             </div>
           </div>
         </div>
         <div class="dp-sec">
           <div class="dp-sec-title">Body Composition Assessment Schedule</div>
           <div class="edit-grid">
-            <div class="edit-field"><label>Bodyweight Recording</label>
-              <select id="ov-bw-freq"><option>2x/Wk (T/S)</option><option>Daily</option><option>Weekly</option></select>
+            <div class="edit-field" style="grid-column:1/-1">
+              <label>Bodyweight Recording Days</label>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:8px" id="bw-days-wrap">
+                <label class="day-pill" id="bw-lbl-mon"><input type="checkbox" id="bw-mon" value="Monday" onchange="updateBWDay('mon')"> Monday</label>
+                <label class="day-pill" id="bw-lbl-tue"><input type="checkbox" id="bw-tue" value="Tuesday" onchange="updateBWDay('tue')"> Tuesday</label>
+                <label class="day-pill" id="bw-lbl-wed"><input type="checkbox" id="bw-wed" value="Wednesday" onchange="updateBWDay('wed')"> Wednesday</label>
+                <label class="day-pill" id="bw-lbl-thu"><input type="checkbox" id="bw-thu" value="Thursday" onchange="updateBWDay('thu')"> Thursday</label>
+                <label class="day-pill" id="bw-lbl-fri"><input type="checkbox" id="bw-fri" value="Friday" onchange="updateBWDay('fri')"> Friday</label>
+                <label class="day-pill" id="bw-lbl-sat"><input type="checkbox" id="bw-sat" value="Saturday" onchange="updateBWDay('sat')"> Saturday</label>
+                <label class="day-pill" id="bw-lbl-sun"><input type="checkbox" id="bw-sun" value="Sunday" onchange="updateBWDay('sun')"> Sunday</label>
+              </div>
+              <div id="bw-days-saved" style="display:none;flex-wrap:wrap;gap:6px;margin-top:10px"></div>
+              <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+                <button onclick="saveBWDays()" style="padding:8px 20px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600">Save Days</button>
+                <button onclick="editBWDays()" id="bw-days-edit-btn" style="display:none;padding:8px 16px;background:transparent;color:var(--muted);border:1px solid var(--borderw);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase">Edit</button>
+                <span id="bw-days-msg" style="font-size:10px;color:var(--green);min-height:16px"></span>
+              </div>
             </div>
             <div class="edit-field"><label>Circumference Frequency</label>
               <select id="ov-circ-freq"><option>1x/Month</option><option>Bi-Weekly</option><option>Weekly</option></select>
@@ -1114,6 +1167,61 @@ function editDays(){
   document.getElementById('dp-days-saved').style.display='none';
   document.getElementById('dp-days-edit-btn').style.display='none';
   document.getElementById('dp-days-msg').textContent='';
+}
+
+// ── BODYWEIGHT RECORDING DAYS (same pattern) ──
+function updateBWDay(key){
+  const cb=document.getElementById('bw-'+key);
+  const lbl=document.getElementById('bw-lbl-'+key);
+  if(cb.checked) lbl.classList.add('selected');
+  else lbl.classList.remove('selected');
+}
+function getBWDays(){
+  return DAY_ORDER.filter(k=>document.getElementById('bw-'+k).checked).map(k=>DAY_MAP[k]).join(', ');
+}
+function setBWDays(val){
+  if(!val)return;
+  DAY_ORDER.forEach(k=>{
+    document.getElementById('bw-'+k).checked=false;
+    document.getElementById('bw-lbl-'+k).classList.remove('selected');
+  });
+  const selected=(val||'').split(/[,]+/).map(d=>d.trim().toLowerCase());
+  DAY_ORDER.forEach(k=>{
+    const matches=selected.some(d=>DAY_MAP[k].toLowerCase()===d||DAY_MAP[k].toLowerCase().startsWith(d.slice(0,3)));
+    if(matches){
+      document.getElementById('bw-'+k).checked=true;
+      document.getElementById('bw-lbl-'+k).classList.add('selected');
+    }
+  });
+  if(val.trim()) showSavedBWDays();
+}
+function saveBWDays(){
+  const days=getBWDays();
+  if(!days){
+    document.getElementById('bw-days-msg').style.color='var(--red)';
+    document.getElementById('bw-days-msg').textContent='Select at least one day.';
+    setTimeout(()=>document.getElementById('bw-days-msg').textContent='',2500);
+    return;
+  }
+  showSavedBWDays();
+  document.getElementById('bw-days-msg').style.color='var(--green)';
+  document.getElementById('bw-days-msg').textContent='✓ Saved';
+  setTimeout(()=>document.getElementById('bw-days-msg').textContent='',2500);
+}
+function showSavedBWDays(){
+  const days=getBWDays();
+  if(!days)return;
+  document.getElementById('bw-days-wrap').style.display='none';
+  const savedEl=document.getElementById('bw-days-saved');
+  savedEl.style.display='flex';
+  savedEl.innerHTML=days.split(', ').map(d=>`<span class="day-saved-badge">${d}</span>`).join('');
+  document.getElementById('bw-days-edit-btn').style.display='inline-block';
+}
+function editBWDays(){
+  document.getElementById('bw-days-wrap').style.display='grid';
+  document.getElementById('bw-days-saved').style.display='none';
+  document.getElementById('bw-days-edit-btn').style.display='none';
+  document.getElementById('bw-days-msg').textContent='';
 }
 
 // ── GOAL CALCULATOR ──
