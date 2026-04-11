@@ -171,6 +171,29 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
 .toggle.on::after{left:19px;background:var(--gold);}
 .note-box{width:100%;background:var(--c3);border:1px solid var(--borderw);color:var(--white);padding:14px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:300;outline:none;transition:border-color .3s;height:110px;resize:none;display:block;margin-bottom:10px;}
 .note-box:focus{border-color:var(--gold-mid);}
+
+/* Day pills */
+.day-pill{
+  display:flex;align-items:center;justify-content:center;
+  padding:11px 10px;
+  background:var(--c3);border:1px solid var(--borderw);
+  cursor:pointer;font-size:11px;color:var(--muted);
+  transition:all .2s;letter-spacing:.5px;
+  user-select:none;text-align:center;
+}
+.day-pill input[type=checkbox]{display:none;}
+.day-pill:hover{border-color:var(--gold-dark);color:var(--white);}
+.day-pill.selected{
+  background:var(--gold-dim);border-color:var(--gold-mid);
+  color:var(--gold);font-weight:500;
+}
+/* saved day badge */
+.day-saved-badge{
+  padding:8px 18px;
+  background:var(--gold-dim);border:1px solid var(--gold-mid);
+  color:var(--gold);font-size:11px;font-weight:500;
+  letter-spacing:.5px;
+}
 .note-prev{background:var(--c3);border:1px solid var(--borderw);padding:14px;margin-bottom:8px;}
 .note-prev-date{font-size:9px;color:var(--gold);letter-spacing:1.5px;margin-bottom:5px;}
 .note-prev-text{font-size:11px;color:var(--muted);line-height:1.8;}
@@ -440,28 +463,21 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             </div>
             <div class="edit-field" style="grid-column:1/-1">
               <label>Training Days</label>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px" id="dp-training-days-wrap">
-                <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--c3);border:1px solid var(--borderw);cursor:pointer;font-size:11px;color:var(--muted);transition:all .2s;letter-spacing:.5px" id="day-lbl-mon">
-                  <input type="checkbox" id="day-mon" value="Monday" onchange="updateDayStyle('mon')" style="accent-color:var(--gold-mid)"> Monday
-                </label>
-                <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--c3);border:1px solid var(--borderw);cursor:pointer;font-size:11px;color:var(--muted);transition:all .2s;letter-spacing:.5px" id="day-lbl-tue">
-                  <input type="checkbox" id="day-tue" value="Tuesday" onchange="updateDayStyle('tue')" style="accent-color:var(--gold-mid)"> Tuesday
-                </label>
-                <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--c3);border:1px solid var(--borderw);cursor:pointer;font-size:11px;color:var(--muted);transition:all .2s;letter-spacing:.5px" id="day-lbl-wed">
-                  <input type="checkbox" id="day-wed" value="Wednesday" onchange="updateDayStyle('wed')" style="accent-color:var(--gold-mid)"> Wednesday
-                </label>
-                <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--c3);border:1px solid var(--borderw);cursor:pointer;font-size:11px;color:var(--muted);transition:all .2s;letter-spacing:.5px" id="day-lbl-thu">
-                  <input type="checkbox" id="day-thu" value="Thursday" onchange="updateDayStyle('thu')" style="accent-color:var(--gold-mid)"> Thursday
-                </label>
-                <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--c3);border:1px solid var(--borderw);cursor:pointer;font-size:11px;color:var(--muted);transition:all .2s;letter-spacing:.5px" id="day-lbl-fri">
-                  <input type="checkbox" id="day-fri" value="Friday" onchange="updateDayStyle('fri')" style="accent-color:var(--gold-mid)"> Friday
-                </label>
-                <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--c3);border:1px solid var(--borderw);cursor:pointer;font-size:11px;color:var(--muted);transition:all .2s;letter-spacing:.5px" id="day-lbl-sat">
-                  <input type="checkbox" id="day-sat" value="Saturday" onchange="updateDayStyle('sat')" style="accent-color:var(--gold-mid)"> Saturday
-                </label>
-                <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--c3);border:1px solid var(--borderw);cursor:pointer;font-size:11px;color:var(--muted);transition:all .2s;letter-spacing:.5px" id="day-lbl-sun">
-                  <input type="checkbox" id="day-sun" value="Sunday" onchange="updateDayStyle('sun')" style="accent-color:var(--gold-mid)"> Sunday
-                </label>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:8px" id="dp-training-days-wrap">
+                <label class="day-pill" id="day-lbl-mon"><input type="checkbox" id="day-mon" value="Monday" onchange="updateDayStyle('mon')"> Monday</label>
+                <label class="day-pill" id="day-lbl-tue"><input type="checkbox" id="day-tue" value="Tuesday" onchange="updateDayStyle('tue')"> Tuesday</label>
+                <label class="day-pill" id="day-lbl-wed"><input type="checkbox" id="day-wed" value="Wednesday" onchange="updateDayStyle('wed')"> Wednesday</label>
+                <label class="day-pill" id="day-lbl-thu"><input type="checkbox" id="day-thu" value="Thursday" onchange="updateDayStyle('thu')"> Thursday</label>
+                <label class="day-pill" id="day-lbl-fri"><input type="checkbox" id="day-fri" value="Friday" onchange="updateDayStyle('fri')"> Friday</label>
+                <label class="day-pill" id="day-lbl-sat"><input type="checkbox" id="day-sat" value="Saturday" onchange="updateDayStyle('sat')"> Saturday</label>
+                <label class="day-pill" id="day-lbl-sun"><input type="checkbox" id="day-sun" value="Sunday" onchange="updateDayStyle('sun')"> Sunday</label>
+              </div>
+              <!-- shows after save -->
+              <div id="dp-days-saved" style="display:none;flex-wrap:wrap;gap:6px;margin-top:10px"></div>
+              <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+                <button onclick="saveDays()" style="padding:8px 20px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600;transition:all .3s">Save Days</button>
+                <button onclick="editDays()" id="dp-days-edit-btn" style="display:none;padding:8px 16px;background:transparent;color:var(--muted);border:1px solid var(--borderw);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;transition:all .3s">Edit</button>
+                <span id="dp-days-msg" style="font-size:10px;color:var(--green);min-height:16px"></span>
               </div>
             </div>
             <div class="edit-field"><label>Training Time</label><input type="time" id="dp-training-time"></div>
@@ -1035,31 +1051,69 @@ function dpTab(name,el){
 
 // ── TRAINING DAYS ──
 const DAY_MAP={mon:'Monday',tue:'Tuesday',wed:'Wednesday',thu:'Thursday',fri:'Friday',sat:'Saturday',sun:'Sunday'};
+const DAY_ORDER=['mon','tue','wed','thu','fri','sat','sun'];
+
 function updateDayStyle(key){
   const cb=document.getElementById('day-'+key);
   const lbl=document.getElementById('day-lbl-'+key);
-  if(cb.checked){
-    lbl.style.borderColor='var(--gold-mid)';
-    lbl.style.color='var(--gold)';
-    lbl.style.background='var(--gold-dim)';
-  } else {
-    lbl.style.borderColor='var(--borderw)';
-    lbl.style.color='var(--muted)';
-    lbl.style.background='var(--c3)';
-  }
+  if(cb.checked) lbl.classList.add('selected');
+  else lbl.classList.remove('selected');
 }
+
 function getTrainingDays(){
-  return Object.keys(DAY_MAP).filter(k=>document.getElementById('day-'+k).checked).map(k=>DAY_MAP[k]).join(', ');
+  return DAY_ORDER.filter(k=>document.getElementById('day-'+k).checked).map(k=>DAY_MAP[k]).join(', ');
 }
+
 function setTrainingDays(val){
   if(!val)return;
-  const selected=(val||'').split(/[,/]+/).map(d=>d.trim().toLowerCase());
-  Object.keys(DAY_MAP).forEach(k=>{
-    const cb=document.getElementById('day-'+k);
-    const matches=selected.some(d=>DAY_MAP[k].toLowerCase().startsWith(d)||d.startsWith(DAY_MAP[k].toLowerCase().slice(0,3)));
-    cb.checked=matches;
-    updateDayStyle(k);
+  // reset all first
+  DAY_ORDER.forEach(k=>{
+    document.getElementById('day-'+k).checked=false;
+    document.getElementById('day-lbl-'+k).classList.remove('selected');
   });
+  const selected=(val||'').split(/[,]+/).map(d=>d.trim().toLowerCase());
+  DAY_ORDER.forEach(k=>{
+    const matches=selected.some(d=>DAY_MAP[k].toLowerCase()===d||DAY_MAP[k].toLowerCase().startsWith(d.slice(0,3)));
+    if(matches){
+      document.getElementById('day-'+k).checked=true;
+      document.getElementById('day-lbl-'+k).classList.add('selected');
+    }
+  });
+  // if days are already saved, show saved view
+  if(val.trim()) showSavedDays();
+}
+
+function saveDays(){
+  const days=getTrainingDays();
+  if(!days){
+    document.getElementById('dp-days-msg').style.color='var(--red)';
+    document.getElementById('dp-days-msg').textContent='Select at least one day.';
+    setTimeout(()=>document.getElementById('dp-days-msg').textContent='',2500);
+    return;
+  }
+  showSavedDays();
+  document.getElementById('dp-days-msg').style.color='var(--green)';
+  document.getElementById('dp-days-msg').textContent='✓ Saved';
+  setTimeout(()=>document.getElementById('dp-days-msg').textContent='',2500);
+}
+
+function showSavedDays(){
+  const days=getTrainingDays();
+  if(!days)return;
+  // hide grid, show badges
+  document.getElementById('dp-training-days-wrap').style.display='none';
+  const savedEl=document.getElementById('dp-days-saved');
+  savedEl.style.display='flex';
+  savedEl.innerHTML=days.split(', ').map(d=>`<span class="day-saved-badge">${d}</span>`).join('');
+  document.getElementById('dp-days-edit-btn').style.display='inline-block';
+}
+
+function editDays(){
+  // show grid again, hide badges
+  document.getElementById('dp-training-days-wrap').style.display='grid';
+  document.getElementById('dp-days-saved').style.display='none';
+  document.getElementById('dp-days-edit-btn').style.display='none';
+  document.getElementById('dp-days-msg').textContent='';
 }
 
 // ── GOAL CALCULATOR ──
