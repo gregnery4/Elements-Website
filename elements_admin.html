@@ -438,7 +438,32 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             <div class="edit-field"><label>Sex</label>
               <select id="dp-sex"><option>Male</option><option>Female</option></select>
             </div>
-            <div class="edit-field"><label>Training Days</label><input type="text" id="dp-training-days" placeholder="e.g. M/W/F or T/THR"></div>
+            <div class="edit-field" style="grid-column:1/-1">
+              <label>Training Days</label>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px" id="dp-training-days-wrap">
+                <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--c3);border:1px solid var(--borderw);cursor:pointer;font-size:11px;color:var(--muted);transition:all .2s;letter-spacing:.5px" id="day-lbl-mon">
+                  <input type="checkbox" id="day-mon" value="Monday" onchange="updateDayStyle('mon')" style="accent-color:var(--gold-mid)"> Monday
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--c3);border:1px solid var(--borderw);cursor:pointer;font-size:11px;color:var(--muted);transition:all .2s;letter-spacing:.5px" id="day-lbl-tue">
+                  <input type="checkbox" id="day-tue" value="Tuesday" onchange="updateDayStyle('tue')" style="accent-color:var(--gold-mid)"> Tuesday
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--c3);border:1px solid var(--borderw);cursor:pointer;font-size:11px;color:var(--muted);transition:all .2s;letter-spacing:.5px" id="day-lbl-wed">
+                  <input type="checkbox" id="day-wed" value="Wednesday" onchange="updateDayStyle('wed')" style="accent-color:var(--gold-mid)"> Wednesday
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--c3);border:1px solid var(--borderw);cursor:pointer;font-size:11px;color:var(--muted);transition:all .2s;letter-spacing:.5px" id="day-lbl-thu">
+                  <input type="checkbox" id="day-thu" value="Thursday" onchange="updateDayStyle('thu')" style="accent-color:var(--gold-mid)"> Thursday
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--c3);border:1px solid var(--borderw);cursor:pointer;font-size:11px;color:var(--muted);transition:all .2s;letter-spacing:.5px" id="day-lbl-fri">
+                  <input type="checkbox" id="day-fri" value="Friday" onchange="updateDayStyle('fri')" style="accent-color:var(--gold-mid)"> Friday
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--c3);border:1px solid var(--borderw);cursor:pointer;font-size:11px;color:var(--muted);transition:all .2s;letter-spacing:.5px" id="day-lbl-sat">
+                  <input type="checkbox" id="day-sat" value="Saturday" onchange="updateDayStyle('sat')" style="accent-color:var(--gold-mid)"> Saturday
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--c3);border:1px solid var(--borderw);cursor:pointer;font-size:11px;color:var(--muted);transition:all .2s;letter-spacing:.5px" id="day-lbl-sun">
+                  <input type="checkbox" id="day-sun" value="Sunday" onchange="updateDayStyle('sun')" style="accent-color:var(--gold-mid)"> Sunday
+                </label>
+              </div>
+            </div>
             <div class="edit-field"><label>Training Time</label><input type="time" id="dp-training-time"></div>
             <div class="edit-field"><label>Assigned Coach</label>
               <select id="dp-coach"><option>Gavin Regnery</option><option>Mark Bloice</option></select>
@@ -942,7 +967,7 @@ function openClient(id){
   document.getElementById('dp-coach').value=c.coach||'Gavin Regnery';
   if(c.sex)document.getElementById('dp-sex').value=c.sex;
   if(c.comm_pref)document.getElementById('dp-comm').value=c.comm_pref;
-  if(c.training_days)document.getElementById('dp-training-days').value=c.training_days;
+  if(c.training_days)setTrainingDays(c.training_days);
 
   // Tab 3 — Goal Setting (latest metrics)
   const latest=c.client_metrics?.sort((a,b)=>new Date(b.recorded_at)-new Date(a.recorded_at))[0];
@@ -1006,6 +1031,35 @@ function dpTab(name,el){
   if(el)el.classList.add('on');
   // sync meal totals when switching to meal design tab
   if(name==='t5')syncMealTotals();
+}
+
+// ── TRAINING DAYS ──
+const DAY_MAP={mon:'Monday',tue:'Tuesday',wed:'Wednesday',thu:'Thursday',fri:'Friday',sat:'Saturday',sun:'Sunday'};
+function updateDayStyle(key){
+  const cb=document.getElementById('day-'+key);
+  const lbl=document.getElementById('day-lbl-'+key);
+  if(cb.checked){
+    lbl.style.borderColor='var(--gold-mid)';
+    lbl.style.color='var(--gold)';
+    lbl.style.background='var(--gold-dim)';
+  } else {
+    lbl.style.borderColor='var(--borderw)';
+    lbl.style.color='var(--muted)';
+    lbl.style.background='var(--c3)';
+  }
+}
+function getTrainingDays(){
+  return Object.keys(DAY_MAP).filter(k=>document.getElementById('day-'+k).checked).map(k=>DAY_MAP[k]).join(', ');
+}
+function setTrainingDays(val){
+  if(!val)return;
+  const selected=(val||'').split(/[,/]+/).map(d=>d.trim().toLowerCase());
+  Object.keys(DAY_MAP).forEach(k=>{
+    const cb=document.getElementById('day-'+k);
+    const matches=selected.some(d=>DAY_MAP[k].toLowerCase().startsWith(d)||d.startsWith(DAY_MAP[k].toLowerCase().slice(0,3)));
+    cb.checked=matches;
+    updateDayStyle(k);
+  });
 }
 
 // ── GOAL CALCULATOR ──
@@ -1181,6 +1235,7 @@ async function saveClient(){
     occupation:document.getElementById('dp-occ').value,
     start_date:document.getElementById('dp-start').value||null,
     coach:document.getElementById('dp-coach').value,
+    training_days:getTrainingDays()||null,
   }).eq('id',id);
 
   const w=parseFloat(document.getElementById('dp-weight').value);
