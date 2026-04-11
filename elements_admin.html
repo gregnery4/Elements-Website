@@ -1358,84 +1358,165 @@ function handleDexaDrop(event){
 async function handleDexaFile(file){
   if(!file)return;
   showDexaStatus('loading','📄 Reading PDF — extracting DEXA metrics...');
+
   try {
-    // Read PDF as base64
-    const base64=await new Promise((res,rej)=>{
-      const reader=new FileReader();
-      reader.onload=()=>res(reader.result.split(',')[1]);
-      reader.onerror=()=>rej(new Error('Could not read file'));
-      reader.readAsDataURL(file);
-    });
-
-    // Send to Claude API to extract metrics
-    const response=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        messages:[{
-          role:'user',
-          content:[
-            {
-              type:'document',
-              source:{type:'base64',media_type:'application/pdf',data:base64}
-            },
-            {
-              type:'text',
-              text:`Extract DEXA scan metrics from this PDF. Return ONLY a JSON object with these exact keys (use null if not found):
-{
-  "total_mass_lbs": number,
-  "body_fat_percent": number,
-  "lean_mass_lbs": number,
-  "fat_mass_lbs": number,
-  "bmc": number,
-  "visceral_fat_lbs": number,
-  "visceral_fat_score": number,
-  "resting_metabolic_rate": number,
-  "scan_date": "YYYY-MM-DD or null"
-}
-Convert kg to lbs if needed (multiply by 2.205). Return only the JSON, no explanation.`
-            }
-          ]
-        }]
-      })
-    });
-
-    if(!response.ok){
-      const err=await response.json();
-      throw new Error(err.error?.message||'API error');
+    // Load PDF.js from CDN
+    if(!window.pdfjsLib){
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+        s.onload=res; s.onerror=rej;
+        document.head.appendChild(s);
+      });
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc=
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     }
 
-    const data=await response.json();
-    const text=data.content.map(c=>c.text||'').join('');
-    const clean=text.replace(/```json|```/g,'').trim();
-    const metrics=JSON.parse(clean);
+    // Read file as ArrayBuffer
+    const arrayBuffer=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:arrayBuffer}).promise;
 
-    // Auto-fill fields
-    const filled=[];
-    if(metrics.scan_date){document.getElementById('bc-date').value=metrics.scan_date;filled.push(`Date: ${metrics.scan_date}`);}
-    if(metrics.total_mass_lbs){document.getElementById('bc-total-mass').value=metrics.total_mass_lbs;filled.push(`Total Mass: ${metrics.total_mass_lbs} lbs`);}
-    if(metrics.body_fat_percent){document.getElementById('bc-bf').value=metrics.body_fat_percent;filled.push(`Body Fat: ${metrics.body_fat_percent}%`);}
-    if(metrics.lean_mass_lbs){document.getElementById('bc-lean').value=metrics.lean_mass_lbs;filled.push(`Lean Mass: ${metrics.lean_mass_lbs} lbs`);}
-    if(metrics.fat_mass_lbs){document.getElementById('bc-fat-mass').value=metrics.fat_mass_lbs;filled.push(`Fat Mass: ${metrics.fat_mass_lbs} lbs`);}
-    if(metrics.bmc){document.getElementById('bc-bmc').value=metrics.bmc;filled.push(`BMC: ${metrics.bmc}`);}
-    if(metrics.visceral_fat_lbs){document.getElementById('bc-visc-fat').value=metrics.visceral_fat_lbs;filled.push(`Visceral Fat: ${metrics.visceral_fat_lbs}`);}
-    if(metrics.visceral_fat_score){document.getElementById('bc-visc-score').value=metrics.visceral_fat_score;filled.push(`Visceral Score: ${metrics.visceral_fat_score}`);}
-    if(metrics.resting_metabolic_rate){document.getElementById('bc-rmr').value=metrics.resting_metabolic_rate;filled.push(`RMR: ${metrics.resting_metabolic_rate}`);}
+    // Extract all text from all pages
+    let fullText='';
+    for(let p=1;p<=pdf.numPages;p++){
+      const page=await pdf.getPage(p);
+      const content=await page.getTextContent();
+      fullText+=content.items.map(i=>i.str).join(' ')+'\n';
+    }
 
-    // Show preview
-    const preview=document.getElementById('dexa-parse-preview');
-    const previewVals=document.getElementById('dexa-preview-values');
-    preview.style.display='block';
-    previewVals.innerHTML=filled.map(f=>`<div style="padding:6px 10px;background:var(--c2);border:1px solid rgba(76,175,130,.15)">${f}</div>`).join('');
-
-    showDexaStatus('success',`✓ ${filled.length} metrics extracted and filled — review below and hit Save Assessment`);
-    document.getElementById('dexa-dropzone').innerHTML=`<div style="font-size:20px;margin-bottom:8px">✓</div><div style="font-size:12px;color:var(--green);font-weight:500">${file.name}</div><div style="font-size:10px;color:var(--muted);margin-top:4px">${filled.length} metrics extracted · Click to upload a different file</div><input type="file" id="dexa-file-input" accept=".pdf" style="display:none" onchange="handleDexaFile(this.files[0])">`;
+    // Parse metrics from text using patterns from BOD DEXA format
+    const metrics=parseDexaText(fullText);
+    fillDexaFields(metrics,file.name);
 
   } catch(e){
-    showDexaStatus('error','Could not parse PDF: '+e.message+'. Please fill in the fields manually below.');
+    showDexaStatus('error','Could not read PDF: '+e.message+'. Try a different file or fill in manually below.');
   }
+}
+
+function parseDexaText(text){
+  // Normalize text — remove extra spaces
+  const t=text.replace(/\s+/g,' ');
+  const metrics={};
+
+  // ── SCAN DATE ── formats: 03.23.25 | 03/23/2025 | 03 / 23 / 2025
+  const dateMatch=t.match(/Scan Date[:\s]*(\d{1,2})[./\s]+(\d{1,2})[./\s]+(\d{2,4})/i)
+    || t.match(/(\d{1,2})\s*\/\s*(\d{1,2})\s*\/\s*(20\d{2})/);
+  if(dateMatch){
+    let y=dateMatch[3];
+    if(y.length===2) y='20'+y;
+    const m=dateMatch[1].padStart(2,'0');
+    const d=dateMatch[2].padStart(2,'0');
+    metrics.scan_date=`${y}-${m}-${d}`;
+  }
+
+  // ── TOTAL MASS ──
+  const totalMass=t.match(/Total Mass[\s(lbs)]*[\s:]*(\d+\.?\d*)\s*lbs/i)
+    || t.match(/(\d+\.?\d*)\s*lbs\s*Total (?:Mass|Weight)/i)
+    || t.match(/Total Weight\s*(\d+\.?\d*)\s*lbs/i);
+  if(totalMass) metrics.total_mass_lbs=parseFloat(totalMass[1]);
+
+  // ── BODY FAT % ──
+  const bf=t.match(/(\d+\.?\d*)\s*%\s*Body Fat/i)
+    || t.match(/Body Fat\s*%?\s*[\s:]*(\d+\.?\d*)\s*%/i)
+    || t.match(/Total Body Fat\s*%\s*[\s:]*(\d+\.?\d*)\s*%/i);
+  if(bf) metrics.body_fat_percent=parseFloat(bf[1]);
+
+  // ── LEAN MASS ──
+  const lean=t.match(/(\d+\.?\d*)\s*lbs\s*Lean Mass/i)
+    || t.match(/Lean Mass\s*[\s:]*(\d+\.?\d*)\s*lbs/i);
+  if(lean) metrics.lean_mass_lbs=parseFloat(lean[1]);
+
+  // ── FAT MASS ──
+  const fat=t.match(/(\d+\.?\d*)\s*lbs\s*Fat Mass/i)
+    || t.match(/Fat Mass[\s(lbs)]*[\s:]*(\d+\.?\d*)\s*lbs/i);
+  if(fat) metrics.fat_mass_lbs=parseFloat(fat[1]);
+
+  // ── BMC ── listed as "BMC 6.57 lbs" in body comp section
+  const bmc=t.match(/BMC\s+(\d+\.?\d*)\s*lbs/i)
+    || t.match(/Bone Mineral Content[^0-9]*(\d+\.?\d*)\s*lbs/i);
+  if(bmc) metrics.bmc=parseFloat(bmc[1]);
+
+  // ── VISCERAL FAT lbs ──
+  const viscFat=t.match(/(\d+\.?\d*)\s*lbs\s*Visceral Fat/i)
+    || t.match(/Visceral Fat\s*[\s:]*(\d+\.?\d*)\s*lbs/i);
+  if(viscFat) metrics.visceral_fat_lbs=parseFloat(viscFat[1]);
+
+  // ── VISCERAL FAT SCORE cm² ──
+  const viscScore=t.match(/(\d+\.?\d*)\s*cm[\u00B2²2]\s*Visceral Fat score/i)
+    || t.match(/Visceral Fat score[^0-9]*(\d+\.?\d*)\s*cm/i);
+  if(viscScore) metrics.visceral_fat_score=parseFloat(viscScore[1]);
+
+  // ── RMR ──
+  const rmr=t.match(/Resting Met(?:abolism|abolic Rate)[^0-9]*(\d+(?:[,.]?\d+)*)\s*(?:Calories?|cal)/i)
+    || t.match(/(\d{3,4}(?:\.\d+)?)\s*(?:Calories? Per Day|cal\/day)/i)
+    || t.match(/RMR[^0-9]*(\d{3,4}(?:\.\d+)?)/i);
+  if(rmr) metrics.resting_metabolic_rate=parseFloat(rmr[1].replace(',',''));
+
+  return metrics;
+}
+
+function fillDexaFields(metrics, filename){
+  const filled=[];
+
+  if(metrics.scan_date){
+    document.getElementById('bc-date').value=metrics.scan_date;
+    filled.push(`Date: ${metrics.scan_date}`);
+  }
+  if(metrics.total_mass_lbs){
+    document.getElementById('bc-total-mass').value=metrics.total_mass_lbs;
+    filled.push(`Total Mass: ${metrics.total_mass_lbs} lbs`);
+  }
+  if(metrics.body_fat_percent){
+    document.getElementById('bc-bf').value=metrics.body_fat_percent;
+    filled.push(`Body Fat: ${metrics.body_fat_percent}%`);
+  }
+  if(metrics.lean_mass_lbs){
+    document.getElementById('bc-lean').value=metrics.lean_mass_lbs;
+    filled.push(`Lean Mass: ${metrics.lean_mass_lbs} lbs`);
+  }
+  if(metrics.fat_mass_lbs){
+    document.getElementById('bc-fat-mass').value=metrics.fat_mass_lbs;
+    filled.push(`Fat Mass: ${metrics.fat_mass_lbs} lbs`);
+  }
+  if(metrics.bmc){
+    document.getElementById('bc-bmc').value=metrics.bmc;
+    filled.push(`BMC: ${metrics.bmc} lbs`);
+  }
+  if(metrics.visceral_fat_lbs){
+    document.getElementById('bc-visc-fat').value=metrics.visceral_fat_lbs;
+    filled.push(`Visceral Fat: ${metrics.visceral_fat_lbs} lbs`);
+  }
+  if(metrics.visceral_fat_score){
+    document.getElementById('bc-visc-score').value=metrics.visceral_fat_score;
+    filled.push(`Visceral Fat Score: ${metrics.visceral_fat_score} cm²`);
+  }
+  if(metrics.resting_metabolic_rate){
+    document.getElementById('bc-rmr').value=metrics.resting_metabolic_rate;
+    filled.push(`RMR: ${metrics.resting_metabolic_rate} cal/day`);
+  }
+
+  if(filled.length===0){
+    showDexaStatus('error','PDF was read but no metrics were found. This may not be a standard DEXA format. Please fill in the fields manually.');
+    return;
+  }
+
+  // Show preview panel
+  const preview=document.getElementById('dexa-parse-preview');
+  const previewVals=document.getElementById('dexa-preview-values');
+  preview.style.display='block';
+  previewVals.innerHTML=filled.map(f=>`
+    <div style="padding:6px 10px;background:var(--c2);border:1px solid rgba(76,175,130,.15);font-size:11px">${f}</div>
+  `).join('');
+
+  showDexaStatus('success',`✓ ${filled.length} metrics extracted — review below and hit Save Assessment`);
+
+  // Update dropzone to show success state
+  document.getElementById('dexa-dropzone').innerHTML=`
+    <div style="font-size:20px;margin-bottom:8px">✅</div>
+    <div style="font-size:12px;color:var(--green);font-weight:500">${filename}</div>
+    <div style="font-size:10px;color:var(--muted);margin-top:4px">${filled.length} metrics extracted · Click to upload a different file</div>
+    <input type="file" id="dexa-file-input" accept=".pdf" style="display:none" onchange="handleDexaFile(this.files[0])">
+  `;
 }
 
 function showDexaStatus(type,msg){
