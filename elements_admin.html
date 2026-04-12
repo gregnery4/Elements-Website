@@ -646,12 +646,6 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             <div class="edit-field"><label>BW % Reduction / Week</label><input type="number" id="dp-bw-pct" step="0.001" placeholder="auto" readonly style="opacity:.6"></div>
           </div>
         </div>
-        <div class="dp-sec">
-          <div class="dp-sec-title">Sleep Score</div>
-          <div class="edit-grid">
-            <div class="edit-field"><label>Avg Sleep Score</label><input type="number" id="dp-sleep" placeholder="82"></div>
-          </div>
-        </div>
         <div id="goal-calc-result" style="background:var(--c3);border:1px solid var(--border);padding:16px;margin-bottom:20px;font-size:12px;color:var(--muted);display:none">
           <div style="color:var(--gold);font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">Calculated Results</div>
           <div id="goal-calc-text"></div>
@@ -1106,7 +1100,6 @@ function openClient(id){
   document.getElementById('dp-weight').value=latest?.body_weight||'';
   document.getElementById('dp-bf').value=latest?.body_fat||'';
   document.getElementById('dp-lean').value=latest?.lean_mass||'';
-  document.getElementById('dp-sleep').value=latest?.sleep_score||'';
   if(latest?.body_weight&&latest?.body_fat)calcGoals();
 
   // Tab 4 — Nutrition
@@ -1772,9 +1765,8 @@ async function saveClient(){
   const w=parseFloat(document.getElementById('dp-weight').value);
   const bf=parseFloat(document.getElementById('dp-bf').value);
   const lm=parseFloat(document.getElementById('dp-lean').value);
-  const sl=parseInt(document.getElementById('dp-sleep').value);
-  if(w||bf||lm||sl){
-    await sb.from('client_metrics').insert({client_id:id,body_weight:w||null,body_fat:bf||null,lean_mass:lm||null,sleep_score:sl||null,recorded_at:new Date().toISOString().split('T')[0]});
+  if(w||bf||lm){
+    await sb.from('client_metrics').insert({client_id:id,body_weight:w||null,body_fat:bf||null,lean_mass:lm||null,recorded_at:new Date().toISOString().split('T')[0]});
   }
 
   msg.textContent='✓ Saved successfully.';msg.style.color='var(--green)';
