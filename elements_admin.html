@@ -672,22 +672,34 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       <div id="dptab-t5" style="display:none">
         <div class="dp-sec">
           <div class="dp-sec-title">Daily Totals (from Calculator)</div>
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:8px">
-            <div style="background:var(--c3);border:1px solid var(--border);padding:14px;text-align:center">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Calories</div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:24px" id="meal-tot-cals">—</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:8px">
+            <div id="meal-card-cals" style="background:var(--c3);border:1px solid var(--border);padding:14px;text-align:center;transition:border-color .3s">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Calories</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1" id="meal-tot-cals">—</div>
+              <div style="font-size:9px;color:var(--muted);margin-top:4px">target</div>
+              <div style="height:2px;background:var(--c4);margin-top:8px"><div id="meal-bar-cals" style="height:2px;background:linear-gradient(90deg,var(--gold-dark),var(--gold));width:0%;transition:width .3s"></div></div>
+              <div style="font-size:11px;margin-top:6px;font-weight:500" id="meal-rem-cals">— remaining</div>
             </div>
-            <div style="background:var(--c3);border:1px solid var(--border);padding:14px;text-align:center">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Protein</div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:24px" id="meal-tot-prot">—</div>
+            <div id="meal-card-prot" style="background:var(--c3);border:1px solid var(--border);padding:14px;text-align:center;transition:border-color .3s">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Protein</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1" id="meal-tot-prot">—</div>
+              <div style="font-size:9px;color:var(--muted);margin-top:4px">grams target</div>
+              <div style="height:2px;background:var(--c4);margin-top:8px"><div id="meal-bar-prot" style="height:2px;background:linear-gradient(90deg,var(--gold-dark),var(--gold));width:0%;transition:width .3s"></div></div>
+              <div style="font-size:11px;margin-top:6px;font-weight:500" id="meal-rem-prot">— remaining</div>
             </div>
-            <div style="background:var(--c3);border:1px solid var(--border);padding:14px;text-align:center">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Carbs</div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:24px" id="meal-tot-carb">—</div>
+            <div id="meal-card-carb" style="background:var(--c3);border:1px solid var(--border);padding:14px;text-align:center;transition:border-color .3s">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Carbs</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1" id="meal-tot-carb">—</div>
+              <div style="font-size:9px;color:var(--muted);margin-top:4px">grams target</div>
+              <div style="height:2px;background:var(--c4);margin-top:8px"><div id="meal-bar-carb" style="height:2px;background:linear-gradient(90deg,#3A6BA8,#5B8FD4);width:0%;transition:width .3s"></div></div>
+              <div style="font-size:11px;margin-top:6px;font-weight:500" id="meal-rem-carb">— remaining</div>
             </div>
-            <div style="background:var(--c3);border:1px solid var(--border);padding:14px;text-align:center">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Fats</div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:24px" id="meal-tot-fat">—</div>
+            <div id="meal-card-fat" style="background:var(--c3);border:1px solid var(--border);padding:14px;text-align:center;transition:border-color .3s">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Fats</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1" id="meal-tot-fat">—</div>
+              <div style="font-size:9px;color:var(--muted);margin-top:4px">grams target</div>
+              <div style="height:2px;background:var(--c4);margin-top:8px"><div id="meal-bar-fat" style="height:2px;background:linear-gradient(90deg,#8B3050,#CF6679);width:0%;transition:width .3s"></div></div>
+              <div style="font-size:11px;margin-top:6px;font-weight:500" id="meal-rem-fat">— remaining</div>
             </div>
           </div>
         </div>
@@ -1453,6 +1465,7 @@ function syncMealTotals(c,p,cb,f){
   document.getElementById('meal-tot-prot').textContent=prot?prot+'g':'—';
   document.getElementById('meal-tot-carb').textContent=carb?carb+'g':'—';
   document.getElementById('meal-tot-fat').textContent=fat?fat+'g':'—';
+  updateMealTotals();
 }
 
 // ── MEAL FIELDS ──
@@ -1465,15 +1478,77 @@ function renderMealFields(){
     html+=`<div style="background:var(--c3);border:1px solid var(--border);padding:16px;margin-bottom:10px">
       <div style="font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Meal ${i} · ${times[i-1]||''} · ${types[i-1]||'Whole Food'}</div>
       <div class="edit-grid">
-        <div class="edit-field"><label>Protein (g)</label><input type="number" id="m${i}-prot" placeholder="0" step="1"></div>
-        <div class="edit-field"><label>Carbs (g)</label><input type="number" id="m${i}-carb" placeholder="0" step="1"></div>
-        <div class="edit-field"><label>Fats (g)</label><input type="number" id="m${i}-fat" placeholder="0" step="1"></div>
+        <div class="edit-field"><label>Protein (g)</label><input type="number" id="m${i}-prot" placeholder="0" step="1" oninput="updateMealTotals()"></div>
+        <div class="edit-field"><label>Carbs (g)</label><input type="number" id="m${i}-carb" placeholder="0" step="1" oninput="updateMealTotals()"></div>
+        <div class="edit-field"><label>Fats (g)</label><input type="number" id="m${i}-fat" placeholder="0" step="1" oninput="updateMealTotals()"></div>
         <div class="edit-field"><label>Time</label><input type="text" id="m${i}-time" value="${times[i-1]||''}"></div>
         <div class="edit-field" style="grid-column:1/-1"><label>Food Preferences</label><input type="text" id="m${i}-foods" placeholder="e.g. chicken breast, sweet potato, olive oil"></div>
       </div>
     </div>`;
   }
   document.getElementById('meal-fields').innerHTML=html;
+  updateMealTotals();
+}
+
+function updateMealTotals(){
+  const count=parseInt(document.getElementById('dp-meal-count')?.value)||4;
+  const targetCals=parseInt(document.getElementById('dp-cals')?.value)||0;
+  const targetProt=parseInt(document.getElementById('res-prot')?.textContent)||0;
+  const targetCarb=parseInt(document.getElementById('res-carb')?.textContent)||0;
+  const targetFat=parseInt(document.getElementById('res-fat')?.textContent)||0;
+
+  let usedProt=0,usedCarb=0,usedFat=0;
+  for(let i=1;i<=count;i++){
+    usedProt+=parseInt(document.getElementById(`m${i}-prot`)?.value)||0;
+    usedCarb+=parseInt(document.getElementById(`m${i}-carb`)?.value)||0;
+    usedFat+=parseInt(document.getElementById(`m${i}-fat`)?.value)||0;
+  }
+  const usedCals=(usedProt*4)+(usedCarb*4)+(usedFat*9);
+
+  const remCals=targetCals-usedCals;
+  const remProt=targetProt-usedProt;
+  const remCarb=targetCarb-usedCarb;
+  const remFat=targetFat-usedFat;
+
+  // Update each card
+  updateMealCard('cals', usedCals, targetCals, remCals, '');
+  updateMealCard('prot', usedProt, targetProt, remProt, 'g');
+  updateMealCard('carb', usedCarb, targetCarb, remCarb, 'g');
+  updateMealCard('fat',  usedFat,  targetFat,  remFat,  'g');
+}
+
+function updateMealCard(key, used, target, rem, unit){
+  const remEl=document.getElementById('meal-rem-'+key);
+  const barEl=document.getElementById('meal-bar-'+key);
+  const cardEl=document.getElementById('meal-card-'+key);
+  if(!remEl||!barEl||!cardEl)return;
+
+  const pct=target>0?Math.min((used/target)*100,100):0;
+  barEl.style.width=pct+'%';
+
+  if(target<=0){
+    remEl.textContent='— remaining';
+    remEl.style.color='var(--muted)';
+    cardEl.style.borderColor='var(--border)';
+    return;
+  }
+
+  if(rem>0){
+    // Under target — show remaining in muted
+    remEl.textContent=`${used}${unit} / ${target}${unit}`;
+    remEl.style.color='var(--muted)';
+    cardEl.style.borderColor='var(--border)';
+  } else if(rem===0){
+    // Exactly on target — green
+    remEl.textContent=`✓ ${used}${unit} / ${target}${unit}`;
+    remEl.style.color='var(--green)';
+    cardEl.style.borderColor='rgba(76,175,130,.4)';
+  } else {
+    // Over target — red warning
+    remEl.textContent=`+${Math.abs(rem)}${unit} over`;
+    remEl.style.color='var(--red)';
+    cardEl.style.borderColor='rgba(207,102,121,.4)';
+  }
 }
 
 // ── DEXA PDF PARSING ──
