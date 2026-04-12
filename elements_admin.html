@@ -812,13 +812,30 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           </div>
         </div>
         <div class="dp-sec">
-          <div class="dp-sec-title">Caliper Skinfolds (mm)</div>
-          <div class="edit-grid">
-            <div class="edit-field"><label>Pectoral</label><input type="number" id="sk-pec" step="0.1"></div>
-            <div class="edit-field"><label>Triceps</label><input type="number" id="sk-tri" step="0.1"></div>
-            <div class="edit-field"><label>Suprailiac-1</label><input type="number" id="sk-sup1" step="0.1"></div>
-            <div class="edit-field"><label>Suprailiac-2</label><input type="number" id="sk-sup2" step="0.1"></div>
-            <div class="edit-field"><label>Umbilical</label><input type="number" id="sk-umb" step="0.1"></div>
+          <div class="dp-sec-title">Caliper Skinfold Sites</div>
+          <!-- Site selector — same pill style as training days -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:10px" id="sk-sites-wrap">
+            <label class="day-pill" id="sk-lbl-pec"><input type="checkbox" id="sk-pec" value="Pectoral" onchange="updateSkSite('pec')"> Pectoral</label>
+            <label class="day-pill" id="sk-lbl-tri"><input type="checkbox" id="sk-tri" value="Triceps" onchange="updateSkSite('tri')"> Triceps</label>
+            <label class="day-pill" id="sk-lbl-bic"><input type="checkbox" id="sk-bic" value="Biceps" onchange="updateSkSite('bic')"> Biceps</label>
+            <label class="day-pill" id="sk-lbl-sub"><input type="checkbox" id="sk-sub" value="Subscapularis" onchange="updateSkSite('sub')"> Subscapularis</label>
+            <label class="day-pill" id="sk-lbl-sup1"><input type="checkbox" id="sk-sup1" value="Suprailiac-1" onchange="updateSkSite('sup1')"> Suprailiac-1</label>
+            <label class="day-pill" id="sk-lbl-sup2"><input type="checkbox" id="sk-sup2" value="Suprailiac-2" onchange="updateSkSite('sup2')"> Suprailiac-2</label>
+            <label class="day-pill" id="sk-lbl-mid"><input type="checkbox" id="sk-mid" value="Mid-Axillary" onchange="updateSkSite('mid')"> Mid-Axillary</label>
+            <label class="day-pill" id="sk-lbl-umb"><input type="checkbox" id="sk-umb" value="Umbilical" onchange="updateSkSite('umb')"> Umbilical</label>
+            <label class="day-pill" id="sk-lbl-ham"><input type="checkbox" id="sk-ham" value="Hamstrings" onchange="updateSkSite('ham')"> Hamstrings</label>
+            <label class="day-pill" id="sk-lbl-qua"><input type="checkbox" id="sk-qua" value="Quadriceps" onchange="updateSkSite('qua')"> Quadriceps</label>
+          </div>
+          <div id="sk-sites-saved" style="display:none;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px">
+            <button onclick="saveSkSites()" style="padding:8px 20px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600">Save Sites</button>
+            <button onclick="editSkSites()" id="sk-sites-edit-btn" style="display:none;padding:8px 16px;background:transparent;color:var(--muted);border:1px solid var(--borderw);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase">Edit</button>
+            <span id="sk-sites-msg" style="font-size:10px;color:var(--green);min-height:16px"></span>
+          </div>
+          <!-- Measurement inputs — only show selected sites -->
+          <div id="sk-measurements" style="display:none">
+            <div style="font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Enter Measurements (mm)</div>
+            <div class="edit-grid" id="sk-inputs-grid"></div>
           </div>
         </div>
         <div class="dp-sec">
@@ -1261,6 +1278,67 @@ function editBWDays(){
   document.getElementById('bw-days-msg').textContent='';
 }
 
+// ── CALIPER SKINFOLD SITES ──
+const SK_SITES={pec:'Pectoral',tri:'Triceps',bic:'Biceps',sub:'Subscapularis',sup1:'Suprailiac-1',sup2:'Suprailiac-2',mid:'Mid-Axillary',umb:'Umbilical',ham:'Hamstrings',qua:'Quadriceps'};
+const SK_ORDER=['pec','tri','bic','sub','sup1','sup2','mid','umb','ham','qua'];
+
+function updateSkSite(key){
+  const cb=document.getElementById('sk-'+key);
+  const lbl=document.getElementById('sk-lbl-'+key);
+  if(cb.checked) lbl.classList.add('selected');
+  else lbl.classList.remove('selected');
+}
+
+function getSkSites(){
+  return SK_ORDER.filter(k=>document.getElementById('sk-'+k).checked).map(k=>SK_SITES[k]);
+}
+
+function saveSkSites(){
+  const sites=getSkSites();
+  const msg=document.getElementById('sk-sites-msg');
+  if(!sites.length){
+    msg.style.color='var(--red)';msg.textContent='Select at least one site.';
+    setTimeout(()=>msg.textContent='',2500);return;
+  }
+  // show saved badges
+  document.getElementById('sk-sites-wrap').style.display='none';
+  const savedEl=document.getElementById('sk-sites-saved');
+  savedEl.style.display='flex';
+  savedEl.innerHTML=sites.map(s=>`<span class="day-saved-badge">${s}</span>`).join('');
+  document.getElementById('sk-sites-edit-btn').style.display='inline-block';
+  // show measurement inputs for selected sites
+  const grid=document.getElementById('sk-inputs-grid');
+  grid.innerHTML=sites.map(s=>{
+    const key=Object.keys(SK_SITES).find(k=>SK_SITES[k]===s);
+    return `<div class="edit-field"><label>${s} (mm)</label><input type="number" id="skm-${key}" step="0.1" placeholder="0.0"></div>`;
+  }).join('');
+  document.getElementById('sk-measurements').style.display='block';
+  msg.style.color='var(--green)';msg.textContent='✓ Sites saved';
+  setTimeout(()=>msg.textContent='',2500);
+}
+
+function editSkSites(){
+  document.getElementById('sk-sites-wrap').style.display='grid';
+  document.getElementById('sk-sites-saved').style.display='none';
+  document.getElementById('sk-sites-edit-btn').style.display='none';
+  document.getElementById('sk-measurements').style.display='none';
+  document.getElementById('sk-sites-msg').textContent='';
+}
+
+function setSkSites(val){
+  if(!val)return;
+  const selected=(val||'').split(',').map(s=>s.trim());
+  SK_ORDER.forEach(k=>{
+    const cb=document.getElementById('sk-'+k);
+    const lbl=document.getElementById('sk-lbl-'+k);
+    const matches=selected.some(s=>s.toLowerCase()===SK_SITES[k].toLowerCase());
+    cb.checked=matches;
+    if(matches) lbl.classList.add('selected');
+    else lbl.classList.remove('selected');
+  });
+  if(selected.length) saveSkSites();
+}
+
 // ── GOAL CALCULATOR ──
 function calcGoals(){
   const bw=parseFloat(document.getElementById('dp-weight').value);
@@ -1544,13 +1622,14 @@ async function saveBodyComp(){
       visceral_fat:document.getElementById('bc-visc-fat').value,
       visceral_fat_score:document.getElementById('bc-visc-score').value,
       rmr:document.getElementById('bc-rmr').value,
-      skinfolds:{
-        pectoral:document.getElementById('sk-pec').value,
-        triceps:document.getElementById('sk-tri').value,
-        suprailiac1:document.getElementById('sk-sup1').value,
-        suprailiac2:document.getElementById('sk-sup2').value,
-        umbilical:document.getElementById('sk-umb').value,
-      },
+      skinfolds:(()=>{
+        const obj={};
+        SK_ORDER.forEach(k=>{
+          const input=document.getElementById('skm-'+k);
+          if(input&&input.value) obj[SK_SITES[k]]=parseFloat(input.value);
+        });
+        return obj;
+      })(),
       circumferences:{
         shoulders:document.getElementById('cm-shoulder').value,
         waist:document.getElementById('cm-waist').value,
