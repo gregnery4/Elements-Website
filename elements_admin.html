@@ -839,14 +839,23 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           </div>
         </div>
         <div class="dp-sec">
-          <div class="dp-sec-title">Circumference Measurements (inches)</div>
-          <div class="edit-grid">
-            <div class="edit-field"><label>Shoulders</label><input type="number" id="cm-shoulder" step="0.1"></div>
-            <div class="edit-field"><label>Umbilical / Waist</label><input type="number" id="cm-waist" step="0.1"></div>
-            <div class="edit-field"><label>Upper Arm</label><input type="number" id="cm-arm" step="0.1"></div>
-            <div class="edit-field"><label>Hips</label><input type="number" id="cm-hip" step="0.1"></div>
-            <div class="edit-field"><label>Thigh</label><input type="number" id="cm-thigh" step="0.1"></div>
-            <div class="edit-field"><label>Calf</label><input type="number" id="cm-calf" step="0.1"></div>
+          <div class="dp-sec-title">Circumference Measurement Sites</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:10px" id="cm-sites-wrap">
+            <label class="day-pill" id="cm-lbl-shoulder"><input type="checkbox" id="cm-shoulder" value="Shoulders" onchange="updateCmSite('shoulder')"> Shoulders</label>
+            <label class="day-pill" id="cm-lbl-arm"><input type="checkbox" id="cm-arm" value="Upper Arm" onchange="updateCmSite('arm')"> Upper Arm</label>
+            <label class="day-pill" id="cm-lbl-waist"><input type="checkbox" id="cm-waist" value="Umbilical / Waist" onchange="updateCmSite('waist')"> Umbilical / Waist</label>
+            <label class="day-pill" id="cm-lbl-hips"><input type="checkbox" id="cm-hip" value="Hips" onchange="updateCmSite('hips')"> Hips</label>
+            <label class="day-pill" id="cm-lbl-thigh"><input type="checkbox" id="cm-thigh" value="Thigh" onchange="updateCmSite('thigh')"> Thigh</label>
+          </div>
+          <div id="cm-sites-saved" style="display:none;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px">
+            <button onclick="saveCmSites()" style="padding:8px 20px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600">Save Sites</button>
+            <button onclick="editCmSites()" id="cm-sites-edit-btn" style="display:none;padding:8px 16px;background:transparent;color:var(--muted);border:1px solid var(--borderw);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase">Edit</button>
+            <span id="cm-sites-msg" style="font-size:10px;color:var(--green);min-height:16px"></span>
+          </div>
+          <div id="cm-measurements" style="display:none">
+            <div style="font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Enter Measurements (inches)</div>
+            <div class="edit-grid" id="cm-inputs-grid"></div>
           </div>
         </div>
         <button class="save-btn" onclick="saveBodyComp()">Save Assessment →</button>
@@ -1339,6 +1348,69 @@ function setSkSites(val){
   if(selected.length) saveSkSites();
 }
 
+// ── CIRCUMFERENCE SITES ──
+const CM_SITES={shoulder:'Shoulders',arm:'Upper Arm',waist:'Umbilical / Waist',hips:'Hips',thigh:'Thigh'};
+const CM_ORDER=['shoulder','arm','waist','hips','thigh'];
+
+function updateCmSite(key){
+  const cb=document.getElementById('cm-'+key==='hips'?'hip':key==='waist'?'waist':key==='arm'?'arm':key);
+  const lbl=document.getElementById('cm-lbl-'+key);
+  if(cb&&cb.checked) lbl.classList.add('selected');
+  else if(lbl) lbl.classList.remove('selected');
+}
+
+function getCmSites(){
+  return CM_ORDER.filter(k=>{
+    const id=k==='hips'?'cm-hip':k==='arm'?'cm-arm':'cm-'+k;
+    const el=document.getElementById(id);
+    return el&&el.checked;
+  }).map(k=>CM_SITES[k]);
+}
+
+function saveCmSites(){
+  const sites=getCmSites();
+  const msg=document.getElementById('cm-sites-msg');
+  if(!sites.length){
+    msg.style.color='var(--red)';msg.textContent='Select at least one site.';
+    setTimeout(()=>msg.textContent='',2500);return;
+  }
+  document.getElementById('cm-sites-wrap').style.display='none';
+  const savedEl=document.getElementById('cm-sites-saved');
+  savedEl.style.display='flex';
+  savedEl.innerHTML=sites.map(s=>`<span class="day-saved-badge">${s}</span>`).join('');
+  document.getElementById('cm-sites-edit-btn').style.display='inline-block';
+  const grid=document.getElementById('cm-inputs-grid');
+  grid.innerHTML=sites.map(s=>{
+    const key=Object.keys(CM_SITES).find(k=>CM_SITES[k]===s);
+    return `<div class="edit-field"><label>${s} (in)</label><input type="number" id="cmm-${key}" step="0.1" placeholder="0.0"></div>`;
+  }).join('');
+  document.getElementById('cm-measurements').style.display='block';
+  msg.style.color='var(--green)';msg.textContent='✓ Sites saved';
+  setTimeout(()=>msg.textContent='',2500);
+}
+
+function editCmSites(){
+  document.getElementById('cm-sites-wrap').style.display='grid';
+  document.getElementById('cm-sites-saved').style.display='none';
+  document.getElementById('cm-sites-edit-btn').style.display='none';
+  document.getElementById('cm-measurements').style.display='none';
+  document.getElementById('cm-sites-msg').textContent='';
+}
+
+function setCmSites(val){
+  if(!val)return;
+  const selected=(val||'').split(',').map(s=>s.trim());
+  CM_ORDER.forEach(k=>{
+    const id=k==='hips'?'cm-hip':k==='arm'?'cm-arm':'cm-'+k;
+    const cb=document.getElementById(id);
+    const lbl=document.getElementById('cm-lbl-'+k);
+    const matches=selected.some(s=>s.toLowerCase()===CM_SITES[k].toLowerCase());
+    if(cb){cb.checked=matches;}
+    if(lbl){if(matches)lbl.classList.add('selected');else lbl.classList.remove('selected');}
+  });
+  if(selected.length) saveCmSites();
+}
+
 // ── GOAL CALCULATOR ──
 function calcGoals(){
   const bw=parseFloat(document.getElementById('dp-weight').value);
@@ -1630,14 +1702,14 @@ async function saveBodyComp(){
         });
         return obj;
       })(),
-      circumferences:{
-        shoulders:document.getElementById('cm-shoulder').value,
-        waist:document.getElementById('cm-waist').value,
-        upper_arm:document.getElementById('cm-arm').value,
-        hips:document.getElementById('cm-hip').value,
-        thigh:document.getElementById('cm-thigh').value,
-        calf:document.getElementById('cm-calf').value,
-      }
+      circumferences:(()=>{
+        const obj={};
+        CM_ORDER.forEach(k=>{
+          const input=document.getElementById('cmm-'+k);
+          if(input&&input.value) obj[CM_SITES[k]]=parseFloat(input.value);
+        });
+        return obj;
+      })()
     })
   });
   if(error){msg.style.color='var(--red)';msg.textContent='Error: '+error.message;return;}
