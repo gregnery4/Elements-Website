@@ -1207,7 +1207,10 @@ function generateMealPlan(){
           <span style="font-size:11px;color:var(--muted);letter-spacing:.5px">Carbohydrates</span>
         </div>
       </div>
-      ${foods?`<div style="padding:10px 14px;background:var(--c2);border:1px solid var(--borderw);font-size:11px;color:var(--muted)"><span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-right:10px">Food Preferences</span>${foods}</div>`:''}
+      ${foods ? `<div style="padding:14px;background:var(--c2);border:1px solid var(--borderw);margin-top:2px">
+        <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:10px">Food Portions</div>
+        ${convertFoodsToPortions(foods, prot, carb, fat)}
+      </div>` : ''}
     </div>`;
   }
 
@@ -1229,6 +1232,137 @@ function generateMealPlan(){
   </div>`;
 
   document.getElementById('meal-plan-output').innerHTML=html||'<div style="font-size:12px;color:var(--muted);padding:20px 0;text-align:center">No meal data found. Fill in the Meal Design tab first.</div>';
+}
+
+// ── FOOD DATABASE ──
+// Each entry: { keywords, type ('protein'|'carb'|'fat'), protPerOz, carbPerOz, fatPerOz, unit }
+// All macros per 1 oz cooked/as-served unless noted
+const FOOD_DB = [
+  // PROTEINS
+  {k:['chicken breast','chicken'],          type:'protein', p:8.8,  c:0,    f:0.7,  unit:'oz cooked'},
+  {k:['chicken thigh'],                     type:'protein', p:7.2,  c:0,    f:3.5,  unit:'oz cooked'},
+  {k:['turkey breast','turkey'],            type:'protein', p:8.5,  c:0,    f:0.5,  unit:'oz cooked'},
+  {k:['ground beef','lean ground beef'],    type:'protein', p:7.0,  c:0,    f:4.0,  unit:'oz cooked'},
+  {k:['ground turkey'],                     type:'protein', p:7.5,  c:0,    f:2.5,  unit:'oz cooked'},
+  {k:['salmon'],                            type:'protein', p:7.1,  c:0,    f:3.6,  unit:'oz cooked'},
+  {k:['tuna','canned tuna'],               type:'protein', p:8.5,  c:0,    f:0.3,  unit:'oz drained'},
+  {k:['tilapia'],                           type:'protein', p:7.5,  c:0,    f:0.7,  unit:'oz cooked'},
+  {k:['cod','white fish','any fish','fish'],type:'protein', p:7.5,  c:0,    f:0.5,  unit:'oz cooked'},
+  {k:['shrimp'],                            type:'protein', p:7.0,  c:0,    f:0.3,  unit:'oz cooked'},
+  {k:['steak','beef','sirloin','ribeye'],   type:'protein', p:7.0,  c:0,    f:4.5,  unit:'oz cooked'},
+  {k:['pork tenderloin','pork'],            type:'protein', p:7.5,  c:0,    f:1.5,  unit:'oz cooked'},
+  {k:['egg white','egg whites'],            type:'protein', p:3.6,  c:0.2,  f:0,    unit:'oz (≈1 white)'},
+  {k:['whole egg','eggs'],                  type:'protein', p:3.0,  c:0.2,  f:2.5,  unit:'oz (≈1 large)'},
+  {k:['greek yogurt'],                      type:'protein', p:3.0,  c:2.0,  f:0.3,  unit:'oz'},
+  {k:['cottage cheese'],                    type:'protein', p:3.5,  c:1.0,  f:0.5,  unit:'oz'},
+  {k:['whey protein','protein powder','protein shake','nutridyn whey'],type:'protein',p:22.5,c:2.0,f:1.5,unit:'scoop (30g)'},
+  {k:['casein protein'],                    type:'protein', p:22.0, c:3.0,  f:1.0,  unit:'scoop (30g)'},
+  // CARBS
+  {k:['white rice','rice'],                 type:'carb',    p:0.9,  c:6.5,  f:0.1,  unit:'oz cooked'},
+  {k:['brown rice'],                        type:'carb',    p:0.8,  c:6.1,  f:0.3,  unit:'oz cooked'},
+  {k:['sweet potato','sweet potatoes'],     type:'carb',    p:0.5,  c:6.0,  f:0.0,  unit:'oz cooked'},
+  {k:['white potato','potato','potatoes'],  type:'carb',    p:0.6,  c:6.2,  f:0.0,  unit:'oz cooked'},
+  {k:['oats','oatmeal'],                    type:'carb',    p:1.7,  c:9.4,  f:0.8,  unit:'oz dry'},
+  {k:['pasta'],                             type:'carb',    p:1.2,  c:7.8,  f:0.2,  unit:'oz cooked'},
+  {k:['couscous'],                          type:'carb',    p:1.2,  c:7.0,  f:0.1,  unit:'oz cooked'},
+  {k:['quinoa'],                            type:'carb',    p:1.3,  c:6.0,  f:0.5,  unit:'oz cooked'},
+  {k:['strawberry','strawberries','berries'],type:'carb',   p:0.2,  c:2.2,  f:0.1,  unit:'oz'},
+  {k:['banana'],                            type:'carb',    p:0.3,  c:6.7,  f:0.1,  unit:'oz'},
+  {k:['apple'],                             type:'carb',    p:0.1,  c:3.9,  f:0.1,  unit:'oz'},
+  {k:['bread'],                             type:'carb',    p:2.5,  c:13.5, f:1.0,  unit:'slice (1oz)'},
+  // FATS
+  {k:['olive oil'],                         type:'fat',     p:0,    c:0,    f:28.0, unit:'tbsp'},
+  {k:['avocado'],                           type:'fat',     p:0.5,  c:2.5,  f:4.0,  unit:'oz'},
+  {k:['almond butter','peanut butter','nut butter'],type:'fat',p:3.5,c:3.0,f:16.0,unit:'tbsp (16g)'},
+  {k:['almonds','nuts','mixed nuts'],       type:'fat',     p:6.0,  c:6.0,  f:14.0, unit:'oz'},
+  {k:['coconut oil'],                       type:'fat',     p:0,    c:0,    f:28.0, unit:'tbsp'},
+  {k:['butter'],                            type:'fat',     p:0,    c:0,    f:28.0, unit:'tbsp'},
+  {k:['cheese'],                            type:'fat',     p:6.0,  c:0.5,  f:8.0,  unit:'oz'},
+];
+
+function convertFoodsToPortions(foodsStr, targetProt, targetCarb, targetFat){
+  if(!foodsStr.trim()) return '<span style="color:var(--muted);font-size:11px">No food preferences entered.</span>';
+
+  const items = foodsStr.split(/[,;]+/).map(s => s.trim().toLowerCase()).filter(Boolean);
+  const rows = [];
+
+  items.forEach(item => {
+    // Find matching food in database
+    const match = FOOD_DB.find(f => f.k.some(k => item.includes(k) || k.includes(item)));
+    if(!match) {
+      rows.push(`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--borderw)">
+        <span style="font-size:12px;color:var(--white);flex:1;text-transform:capitalize">${item}</span>
+        <span style="font-size:10px;color:var(--muted);font-style:italic">Enter manually — food not in database</span>
+      </div>`);
+      return;
+    }
+
+    // Determine which macro this food primarily serves
+    let targetG, macroPerUnit, label, color;
+    if(match.type === 'protein'){
+      targetG = targetProt; macroPerUnit = match.p; label = 'protein'; color = 'var(--gold)';
+    } else if(match.type === 'carb'){
+      targetG = targetCarb; macroPerUnit = match.c; label = 'carbs'; color = '#5B8FD4';
+    } else {
+      targetG = targetFat; macroPerUnit = match.f; label = 'fat'; color = '#CF6679';
+    }
+
+    if(!targetG || !macroPerUnit){ return; }
+
+    // Calculate portion
+    let portion, portionStr;
+
+    // Special handling for per-unit foods (scoops, slices, tbsp)
+    if(match.unit.includes('scoop')){
+      const scoops = targetG / match.p;
+      portionStr = `${scoops.toFixed(1)} scoop${scoops !== 1 ? 's' : ''}`;
+    } else if(match.unit.includes('tbsp')){
+      portion = targetG / macroPerUnit;
+      portionStr = `${portion.toFixed(1)} tbsp`;
+    } else if(match.unit.includes('slice')){
+      portion = targetG / macroPerUnit;
+      portionStr = `${Math.round(portion)} slice${Math.round(portion) !== 1 ? 's' : ''}`;
+    } else {
+      // oz-based
+      portion = targetG / macroPerUnit;
+      portionStr = `${portion.toFixed(1)} oz`;
+      // Convert to more readable if large
+      if(portion >= 16) portionStr = `${(portion/16).toFixed(1)} lb`;
+    }
+
+    // Calculate actual macros this portion provides
+    let actualP, actualC, actualF;
+    if(match.unit.includes('scoop')){
+      const scoops = targetG / match.p;
+      actualP = Math.round(scoops * match.p);
+      actualC = Math.round(scoops * match.c);
+      actualF = Math.round(scoops * match.f);
+    } else if(match.unit.includes('tbsp')){
+      const tbsp = targetG / macroPerUnit;
+      actualP = Math.round(tbsp * match.p);
+      actualC = Math.round(tbsp * match.c);
+      actualF = Math.round(tbsp * match.f);
+    } else {
+      actualP = Math.round(portion * match.p);
+      actualC = Math.round(portion * match.c);
+      actualF = Math.round(portion * match.f);
+    }
+
+    rows.push(`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--borderw);flex-wrap:wrap">
+      <div style="flex:1;min-width:120px">
+        <div style="font-size:12px;color:var(--white);font-weight:500;text-transform:capitalize;margin-bottom:2px">${item}</div>
+        <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">${match.unit}</div>
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:${color};min-width:80px;text-align:center">${portionStr}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${actualP ? `<span style="padding:3px 8px;background:rgba(201,168,108,.1);border:1px solid rgba(201,168,108,.2);font-size:9px;color:var(--gold);letter-spacing:1px">${actualP}g P</span>` : ''}
+        ${actualC ? `<span style="padding:3px 8px;background:rgba(91,143,212,.1);border:1px solid rgba(91,143,212,.2);font-size:9px;color:#5B8FD4;letter-spacing:1px">${actualC}g C</span>` : ''}
+        ${actualF ? `<span style="padding:3px 8px;background:rgba(207,102,121,.1);border:1px solid rgba(207,102,121,.2);font-size:9px;color:#CF6679;letter-spacing:1px">${actualF}g F</span>` : ''}
+      </div>
+    </div>`);
+  });
+
+  return rows.length ? rows.join('') : '<span style="color:var(--muted);font-size:11px">No matching foods found in database.</span>';
 }
 
 // ── TRAINING DAYS ──
