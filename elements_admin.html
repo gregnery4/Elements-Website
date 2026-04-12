@@ -1472,16 +1472,29 @@ function syncMealTotals(c,p,cb,f){
 function renderMealFields(){
   const count=parseInt(document.getElementById('dp-meal-count').value)||4;
   const times=['7:00 AM','10:00 AM','1:00 PM','4:00 PM','7:00 PM','9:00 PM'];
-  const types=['Whole Food','Whole Food','Whole Food','Shake','Whole Food','Whole Food'];
+  const defaultTypes=['Whole Food','Whole Food','Whole Food','Shake','Whole Food','Whole Food'];
   let html='';
   for(let i=1;i<=count;i++){
     html+=`<div style="background:var(--c3);border:1px solid var(--border);padding:16px;margin-bottom:10px">
-      <div style="font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Meal ${i} · ${times[i-1]||''} · ${types[i-1]||'Whole Food'}</div>
+      <div id="m${i}-header" style="font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">
+        Meal ${i} · <span id="m${i}-header-time">${times[i-1]||''}</span> · <span id="m${i}-header-type">${defaultTypes[i-1]||'Whole Food'}</span>
+      </div>
       <div class="edit-grid">
         <div class="edit-field"><label>Protein (g)</label><input type="number" id="m${i}-prot" placeholder="0" step="1" oninput="updateMealTotals()"></div>
         <div class="edit-field"><label>Carbs (g)</label><input type="number" id="m${i}-carb" placeholder="0" step="1" oninput="updateMealTotals()"></div>
         <div class="edit-field"><label>Fats (g)</label><input type="number" id="m${i}-fat" placeholder="0" step="1" oninput="updateMealTotals()"></div>
-        <div class="edit-field"><label>Time</label><input type="text" id="m${i}-time" value="${times[i-1]||''}"></div>
+        <div class="edit-field">
+          <label>Time</label>
+          <input type="text" id="m${i}-time" value="${times[i-1]||''}"
+            oninput="document.getElementById('m${i}-header-time').textContent=this.value||'—'">
+        </div>
+        <div class="edit-field">
+          <label>Meal Type</label>
+          <select id="m${i}-type" onchange="document.getElementById('m${i}-header-type').textContent=this.value">
+            <option value="Whole Food" ${defaultTypes[i-1]==='Whole Food'?'selected':''}>Whole Food</option>
+            <option value="Shake" ${defaultTypes[i-1]==='Shake'?'selected':''}>Shake</option>
+          </select>
+        </div>
         <div class="edit-field" style="grid-column:1/-1"><label>Food Preferences</label><input type="text" id="m${i}-foods" placeholder="e.g. chicken breast, sweet potato, olive oil"></div>
       </div>
     </div>`;
