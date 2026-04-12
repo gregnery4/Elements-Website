@@ -1346,16 +1346,20 @@ const CM_SITES={shoulder:'Shoulders',arm:'Upper Arm',waist:'Umbilical / Waist',h
 const CM_ORDER=['shoulder','arm','waist','hips','thigh'];
 
 function updateCmSite(key){
-  const cb=document.getElementById('cm-'+key==='hips'?'hip':key==='waist'?'waist':key==='arm'?'arm':key);
+  // Map key to actual checkbox ID
+  const idMap={shoulder:'cm-shoulder',arm:'cm-arm',waist:'cm-waist',hips:'cm-hip',thigh:'cm-thigh'};
+  const cb=document.getElementById(idMap[key]);
   const lbl=document.getElementById('cm-lbl-'+key);
-  if(cb&&cb.checked) lbl.classList.add('selected');
-  else if(lbl) lbl.classList.remove('selected');
+  if(cb&&lbl){
+    if(cb.checked) lbl.classList.add('selected');
+    else lbl.classList.remove('selected');
+  }
 }
 
 function getCmSites(){
+  const idMap={shoulder:'cm-shoulder',arm:'cm-arm',waist:'cm-waist',hips:'cm-hip',thigh:'cm-thigh'};
   return CM_ORDER.filter(k=>{
-    const id=k==='hips'?'cm-hip':k==='arm'?'cm-arm':'cm-'+k;
-    const el=document.getElementById(id);
+    const el=document.getElementById(idMap[k]);
     return el&&el.checked;
   }).map(k=>CM_SITES[k]);
 }
@@ -1392,13 +1396,13 @@ function editCmSites(){
 
 function setCmSites(val){
   if(!val)return;
+  const idMap={shoulder:'cm-shoulder',arm:'cm-arm',waist:'cm-waist',hips:'cm-hip',thigh:'cm-thigh'};
   const selected=(val||'').split(',').map(s=>s.trim());
   CM_ORDER.forEach(k=>{
-    const id=k==='hips'?'cm-hip':k==='arm'?'cm-arm':'cm-'+k;
-    const cb=document.getElementById(id);
+    const cb=document.getElementById(idMap[k]);
     const lbl=document.getElementById('cm-lbl-'+k);
     const matches=selected.some(s=>s.toLowerCase()===CM_SITES[k].toLowerCase());
-    if(cb){cb.checked=matches;}
+    if(cb) cb.checked=matches;
     if(lbl){if(matches)lbl.classList.add('selected');else lbl.classList.remove('selected');}
   });
   if(selected.length) saveCmSites();
