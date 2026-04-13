@@ -1118,11 +1118,9 @@ let allClients=[];
 async function loadAll(){
   const{data}=await sb.from('profiles').select(`
     id,full_name,email,coach,start_date,occupation,phone,age,
-    client_metrics(body_weight,body_fat,lean_mass,sleep_score,recorded_at),
-    sessions(id,status,session_date,session_type,coach),
+    client_metrics(body_weight,body_fat,lean_mass,recorded_at),
     supplements(id,name,brand,dose,timing,icon,active),
-    nutrition_targets(calories,protein_g,carbs_g,fat_g,water_l,meal_timing,coach_notes),
-    coach_notes(id,coach,note,created_at)
+    nutrition_targets(calories,protein_g,carbs_g,fat_g,water_l,meal_timing,coach_notes)
   `).eq('role','client').order('created_at',{ascending:false});
 
   allClients=data||[];
@@ -1237,21 +1235,6 @@ function openClient(id){
     <div class="supp-info"><div class="supp-nm">${s.name}</div><div class="supp-ds">${s.dose||''} · ${s.timing||''}</div></div>
     <div class="toggle ${s.active?'on':''}" onclick="toggleSupp('${s.id}',this)"></div></div>`).join('')
     :'<div style="font-size:12px;color:var(--muted)">No supplements assigned yet.</div>';
-
-  // Tab 9 — Sessions
-  const sess=(c.sessions||[]).sort((a,b)=>new Date(b.session_date)-new Date(a.session_date));
-  document.getElementById('dp-sess-list').innerHTML=sess.length?sess.map(s=>`
-    <div class="sess-row"><div class="sess-date">${new Date(s.session_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})} ${new Date(s.session_date).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}</div>
-    <div class="sess-name">${s.session_type||'Training'}</div>
-    <span class="sess-tag ${s.status==='completed'?'done':'up'}">${s.status}</span></div>`).join('')
-    :'<div style="font-size:12px;color:var(--muted)">No sessions yet.</div>';
-
-  // Tab 10 — Notes
-  const notes=(c.coach_notes||[]).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
-  document.getElementById('dp-notes-list').innerHTML=notes.length?notes.map(n=>`
-    <div class="note-prev"><div class="note-prev-date">${new Date(n.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})} · ${n.coach||'Coach'}</div>
-    <div class="note-prev-text">${n.note}</div></div>`).join('')
-    :'<div style="font-size:12px;color:var(--muted)">No notes yet.</div>';
 
   // Weekly data
   renderWeeklyLog();
@@ -2650,39 +2633,6 @@ async function toggleSupp(id,el){
   el.classList.toggle('on');
   const active=el.classList.contains('on');
   await sb.from('supplements').update({active}).eq('id',id);
-}
-
-async function addSession(){
-  if(!currentClient)return;
-  const msg=document.getElementById('dp-sess-msg');
-  const date=document.getElementById('new-sess-date').value;
-  if(!date){msg.style.color='var(--red)';msg.textContent='Please select a date and time.';return;}
-  await sb.from('sessions').insert({
-    client_id:currentClient.id,
-    session_date:new Date(date).toISOString(),
-    session_type:document.getElementById('new-sess-type').value,
-    coach:document.getElementById('new-sess-coach').value,
-    status:document.getElementById('new-sess-status').value,
-  });
-  msg.style.color='var(--green)';msg.textContent='✓ Session added.';
-  document.getElementById('new-sess-date').value='';
-  document.getElementById('new-sess-type').value='';
-  setTimeout(()=>msg.textContent='',3000);
-  await loadAll();
-  openClient(currentClient.id);
-}
-
-async function addNote(){
-  if(!currentClient)return;
-  const msg=document.getElementById('dp-note-msg');
-  const note=document.getElementById('new-note').value.trim();
-  if(!note){msg.style.color='var(--red)';msg.textContent='Please write a note first.';return;}
-  await sb.from('coach_notes').insert({client_id:currentClient.id,note,coach:'Coach'});
-  msg.style.color='var(--green)';msg.textContent='✓ Note saved.';
-  document.getElementById('new-note').value='';
-  setTimeout(()=>msg.textContent='',3000);
-  await loadAll();
-  openClient(currentClient.id);
 }
 
 async function flashSave(btn){
