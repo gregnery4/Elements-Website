@@ -1118,6 +1118,7 @@ let allClients=[];
 async function loadAll(){
   const{data}=await sb.from('profiles').select(`
     id,full_name,email,coach,start_date,occupation,phone,age,
+    training_age,sex,comm_pref,training_days,training_time,
     client_metrics(body_weight,body_fat,lean_mass,recorded_at),
     supplements(id,name,brand,dose,timing,icon,active),
     nutrition_targets(calories,protein_g,carbs_g,fat_g,water_l,meal_timing,coach_notes)
@@ -1338,9 +1339,10 @@ const FOOD_DB = [
   {k:['cod','white fish','any fish','fish'],type:'protein', p:7.5,  c:0,    f:0.5,  unit:'oz cooked'},
   {k:['shrimp'],                            type:'protein', p:7.0,  c:0,    f:0.3,  unit:'oz cooked'},
   {k:['steak','beef','sirloin','ribeye'],   type:'protein', p:7.0,  c:0,    f:4.5,  unit:'oz cooked'},
+  {k:['tri-tip','tritip','tri tip'],        type:'protein', p:7.5,  c:0,    f:4.0,  unit:'oz cooked'},
   {k:['pork tenderloin','pork'],            type:'protein', p:7.5,  c:0,    f:1.5,  unit:'oz cooked'},
-  {k:['egg white','egg whites'],            type:'protein', p:3.6,  c:0.2,  f:0,    unit:'oz (≈1 white)'},
-  {k:['whole egg','eggs'],                  type:'protein', p:3.0,  c:0.2,  f:2.5,  unit:'oz (≈1 large)'},
+  {k:['egg white','egg whites'],            type:'protein', p:3.6,  c:0.2,  f:0,    unit:'oz'},
+  {k:['whole egg','eggs','egg'],            type:'protein', p:6.0,  c:0.3,  f:5.0,  unit:'egg', perUnit:1},
   {k:['greek yogurt'],                      type:'protein', p:3.0,  c:2.0,  f:0.3,  unit:'oz'},
   {k:['cottage cheese'],                    type:'protein', p:3.5,  c:1.0,  f:0.5,  unit:'oz'},
   {k:['whey protein','protein powder','protein shake','nutridyn whey'],type:'protein',p:22.5,c:2.0,f:1.5,unit:'scoop (30g)'},
@@ -1355,6 +1357,8 @@ const FOOD_DB = [
   {k:['couscous'],                          type:'carb',    p:1.2,  c:7.0,  f:0.1,  unit:'oz cooked'},
   {k:['quinoa'],                            type:'carb',    p:1.3,  c:6.0,  f:0.5,  unit:'oz cooked'},
   {k:['strawberry','strawberries','berries'],type:'carb',   p:0.2,  c:2.2,  f:0.1,  unit:'oz'},
+  {k:['tomato','tomatoes'],                 type:'carb',    p:0.2,  c:1.1,  f:0.1,  unit:'oz'},
+  {k:['zucchini','courgette'],              type:'carb',    p:0.4,  c:1.0,  f:0.1,  unit:'oz'},
   {k:['banana'],                            type:'carb',    p:0.3,  c:6.7,  f:0.1,  unit:'oz'},
   {k:['apple'],                             type:'carb',    p:0.1,  c:3.9,  f:0.1,  unit:'oz'},
   {k:['bread'],                             type:'carb',    p:2.5,  c:13.5, f:1.0,  unit:'slice (1oz)'},
@@ -1375,71 +1379,86 @@ function convertFoodsToPortions(foodsStr, targetProt, targetCarb, targetFat){
   const rows = [];
 
   items.forEach(item => {
-    // Find matching food in database
     const match = FOOD_DB.find(f => f.k.some(k => item.includes(k) || k.includes(item)));
-    if(!match) {
+    if(!match){
       rows.push(`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--borderw)">
         <span style="font-size:12px;color:var(--white);flex:1;text-transform:capitalize">${item}</span>
-        <span style="font-size:10px;color:var(--muted);font-style:italic">Enter manually — food not in database</span>
+        <span style="font-size:10px;color:var(--muted);font-style:italic">Enter manually — not in database</span>
       </div>`);
       return;
     }
 
-    // Determine which macro this food primarily serves
-    let targetG, macroPerUnit, label, color;
-    if(match.type === 'protein'){
-      targetG = targetProt; macroPerUnit = match.p; label = 'protein'; color = 'var(--gold)';
-    } else if(match.type === 'carb'){
-      targetG = targetCarb; macroPerUnit = match.c; label = 'carbs'; color = '#5B8FD4';
-    } else {
-      targetG = targetFat; macroPerUnit = match.f; label = 'fat'; color = '#CF6679';
-    }
+    let portionStr, actualP, actualC, actualF, color, displayUnit;
 
-    if(!targetG || !macroPerUnit){ return; }
+    // ── EGGS — show as count ──
+    if(match.unit === 'egg'){
+      const count = Math.round(targetProt / match.p);
+      portionStr = `${count} egg${count !== 1 ? 's' : ''}`;
+      displayUnit = 'whole eggs';
+      actualP = Math.round(count * match.p);
+      actualC = Math.round(count * match.c);
+      actualF = Math.round(count * match.f);
+      color = 'var(--gold)';
 
-    // Calculate portion
-    let portion, portionStr;
-
-    // Special handling for per-unit foods (scoops, slices, tbsp)
-    if(match.unit.includes('scoop')){
-      const scoops = targetG / match.p;
+    // ── SCOOPS (protein powder) ──
+    } else if(match.unit.includes('scoop')){
+      const scoops = targetProt / match.p;
       portionStr = `${scoops.toFixed(1)} scoop${scoops !== 1 ? 's' : ''}`;
-    } else if(match.unit.includes('tbsp')){
-      portion = targetG / macroPerUnit;
-      portionStr = `${portion.toFixed(1)} tbsp`;
-    } else if(match.unit.includes('slice')){
-      portion = targetG / macroPerUnit;
-      portionStr = `${Math.round(portion)} slice${Math.round(portion) !== 1 ? 's' : ''}`;
-    } else {
-      // oz-based
-      portion = targetG / macroPerUnit;
-      portionStr = `${portion.toFixed(1)} oz`;
-      // Convert to more readable if large
-      if(portion >= 16) portionStr = `${(portion/16).toFixed(1)} lb`;
-    }
-
-    // Calculate actual macros this portion provides
-    let actualP, actualC, actualF;
-    if(match.unit.includes('scoop')){
-      const scoops = targetG / match.p;
+      displayUnit = match.unit;
       actualP = Math.round(scoops * match.p);
       actualC = Math.round(scoops * match.c);
       actualF = Math.round(scoops * match.f);
-    } else if(match.unit.includes('tbsp')){
-      const tbsp = targetG / macroPerUnit;
-      actualP = Math.round(tbsp * match.p);
-      actualC = Math.round(tbsp * match.c);
-      actualF = Math.round(tbsp * match.f);
+      color = 'var(--gold)';
+
+    // ── PROTEINS — always show in oz ──
+    } else if(match.type === 'protein'){
+      if(!targetProt || !match.p){ return; }
+      const oz = targetProt / match.p;
+      portionStr = oz >= 16 ? `${(oz/16).toFixed(2)} lb` : `${oz.toFixed(1)} oz`;
+      displayUnit = match.unit;
+      actualP = Math.round(oz * match.p);
+      actualC = Math.round(oz * match.c);
+      actualF = Math.round(oz * match.f);
+      color = 'var(--gold)';
+
+    // ── CARBS — always show in grams ──
+    } else if(match.type === 'carb'){
+      if(!targetCarb || !match.c){ return; }
+      // match.c is grams of carb per oz — so grams needed = targetCarb / match.c * 28.35
+      const grams = (targetCarb / match.c) * 28.35;
+      portionStr = `${Math.round(grams)}g`;
+      displayUnit = match.unit.replace('oz','g');
+      const oz = grams / 28.35;
+      actualP = Math.round(oz * match.p);
+      actualC = Math.round(oz * match.c);
+      actualF = Math.round(oz * match.f);
+      color = '#5B8FD4';
+
+    // ── FATS — tbsp for liquids, oz for solids ──
     } else {
-      actualP = Math.round(portion * match.p);
-      actualC = Math.round(portion * match.c);
-      actualF = Math.round(portion * match.f);
+      if(!targetFat || !match.f){ return; }
+      if(match.unit.includes('tbsp')){
+        const tbsp = targetFat / match.f;
+        portionStr = `${tbsp.toFixed(1)} tbsp`;
+        displayUnit = 'tablespoons';
+        actualP = Math.round(tbsp * match.p);
+        actualC = Math.round(tbsp * match.c);
+        actualF = Math.round(tbsp * match.f);
+      } else {
+        const oz = targetFat / match.f;
+        portionStr = `${oz.toFixed(1)} oz`;
+        displayUnit = match.unit;
+        actualP = Math.round(oz * match.p);
+        actualC = Math.round(oz * match.c);
+        actualF = Math.round(oz * match.f);
+      }
+      color = '#CF6679';
     }
 
     rows.push(`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--borderw);flex-wrap:wrap">
       <div style="flex:1;min-width:120px">
         <div style="font-size:12px;color:var(--white);font-weight:500;text-transform:capitalize;margin-bottom:2px">${item}</div>
-        <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">${match.unit}</div>
+        <div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">${displayUnit}</div>
       </div>
       <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:${color};min-width:80px;text-align:center">${portionStr}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -2542,21 +2561,24 @@ async function saveClient(){
   const msg=document.getElementById('dp-save-msg');
   msg.textContent='Saving...';msg.style.color='var(--gold)';
 
-  await sb.from('profiles').update({
-    full_name:document.getElementById('dp-fullname').value,
-    phone:document.getElementById('dp-phone').value,
+  const{error}=await sb.from('profiles').update({
+    full_name:document.getElementById('dp-fullname').value||null,
+    phone:document.getElementById('dp-phone').value||null,
     age:parseInt(document.getElementById('dp-age').value)||null,
-    occupation:document.getElementById('dp-occ').value,
+    training_age:parseFloat(document.getElementById('dp-training-age').value)||null,
+    sex:document.getElementById('dp-sex').value||null,
+    occupation:document.getElementById('dp-occ').value||null,
     start_date:document.getElementById('dp-start').value||null,
-    coach:document.getElementById('dp-coach').value,
+    coach:document.getElementById('dp-coach').value||null,
+    comm_pref:document.getElementById('dp-comm').value||null,
     training_days:getTrainingDays()||null,
+    training_time:document.getElementById('dp-training-time').value||null,
   }).eq('id',id);
 
-  const w=parseFloat(document.getElementById('dp-weight').value);
-  const bf=parseFloat(document.getElementById('dp-bf').value);
-  const lm=parseFloat(document.getElementById('dp-lean').value);
-  if(w||bf||lm){
-    await sb.from('client_metrics').insert({client_id:id,body_weight:w||null,body_fat:bf||null,lean_mass:lm||null,recorded_at:new Date().toISOString().split('T')[0]});
+  if(error){
+    msg.style.color='var(--red)';
+    msg.textContent='Error: '+error.message;
+    return;
   }
 
   msg.textContent='✓ Saved successfully.';msg.style.color='var(--green)';
