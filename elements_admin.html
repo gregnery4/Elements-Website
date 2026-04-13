@@ -1116,13 +1116,14 @@ const COLORS=['linear-gradient(135deg,#7B6A4A,#4A3D26)','linear-gradient(135deg,
 let allClients=[];
 
 async function loadAll(){
-  const{data}=await sb.from('profiles').select(`
+  const{data,error}=await sb.from('profiles').select(`
     id,full_name,email,coach,start_date,occupation,phone,age,
-    training_age,sex,comm_pref,training_days,training_time,
     client_metrics(body_weight,body_fat,lean_mass,recorded_at),
     supplements(id,name,brand,dose,timing,icon,active),
     nutrition_targets(calories,protein_g,carbs_g,fat_g,water_l,meal_timing,coach_notes)
   `).eq('role','client').order('created_at',{ascending:false});
+
+  if(error) console.error('loadAll error:',error.message);
 
   allClients=data||[];
   renderOverview();
@@ -2561,7 +2562,8 @@ async function saveClient(){
   const msg=document.getElementById('dp-save-msg');
   msg.textContent='Saving...';msg.style.color='var(--gold)';
 
-  const{error}=await sb.from('profiles').update({
+  // Try full save first (works once new columns are added in Supabase)
+  let{error}=await sb.from('profiles').update({
     full_name:document.getElementById('dp-fullname').value||null,
     phone:document.getElementById('dp-phone').value||null,
     age:parseInt(document.getElementById('dp-age').value)||null,
@@ -2575,9 +2577,25 @@ async function saveClient(){
     training_time:document.getElementById('dp-training-time').value||null,
   }).eq('id',id);
 
+  // If error (likely missing columns), fall back to core fields only
   if(error){
-    msg.style.color='var(--red)';
-    msg.textContent='Error: '+error.message;
+    const fb=await sb.from('profiles').update({
+      full_name:document.getElementById('dp-fullname').value||null,
+      phone:document.getElementById('dp-phone').value||null,
+      age:parseInt(document.getElementById('dp-age').value)||null,
+      occupation:document.getElementById('dp-occ').value||null,
+      start_date:document.getElementById('dp-start').value||null,
+      coach:document.getElementById('dp-coach').value||null,
+    }).eq('id',id);
+    if(fb.error){
+      msg.style.color='var(--red)';
+      msg.textContent='Error: '+fb.error.message;
+      return;
+    }
+    msg.textContent='✓ Saved (core fields). Add missing columns in Supabase for full save.';
+    msg.style.color='var(--gold)';
+    setTimeout(()=>msg.textContent='',5000);
+    await loadAll();
     return;
   }
 
