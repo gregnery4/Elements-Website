@@ -634,8 +634,8 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           <div style="color:var(--gold);font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">Calculated Results</div>
           <div id="goal-calc-text"></div>
         </div>
-        <button class="save-btn" onclick="saveClient()">Save Goal Data →</button>
-        <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-save-msg2"></div>
+        <button class="save-btn" onclick="saveGoalData()">Save Goal Data →</button>
+        <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-goal-msg"></div>
       </div>
 
       <!-- TAB 4: DAILY CALORIE CALCULATOR -->
@@ -810,7 +810,6 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             <div class="edit-field"><label>Fat Mass (lbs)</label><input type="number" id="bc-fat-mass" step="0.1"></div>
             <div class="edit-field"><label>Bone Mineral Content (BMC)</label><input type="number" id="bc-bmc" step="0.01"></div>
             <div class="edit-field"><label>Visceral Fat (lbs)</label><input type="number" id="bc-visc-fat" step="0.01"></div>
-            <div class="edit-field"><label>Visceral Fat Score</label><input type="number" id="bc-visc-score" step="0.1"></div>
             <div class="edit-field"><label>Resting Metabolic Rate</label><input type="number" id="bc-rmr"></div>
           </div>
         </div>
@@ -1916,10 +1915,6 @@ function fillDexaFields(metrics, filename){
     document.getElementById('bc-visc-fat').value=metrics.visceral_fat_lbs;
     filled.push(`Visceral Fat: ${metrics.visceral_fat_lbs} lbs`);
   }
-  if(metrics.visceral_fat_score){
-    document.getElementById('bc-visc-score').value=metrics.visceral_fat_score;
-    filled.push(`Visceral Fat Score: ${metrics.visceral_fat_score} cm²`);
-  }
   if(metrics.resting_metabolic_rate){
     document.getElementById('bc-rmr').value=metrics.resting_metabolic_rate;
     filled.push(`RMR: ${metrics.resting_metabolic_rate} cal/day`);
@@ -1972,7 +1967,6 @@ async function saveBodyComp(){
       fat_mass:document.getElementById('bc-fat-mass').value,
       bmc:document.getElementById('bc-bmc').value,
       visceral_fat:document.getElementById('bc-visc-fat').value,
-      visceral_fat_score:document.getElementById('bc-visc-score').value,
       rmr:document.getElementById('bc-rmr').value,
       skinfolds:(()=>{
         const obj={};
@@ -2061,23 +2055,50 @@ async function saveClient(){
   await loadAll();
 }
 
+async function saveGoalData(){
+  if(!currentClient)return;
+  const id=currentClient.id;
+  const msg=document.getElementById('dp-goal-msg');
+  msg.textContent='Saving...';msg.style.color='var(--gold)';
+  const w=parseFloat(document.getElementById('dp-weight').value);
+  const bf=parseFloat(document.getElementById('dp-bf').value);
+  const lm=parseFloat(document.getElementById('dp-lean').value);
+  const{error}=await sb.from('client_metrics').insert({
+    client_id:id,
+    body_weight:w||null,
+    body_fat:bf||null,
+    lean_mass:lm||null,
+    recorded_at:new Date().toISOString().split('T')[0]
+  });
+  if(error){msg.style.color='var(--red)';msg.textContent='Error: '+error.message;return;}
+  msg.textContent='✓ Goal data saved.';msg.style.color='var(--green)';
+  setTimeout(()=>msg.textContent='',3000);
+  await loadAll();
+}
+
 async function saveNutrition(){
   if(!currentClient)return;
   const id=currentClient.id;
   const msg=document.getElementById('dp-nut-msg');
   msg.textContent='Saving...';msg.style.color='var(--gold)';
-  await sb.from('nutrition_targets').upsert({
+  // Use correct IDs from the Calories tab (Tab 4)
+  const cals=parseInt(document.getElementById('dp-cals').value)||null;
+  const protPct=parseFloat(document.getElementById('dp-prot-pct').value)||40;
+  const carbPct=parseFloat(document.getElementById('dp-carb-pct').value)||18;
+  const fatPct=parseFloat(document.getElementById('dp-fat-pct').value)||42;
+  const protG=cals?Math.round(cals*(protPct/100)/4):null;
+  const carbG=cals?Math.round(cals*(carbPct/100)/4):null;
+  const fatG=cals?Math.round(cals*(fatPct/100)/9):null;
+  const{error}=await sb.from('nutrition_targets').upsert({
     client_id:id,
-    calories:parseInt(document.getElementById('dp-cals').value)||null,
-    protein_g:parseInt(document.getElementById('dp-protein').value)||null,
-    carbs_g:parseInt(document.getElementById('dp-carbs').value)||null,
-    fat_g:parseInt(document.getElementById('dp-fat').value)||null,
-    water_l:parseFloat(document.getElementById('dp-water').value)||null,
-    meal_timing:document.getElementById('dp-meals').value,
-    coach_notes:document.getElementById('dp-nut-notes').value,
+    calories:cals,
+    protein_g:protG,
+    carbs_g:carbG,
+    fat_g:fatG,
     updated_at:new Date().toISOString(),
   },{onConflict:'client_id'});
-  msg.textContent='✓ Nutrition saved.';msg.style.color='var(--green)';
+  if(error){msg.style.color='var(--red)';msg.textContent='Error: '+error.message;return;}
+  msg.textContent='✓ Nutrition targets saved.';msg.style.color='var(--green)';
   setTimeout(()=>msg.textContent='',3000);
 }
 
