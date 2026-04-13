@@ -731,39 +731,162 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
 
       <!-- TAB 6: WEEKLY DATA ENTRY -->
       <div id="dptab-t6" style="display:none">
+
+        <!-- WEEKLY LOG TABLE -->
         <div class="dp-sec">
-          <div class="dp-sec-title">Weekly Check-In Log</div>
-          <div style="overflow-x:auto">
-            <table style="width:100%;border-collapse:collapse;font-size:11px">
-              <thead>
-                <tr style="border-bottom:1px solid var(--border)">
-                  <th style="text-align:left;padding:8px 12px;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;white-space:nowrap">Week</th>
-                  <th style="text-align:left;padding:8px 12px;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;white-space:nowrap">Date</th>
-                  <th style="text-align:left;padding:8px 12px;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;white-space:nowrap">Body Weight (lbs)</th>
-                  <th style="text-align:left;padding:8px 12px;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;white-space:nowrap">Meals Logged</th>
-                  <th style="text-align:left;padding:8px 12px;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;white-space:nowrap">Nutrition Tracked</th>
-                  <th style="text-align:left;padding:8px 12px;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;white-space:nowrap">Notes</th>
-                </tr>
-              </thead>
-              <tbody id="weekly-log-body">
-                <tr><td colspan="6" style="padding:30px;text-align:center;color:var(--muted);font-size:12px">No weekly data yet.</td></tr>
-              </tbody>
-            </table>
+          <div class="dp-sec-title" style="display:flex;align-items:center;justify-content:space-between">
+            Weekly Review Log
+            <span style="font-size:10px;color:var(--muted);letter-spacing:1px;font-family:'Montserrat',sans-serif;font-weight:300">Click any week to expand</span>
+          </div>
+          <div id="weekly-log-body">
+            <div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No weekly reviews yet. Add the first one below.</div>
           </div>
         </div>
-        <div class="dp-sec" style="margin-top:20px">
-          <div class="dp-sec-title">Add Weekly Entry</div>
-          <div class="edit-grid">
-            <div class="edit-field"><label>Week Number</label><input type="number" id="wk-num" placeholder="1"></div>
-            <div class="edit-field"><label>Date</label><input type="date" id="wk-date"></div>
-            <div class="edit-field"><label>Body Weight (lbs)</label><input type="number" id="wk-weight" step="0.1" placeholder="0.0"></div>
-            <div class="edit-field"><label>Meals Logged</label><input type="number" id="wk-meals" placeholder="4"></div>
-            <div class="edit-field"><label>Nutrition Tracked</label>
-              <select id="wk-tracked"><option value="yes">Yes</option><option value="partial">Partial</option><option value="no">No</option></select>
-            </div>
-            <div class="edit-field"><label>Notes</label><input type="text" id="wk-notes" placeholder="Any notes..."></div>
+
+        <!-- ADD WEEKLY REVIEW -->
+        <div class="dp-sec" style="margin-top:3px">
+          <div class="dp-sec-title">Add Weekly Review</div>
+
+          <!-- Week info -->
+          <div class="edit-grid" style="margin-bottom:20px">
+            <div class="edit-field"><label>Week Number</label><input type="number" id="wk-num" placeholder="1" min="1"></div>
+            <div class="edit-field"><label>Week Start Date</label><input type="date" id="wk-date"></div>
           </div>
-          <button class="save-btn" style="margin-top:8px" onclick="addWeeklyEntry()">Add Entry →</button>
+
+          <!-- SECTION 1: Training Frequency -->
+          <div style="background:var(--c3);border:1px solid var(--border);padding:18px;margin-bottom:3px">
+            <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:14px">1. Training Frequency</div>
+            <div class="edit-grid">
+              <div class="edit-field">
+                <label>Sessions Completed This Week</label>
+                <input type="number" id="wk-sessions-done" placeholder="0" min="0">
+              </div>
+              <div class="edit-field">
+                <label>Sessions Scheduled This Week</label>
+                <input type="number" id="wk-sessions-target" placeholder="3" min="0">
+              </div>
+            </div>
+            <div class="edit-field" style="margin-top:10px">
+              <label>Compliance</label>
+              <select id="wk-training-compliance">
+                <option value="full">✓ Full — All sessions completed</option>
+                <option value="partial">⚠ Partial — Missed 1 session</option>
+                <option value="missed">✗ Missed — 2+ sessions missed</option>
+              </select>
+            </div>
+            <div class="edit-field" style="margin-top:10px">
+              <label>Training Notes</label>
+              <input type="text" id="wk-training-notes" placeholder="e.g. Strong session Tuesday, felt fatigued Friday">
+            </div>
+          </div>
+
+          <!-- SECTION 2: Bodyweight Recording -->
+          <div style="background:var(--c3);border:1px solid var(--border);padding:18px;margin-bottom:3px">
+            <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:14px">2. Bodyweight Recording</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Check off each day bodyweight was recorded:</div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:12px" id="wk-bw-days-wrap">
+              <label class="day-pill" id="wk-bw-lbl-mon"><input type="checkbox" id="wk-bw-mon" onchange="updateWkBWDay('mon')"> Mon</label>
+              <label class="day-pill" id="wk-bw-lbl-tue"><input type="checkbox" id="wk-bw-tue" onchange="updateWkBWDay('tue')"> Tue</label>
+              <label class="day-pill" id="wk-bw-lbl-wed"><input type="checkbox" id="wk-bw-wed" onchange="updateWkBWDay('wed')"> Wed</label>
+              <label class="day-pill" id="wk-bw-lbl-thu"><input type="checkbox" id="wk-bw-thu" onchange="updateWkBWDay('thu')"> Thu</label>
+              <label class="day-pill" id="wk-bw-lbl-fri"><input type="checkbox" id="wk-bw-fri" onchange="updateWkBWDay('fri')"> Fri</label>
+              <label class="day-pill" id="wk-bw-lbl-sat"><input type="checkbox" id="wk-bw-sat" onchange="updateWkBWDay('sat')"> Sat</label>
+              <label class="day-pill" id="wk-bw-lbl-sun"><input type="checkbox" id="wk-bw-sun" onchange="updateWkBWDay('sun')"> Sun</label>
+            </div>
+            <div class="edit-grid">
+              <div class="edit-field">
+                <label>Avg Bodyweight This Week (lbs)</label>
+                <input type="number" id="wk-weight" step="0.1" placeholder="0.0">
+              </div>
+              <div class="edit-field">
+                <label>All Scheduled Days Recorded?</label>
+                <select id="wk-bw-compliance">
+                  <option value="yes">✓ Yes — All days recorded</option>
+                  <option value="partial">⚠ Partial — Missed some days</option>
+                  <option value="no">✗ No — Not recorded</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 3: Meal Pictures / Nutrition -->
+          <div style="background:var(--c3);border:1px solid var(--border);padding:18px;margin-bottom:3px">
+            <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:14px">3. Nutrition Tracking</div>
+            <div class="edit-grid">
+              <div class="edit-field">
+                <label>Meal Pictures Uploaded</label>
+                <select id="wk-meals-compliance">
+                  <option value="all">✓ All meals — Every meal photographed</option>
+                  <option value="most">⚠ Most meals — 1–2 missed per day</option>
+                  <option value="some">⚠ Some meals — Inconsistent</option>
+                  <option value="none">✗ None — Not completed</option>
+                </select>
+              </div>
+              <div class="edit-field">
+                <label>Daily Meals Logged (avg)</label>
+                <input type="number" id="wk-meals" placeholder="4" min="0">
+              </div>
+              <div class="edit-field">
+                <label>Nutrition Adherence</label>
+                <select id="wk-nutrition-adherence">
+                  <option value="full">✓ Full — On target all week</option>
+                  <option value="good">✓ Good — On target 5–6 days</option>
+                  <option value="partial">⚠ Partial — On target 3–4 days</option>
+                  <option value="poor">✗ Poor — Off target most days</option>
+                </select>
+              </div>
+              <div class="edit-field">
+                <label>Nutrition Notes</label>
+                <input type="text" id="wk-nut-notes" placeholder="e.g. Hit protein targets, struggled with carbs">
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 4: Body Comp Assessment -->
+          <div style="background:var(--c3);border:1px solid var(--border);padding:18px;margin-bottom:3px">
+            <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:14px">4. Body Composition Assessment</div>
+            <div class="edit-grid">
+              <div class="edit-field">
+                <label>Assessment Taken This Week?</label>
+                <select id="wk-assessment-taken" onchange="toggleWkAssessment()">
+                  <option value="no">No</option>
+                  <option value="skinfold">Yes — Skinfold Calipers</option>
+                  <option value="circumference">Yes — Circumference</option>
+                  <option value="dexa">Yes — DEXA Scan</option>
+                  <option value="both">Yes — Skinfold + Circumference</option>
+                </select>
+              </div>
+              <div class="edit-field">
+                <label>Assessment Date</label>
+                <input type="date" id="wk-assessment-date">
+              </div>
+            </div>
+            <div id="wk-assessment-details" style="display:none;margin-top:14px">
+              <div class="edit-grid" id="wk-assessment-fields"></div>
+            </div>
+          </div>
+
+          <!-- SECTION 5: Coach Notes & Overall -->
+          <div style="background:var(--c3);border:1px solid var(--border);padding:18px;margin-bottom:16px">
+            <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:14px">5. Coach Notes & Overall Rating</div>
+            <div class="edit-grid">
+              <div class="edit-field">
+                <label>Overall Week Rating</label>
+                <select id="wk-overall">
+                  <option value="excellent">⭐⭐⭐ Excellent — All action points met</option>
+                  <option value="good">⭐⭐ Good — Most action points met</option>
+                  <option value="average">⭐ Average — Some action points met</option>
+                  <option value="poor">Below Average — Action points missed</option>
+                </select>
+              </div>
+            </div>
+            <div class="edit-field" style="margin-top:10px">
+              <label>Coach Notes</label>
+              <textarea id="wk-notes" placeholder="Overall notes, observations, adjustments for next week..." style="width:100%;background:var(--c2);border:1px solid var(--borderw);color:var(--white);padding:10px 14px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:300;outline:none;height:80px;resize:none;transition:border-color .3s"></textarea>
+            </div>
+          </div>
+
+          <button class="save-btn" onclick="addWeeklyEntry()">Save Weekly Review →</button>
           <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="wk-msg"></div>
         </div>
       </div>
@@ -1994,37 +2117,211 @@ async function saveBodyComp(){
 }
 
 // ── WEEKLY ENTRY ──
+// ── WEEKLY BW DAY CHECKBOXES ──
+function updateWkBWDay(key){
+  const cb=document.getElementById('wk-bw-'+key);
+  const lbl=document.getElementById('wk-bw-lbl-'+key);
+  if(cb.checked) lbl.classList.add('selected');
+  else lbl.classList.remove('selected');
+}
+
+function getWkBWDays(){
+  const days=['mon','tue','wed','thu','fri','sat','sun'];
+  const names={mon:'Mon',tue:'Tue',wed:'Wed',thu:'Thu',fri:'Fri',sat:'Sat',sun:'Sun'};
+  return days.filter(k=>document.getElementById('wk-bw-'+k)?.checked).map(k=>names[k]);
+}
+
+function resetWkBWDays(){
+  ['mon','tue','wed','thu','fri','sat','sun'].forEach(k=>{
+    const cb=document.getElementById('wk-bw-'+k);
+    const lbl=document.getElementById('wk-bw-lbl-'+k);
+    if(cb) cb.checked=false;
+    if(lbl) lbl.classList.remove('selected');
+  });
+}
+
+// ── ASSESSMENT TOGGLE ──
+function toggleWkAssessment(){
+  const type=document.getElementById('wk-assessment-taken').value;
+  const details=document.getElementById('wk-assessment-details');
+  const fields=document.getElementById('wk-assessment-fields');
+  if(type==='no'){details.style.display='none';return;}
+  details.style.display='block';
+  let html='';
+  if(type==='skinfold'||type==='both'){
+    html+=`<div class="edit-field" style="grid-column:1/-1"><label style="color:var(--gold)">Skinfold Sites (mm)</label></div>`;
+    ['Pectoral','Triceps','Biceps','Subscapularis','Suprailiac-1','Suprailiac-2','Mid-Axillary','Umbilical','Hamstrings','Quadriceps'].forEach(site=>{
+      html+=`<div class="edit-field"><label>${site}</label><input type="number" id="wka-sk-${site.toLowerCase().replace(/[^a-z0-9]/g,'')}" step="0.1" placeholder="mm"></div>`;
+    });
+  }
+  if(type==='circumference'||type==='both'){
+    html+=`<div class="edit-field" style="grid-column:1/-1"><label style="color:var(--gold);margin-top:8px">Circumference Sites (inches)</label></div>`;
+    ['Shoulders','Upper Arm','Umbilical / Waist','Hips','Thigh'].forEach(site=>{
+      html+=`<div class="edit-field"><label>${site}</label><input type="number" id="wka-cm-${site.toLowerCase().replace(/[^a-z0-9]/g,'')}" step="0.1" placeholder="in"></div>`;
+    });
+  }
+  if(type==='dexa'){
+    html+=`<div class="edit-field" style="grid-column:1/-1"><label style="color:var(--gold)">DEXA Results</label></div>`;
+    [['Total Mass (lbs)','wka-dexa-mass'],['Body Fat %','wka-dexa-bf'],['Lean Mass (lbs)','wka-dexa-lean'],['Fat Mass (lbs)','wka-dexa-fatmass'],['BMC (lbs)','wka-dexa-bmc'],['Visceral Fat (lbs)','wka-dexa-viscfat'],['RMR (cal)','wka-dexa-rmr']].forEach(([label,id])=>{
+      html+=`<div class="edit-field"><label>${label}</label><input type="number" id="${id}" step="0.1" placeholder="0"></div>`;
+    });
+  }
+  fields.innerHTML=html;
+}
+
+// ── WEEKLY ENTRY ──
 const weeklyData={};
+
 function addWeeklyEntry(){
   const msg=document.getElementById('wk-msg');
   const wk=document.getElementById('wk-num').value;
   const date=document.getElementById('wk-date').value;
-  const weight=document.getElementById('wk-weight').value;
-  const meals=document.getElementById('wk-meals').value;
-  const tracked=document.getElementById('wk-tracked').value;
-  const notes=document.getElementById('wk-notes').value;
-  if(!wk||!date){msg.style.color='var(--red)';msg.textContent='Week number and date are required.';return;}
-  if(!weeklyData[currentClient?.id])weeklyData[currentClient.id]=[];
-  weeklyData[currentClient.id].push({wk,date,weight,meals,tracked,notes});
+  if(!wk||!date){msg.style.color='var(--red)';msg.textContent='Week number and start date are required.';return;}
+
+  const assessmentType=document.getElementById('wk-assessment-taken').value;
+  let assessmentData={};
+  if(assessmentType!=='no'){
+    if(assessmentType==='skinfold'||assessmentType==='both'){
+      assessmentData.skinfolds={};
+      ['pectoral','triceps','biceps','subscapularis','suprailiac1','suprailiac2','midaxillary','umbilical','hamstrings','quadriceps'].forEach(k=>{
+        const v=document.getElementById(`wka-sk-${k}`)?.value;
+        if(v) assessmentData.skinfolds[k]=parseFloat(v);
+      });
+    }
+    if(assessmentType==='circumference'||assessmentType==='both'){
+      assessmentData.circumferences={};
+      [['shoulders','shoulders'],['upperarm','upper arm'],['umbilicalwaist','umbilical / waist'],['hips','hips'],['thigh','thigh']].forEach(([k,label])=>{
+        const v=document.getElementById(`wka-cm-${k}`)?.value;
+        if(v) assessmentData.circumferences[label]=parseFloat(v);
+      });
+    }
+    if(assessmentType==='dexa'){
+      assessmentData.dexa={
+        total_mass:parseFloat(document.getElementById('wka-dexa-mass')?.value)||null,
+        body_fat:parseFloat(document.getElementById('wka-dexa-bf')?.value)||null,
+        lean_mass:parseFloat(document.getElementById('wka-dexa-lean')?.value)||null,
+        fat_mass:parseFloat(document.getElementById('wka-dexa-fatmass')?.value)||null,
+        bmc:parseFloat(document.getElementById('wka-dexa-bmc')?.value)||null,
+        visceral_fat:parseFloat(document.getElementById('wka-dexa-viscfat')?.value)||null,
+        rmr:parseFloat(document.getElementById('wka-dexa-rmr')?.value)||null,
+      };
+    }
+    assessmentData.date=document.getElementById('wk-assessment-date').value;
+    assessmentData.type=assessmentType;
+  }
+
+  const entry={
+    wk,date,
+    sessions_done:document.getElementById('wk-sessions-done').value,
+    sessions_target:document.getElementById('wk-sessions-target').value,
+    training_compliance:document.getElementById('wk-training-compliance').value,
+    training_notes:document.getElementById('wk-training-notes').value,
+    bw_days:getWkBWDays().join(', '),
+    weight:document.getElementById('wk-weight').value,
+    bw_compliance:document.getElementById('wk-bw-compliance').value,
+    meals_compliance:document.getElementById('wk-meals-compliance').value,
+    meals_logged:document.getElementById('wk-meals').value,
+    nutrition_adherence:document.getElementById('wk-nutrition-adherence').value,
+    nut_notes:document.getElementById('wk-nut-notes').value,
+    assessment_type:assessmentType,
+    assessment:assessmentData,
+    overall:document.getElementById('wk-overall').value,
+    notes:document.getElementById('wk-notes').value,
+  };
+
+  if(!weeklyData[currentClient?.id]) weeklyData[currentClient.id]=[];
+  // replace if same week number exists
+  const idx=weeklyData[currentClient.id].findIndex(e=>e.wk===wk);
+  if(idx>-1) weeklyData[currentClient.id][idx]=entry;
+  else weeklyData[currentClient.id].push(entry);
+  weeklyData[currentClient.id].sort((a,b)=>parseInt(b.wk)-parseInt(a.wk));
+
   renderWeeklyLog();
-  ['wk-num','wk-date','wk-weight','wk-meals','wk-notes'].forEach(id=>document.getElementById(id).value='');
-  msg.style.color='var(--green)';msg.textContent='✓ Entry added.';
+
+  // reset form
+  ['wk-num','wk-date','wk-weight','wk-meals','wk-training-notes','wk-nut-notes','wk-notes','wk-assessment-date','wk-sessions-done','wk-sessions-target'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('wk-assessment-details').style.display='none';
+  document.getElementById('wk-assessment-taken').value='no';
+  resetWkBWDays();
+
+  msg.style.color='var(--green)'; msg.textContent='✓ Weekly review saved.';
   setTimeout(()=>msg.textContent='',3000);
 }
 
 function renderWeeklyLog(){
   const entries=weeklyData[currentClient?.id]||[];
-  const tbody=document.getElementById('weekly-log-body');
-  if(!entries.length){tbody.innerHTML='<tr><td colspan="6" style="padding:30px;text-align:center;color:var(--muted);font-size:12px">No weekly data yet.</td></tr>';return;}
-  tbody.innerHTML=entries.map(e=>`
-    <tr style="border-bottom:1px solid var(--borderw)">
-      <td style="padding:10px 12px">Week ${e.wk}</td>
-      <td style="padding:10px 12px">${e.date}</td>
-      <td style="padding:10px 12px">${e.weight||'—'} lbs</td>
-      <td style="padding:10px 12px">${e.meals||'—'}</td>
-      <td style="padding:10px 12px"><span class="tag ${e.tracked==='yes'?'tag-green':e.tracked==='partial'?'tag-gold':'tag-red'}">${e.tracked}</span></td>
-      <td style="padding:10px 12px;color:var(--muted);font-size:11px">${e.notes||'—'}</td>
-    </tr>`).join('');
+  const container=document.getElementById('weekly-log-body');
+  if(!entries.length){
+    container.innerHTML='<div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No weekly reviews yet.</div>';
+    return;
+  }
+
+  const complianceColor={full:'var(--green)',good:'var(--green)',yes:'var(--green)',all:'var(--green)',excellent:'var(--green)',partial:'var(--gold)',most:'var(--gold)',average:'var(--gold)',missed:'var(--red)',poor:'var(--red)',no:'var(--red)',none:'var(--red)'};
+  const complianceLabel={full:'✓ Full',good:'✓ Good',yes:'✓ Yes',all:'✓ All',excellent:'⭐⭐⭐ Excellent',partial:'⚠ Partial',most:'⚠ Most',average:'⭐ Average',missed:'✗ Missed',poor:'✗ Poor',no:'✗ No',none:'✗ None'};
+
+  container.innerHTML=entries.map((e,i)=>`
+    <div style="border:1px solid var(--border);margin-bottom:3px;overflow:hidden">
+      <!-- Collapsed header — click to expand -->
+      <div onclick="toggleWeekExpand(${i})" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;background:var(--c2);transition:background .2s" onmouseover="this.style.background='var(--c3)'" onmouseout="this.style.background='var(--c2)'">
+        <div style="display:flex;align-items:center;gap:16px">
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px">Week ${e.wk}</span>
+          <span style="font-size:10px;color:var(--muted)">${e.date}</span>
+          ${e.weight?`<span style="font-size:11px;color:var(--white);background:var(--c3);padding:3px 10px;border:1px solid var(--borderw)">${e.weight} lbs</span>`:''}
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:10px;color:${complianceColor[e.overall]||'var(--muted)'}">${complianceLabel[e.overall]||e.overall||'—'}</span>
+          <span style="font-size:12px;color:var(--muted)" id="wk-chevron-${i}">▼</span>
+        </div>
+      </div>
+      <!-- Expanded body -->
+      <div id="wk-expand-${i}" style="display:none;padding:18px;background:var(--c1);border-top:1px solid var(--border)">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:3px">
+          <!-- Training -->
+          <div style="background:var(--c2);border:1px solid var(--border);padding:14px">
+            <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Training Frequency</div>
+            <div style="font-size:22px;font-family:'Bebas Neue',sans-serif;color:${complianceColor[e.training_compliance]||'var(--muted)'}">${e.sessions_done||'—'} / ${e.sessions_target||'—'}</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:4px">sessions completed</div>
+            <div style="margin-top:8px"><span style="font-size:10px;color:${complianceColor[e.training_compliance]||'var(--muted)'}">${complianceLabel[e.training_compliance]||'—'}</span></div>
+            ${e.training_notes?`<div style="font-size:11px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--borderw)">${e.training_notes}</div>`:''}
+          </div>
+          <!-- Bodyweight -->
+          <div style="background:var(--c2);border:1px solid var(--border);padding:14px">
+            <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Bodyweight Recording</div>
+            ${e.weight?`<div style="font-size:22px;font-family:'Bebas Neue',sans-serif;color:var(--white)">${e.weight} lbs</div><div style="font-size:9px;color:var(--muted);margin-top:4px">avg this week</div>`:''}
+            ${e.bw_days?`<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">${e.bw_days.split(', ').map(d=>`<span style="padding:2px 8px;background:var(--gold-dim);border:1px solid rgba(201,168,108,.3);font-size:9px;color:var(--gold)">${d}</span>`).join('')}</div>`:''}
+            <div style="margin-top:8px"><span style="font-size:10px;color:${complianceColor[e.bw_compliance]||'var(--muted)'}">${complianceLabel[e.bw_compliance]||'—'}</span></div>
+          </div>
+          <!-- Nutrition -->
+          <div style="background:var(--c2);border:1px solid var(--border);padding:14px">
+            <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Nutrition Tracking</div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Meal pictures: <span style="color:${complianceColor[e.meals_compliance]||'var(--muted)'}">${complianceLabel[e.meals_compliance]||'—'}</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Adherence: <span style="color:${complianceColor[e.nutrition_adherence]||'var(--muted)'}">${complianceLabel[e.nutrition_adherence]||'—'}</span></div>
+            ${e.meals_logged?`<div style="font-size:11px;color:var(--muted)">Avg meals/day: <span style="color:var(--white)">${e.meals_logged}</span></div>`:''}
+            ${e.nut_notes?`<div style="font-size:11px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--borderw)">${e.nut_notes}</div>`:''}
+          </div>
+          <!-- Body Comp -->
+          <div style="background:var(--c2);border:1px solid var(--border);padding:14px">
+            <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Body Composition</div>
+            ${e.assessment_type==='no'?'<div style="font-size:11px;color:var(--muted)">No assessment this week</div>':
+              `<div style="font-size:10px;color:var(--gold);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">${e.assessment_type} · ${e.assessment?.date||''}</div>`+
+              (e.assessment?.dexa?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${Object.entries(e.assessment.dexa).filter(([k,v])=>v).map(([k,v])=>`<div style="font-size:10px;color:var(--muted)">${k.replace(/_/g,' ')}: <span style="color:var(--white)">${v}</span></div>`).join('')}</div>`:'') +
+              (e.assessment?.skinfolds&&Object.keys(e.assessment.skinfolds).length?`<div style="margin-top:6px"><div style="font-size:9px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">Skinfolds (mm)</div><div style="display:flex;flex-wrap:wrap;gap:4px">${Object.entries(e.assessment.skinfolds).map(([k,v])=>`<span style="padding:2px 8px;background:var(--c3);border:1px solid var(--borderw);font-size:10px;color:var(--white)">${k}: ${v}</span>`).join('')}</div></div>`:'') +
+              (e.assessment?.circumferences&&Object.keys(e.assessment.circumferences).length?`<div style="margin-top:6px"><div style="font-size:9px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">Circumference (in)</div><div style="display:flex;flex-wrap:wrap;gap:4px">${Object.entries(e.assessment.circumferences).map(([k,v])=>`<span style="padding:2px 8px;background:var(--c3);border:1px solid var(--borderw);font-size:10px;color:var(--white)">${k}: ${v}</span>`).join('')}</div></div>`:'')
+            }
+          </div>
+        </div>
+        ${e.notes?`<div style="background:var(--c2);border:1px solid var(--border);padding:14px;margin-top:0"><div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:8px">Coach Notes</div><div style="font-size:12px;color:var(--muted);line-height:1.8">${e.notes}</div></div>`:''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleWeekExpand(i){
+  const body=document.getElementById(`wk-expand-${i}`);
+  const chev=document.getElementById(`wk-chevron-${i}`);
+  const open=body.style.display==='block';
+  body.style.display=open?'none':'block';
+  if(chev) chev.textContent=open?'▼':'▲';
 }
 
 async function saveClient(){
