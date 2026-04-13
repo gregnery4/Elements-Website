@@ -449,10 +449,8 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       <div class="dp-tab" onclick="dpTab('t4',this)">5. Calories</div>
       <div class="dp-tab" onclick="dpTab('t5',this)">6. Meal Design</div>
       <div class="dp-tab" onclick="dpTab('t11',this)">6b. Meal Plan</div>
-      <div class="dp-tab" onclick="dpTab('t6',this)">7. Weekly Data</div>
-      <div class="dp-tab" onclick="dpTab('t8',this)">Supplements</div>
-      <div class="dp-tab" onclick="dpTab('t9',this)">Sessions</div>
-      <div class="dp-tab" onclick="dpTab('t10',this)">Notes</div>
+      <div class="dp-tab" onclick="dpTab('t8',this)">7. Supplements</div>
+      <div class="dp-tab" onclick="dpTab('t6',this)">8. Weekly Data Reviews</div>
     </div>
     <div class="dp-body">
 
@@ -732,6 +730,17 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       <!-- TAB 6: WEEKLY DATA ENTRY -->
       <div id="dptab-t6" style="display:none">
 
+        <!-- MONTHLY SUMMARY (shows when 4+ weeks exist) -->
+        <div class="dp-sec" id="monthly-summary-section" style="display:none">
+          <div class="dp-sec-title" style="display:flex;align-items:center;justify-content:space-between">
+            Monthly Summary
+            <button onclick="generateMonthlySummaryPDF()" style="padding:8px 20px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600">Download PDF →</button>
+          </div>
+          <div id="monthly-summary-preview" style="background:var(--c3);border:1px solid var(--border);padding:20px">
+            <div style="font-size:12px;color:var(--muted);text-align:center">Click Download PDF to generate the monthly summary.</div>
+          </div>
+        </div>
+
         <!-- WEEKLY LOG TABLE -->
         <div class="dp-sec">
           <div class="dp-sec-title" style="display:flex;align-items:center;justify-content:space-between">
@@ -794,10 +803,6 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
               <label class="day-pill" id="wk-bw-lbl-sun"><input type="checkbox" id="wk-bw-sun" onchange="updateWkBWDay('sun')"> Sun</label>
             </div>
             <div class="edit-grid">
-              <div class="edit-field">
-                <label>Avg Bodyweight This Week (lbs)</label>
-                <input type="number" id="wk-weight" step="0.1" placeholder="0.0">
-              </div>
               <div class="edit-field">
                 <label>All Scheduled Days Recorded?</label>
                 <select id="wk-bw-compliance">
@@ -1023,43 +1028,6 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           </div>
           <button class="save-btn" style="margin-top:8px" onclick="addSupplement()">Add to Protocol →</button>
           <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-supp-msg"></div>
-        </div>
-      </div>
-
-      <!-- TAB 9: SESSIONS -->
-      <div id="dptab-t9" style="display:none">
-        <div class="dp-sec">
-          <div class="dp-sec-title">Session History</div>
-          <div id="dp-sess-list"><div style="font-size:12px;color:var(--muted)">No sessions recorded.</div></div>
-        </div>
-        <div class="dp-sec" style="margin-top:20px">
-          <div class="dp-sec-title">Add Session</div>
-          <div class="edit-grid">
-            <div class="edit-field"><label>Date & Time</label><input type="datetime-local" id="new-sess-date"></div>
-            <div class="edit-field"><label>Session Type</label><input type="text" id="new-sess-type" placeholder="e.g. Lower Body Strength"></div>
-            <div class="edit-field"><label>Coach</label>
-              <select id="new-sess-coach"><option>Gavin Regnery</option><option>Mark Bloice</option></select>
-            </div>
-            <div class="edit-field"><label>Status</label>
-              <select id="new-sess-status"><option value="upcoming">Upcoming</option><option value="completed">Completed</option></select>
-            </div>
-          </div>
-          <button class="save-btn" style="margin-top:8px" onclick="addSession()">Add Session →</button>
-          <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-sess-msg"></div>
-        </div>
-      </div>
-
-      <!-- TAB 10: NOTES -->
-      <div id="dptab-t10" style="display:none">
-        <div class="dp-sec">
-          <div class="dp-sec-title">Add Coach Note</div>
-          <textarea class="note-box" id="new-note" placeholder="Private coaching note — visible to coaches only"></textarea>
-          <button class="save-btn" onclick="addNote()">Save Note →</button>
-          <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-note-msg"></div>
-        </div>
-        <div class="dp-sec" style="margin-top:20px">
-          <div class="dp-sec-title">Previous Notes</div>
-          <div id="dp-notes-list"><div style="font-size:12px;color:var(--muted)">No notes yet.</div></div>
         </div>
       </div>
 
@@ -2205,8 +2173,12 @@ function toggleWkAssessment(){
   details.style.display='block';
   let html='';
   if(type==='skinfold'||type==='both'){
+    // Pull selected sites from the Body Comp tab skinfold selector
+    const selectedSites=getSkSites();
+    const sitesToUse=selectedSites.length>0 ? selectedSites :
+      Object.values(SK_SITES); // fallback to all if none selected
     html+=`<div class="edit-field" style="grid-column:1/-1"><label style="color:var(--gold)">Skinfold Sites (mm)</label></div>`;
-    ['Pectoral','Triceps','Biceps','Subscapularis','Suprailiac-1','Suprailiac-2','Mid-Axillary','Umbilical','Hamstrings','Quadriceps'].forEach(site=>{
+    sitesToUse.forEach(site=>{
       html+=`<div class="edit-field"><label>${site}</label><input type="number" id="wka-sk-${site.toLowerCase().replace(/[^a-z0-9]/g,'')}" step="0.1" placeholder="mm"></div>`;
     });
   }
@@ -2239,9 +2211,12 @@ function addWeeklyEntry(){
   if(assessmentType!=='no'){
     if(assessmentType==='skinfold'||assessmentType==='both'){
       assessmentData.skinfolds={};
-      ['pectoral','triceps','biceps','subscapularis','suprailiac1','suprailiac2','midaxillary','umbilical','hamstrings','quadriceps'].forEach(k=>{
-        const v=document.getElementById(`wka-sk-${k}`)?.value;
-        if(v) assessmentData.skinfolds[k]=parseFloat(v);
+      const selectedSites=getSkSites();
+      const sitesToUse=selectedSites.length>0?selectedSites:Object.values(SK_SITES);
+      sitesToUse.forEach(site=>{
+        const key=site.toLowerCase().replace(/[^a-z0-9]/g,'');
+        const v=document.getElementById(`wka-sk-${key}`)?.value;
+        if(v) assessmentData.skinfolds[site]=parseFloat(v);
       });
     }
     if(assessmentType==='circumference'||assessmentType==='both'){
@@ -2274,7 +2249,6 @@ function addWeeklyEntry(){
     training_compliance:document.getElementById('wk-training-compliance').value,
     training_notes:document.getElementById('wk-training-notes').value,
     bw_days:getWkBWDays().join(', '),
-    weight:document.getElementById('wk-weight').value,
     bw_compliance:document.getElementById('wk-bw-compliance').value,
     meals_compliance:document.getElementById('wk-meals-compliance').value,
     meals_logged:document.getElementById('wk-meals').value,
@@ -2295,7 +2269,7 @@ function addWeeklyEntry(){
   renderWeeklyLog();
 
   // reset form
-  ['wk-num','wk-date','wk-weight','wk-meals','wk-training-notes','wk-nut-notes','wk-notes','wk-assessment-date','wk-sessions-done','wk-sessions-target'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['wk-num','wk-date','wk-meals','wk-training-notes','wk-nut-notes','wk-assessment-date','wk-sessions-done','wk-sessions-target'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('wk-assessment-details').style.display='none';
   document.getElementById('wk-assessment-taken').value='no';
   resetWkBWDays();
@@ -2322,7 +2296,6 @@ function renderWeeklyLog(){
         <div style="display:flex;align-items:center;gap:16px">
           <span style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px">Week ${e.wk}</span>
           <span style="font-size:10px;color:var(--muted)">${e.date}</span>
-          ${e.weight?`<span style="font-size:11px;color:var(--white);background:var(--c3);padding:3px 10px;border:1px solid var(--borderw)">${e.weight} lbs</span>`:''}
         </div>
         <div style="display:flex;align-items:center;gap:10px">
           ${e.score!==null&&e.score!==undefined?`<span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:${e.score>=80?'var(--green)':e.score>=50?'var(--gold)':'var(--red)'}">${e.score}%</span>`:'<span style="font-size:10px;color:var(--muted)">No score</span>'}
@@ -2370,14 +2343,212 @@ function renderWeeklyLog(){
       </div>
     </div>
   `).join('');
-}
-
-function toggleWeekExpand(i){
+  checkMonthlySummary();
+}(i){
   const body=document.getElementById(`wk-expand-${i}`);
   const chev=document.getElementById(`wk-chevron-${i}`);
   const open=body.style.display==='block';
   body.style.display=open?'none':'block';
   if(chev) chev.textContent=open?'▼':'▲';
+}
+
+// ── MONTHLY SUMMARY ──
+function checkMonthlySummary(){
+  const entries=weeklyData[currentClient?.id]||[];
+  const section=document.getElementById('monthly-summary-section');
+  if(!section) return;
+  if(entries.length>=4){
+    section.style.display='block';
+    buildMonthlySummaryPreview(entries);
+  } else {
+    section.style.display='none';
+  }
+}
+
+function buildMonthlySummaryPreview(entries){
+  const last4=entries.slice(0,4);
+  const clientName=currentClient?.full_name||currentClient?.email||'Client';
+  const avgScore=last4.filter(e=>e.score!==null&&e.score!==undefined).reduce((a,e,_,arr)=>a+e.score/arr.length,0);
+  const totalSessions=last4.reduce((a,e)=>a+(parseInt(e.sessions_done)||0),0);
+  const scheduledSessions=last4.reduce((a,e)=>a+(parseInt(e.sessions_target)||0),0);
+  const scoreColor=s=>s>=80?'#4CAF82':s>=50?'#C9A86C':'#CF6679';
+
+  const preview=document.getElementById('monthly-summary-preview');
+  preview.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.08)">
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:#F0EDE8">${clientName}</div>
+        <div style="font-size:10px;color:#7A746C;letter-spacing:1.5px;text-transform:uppercase;margin-top:2px">Monthly Summary · Weeks ${last4.map(e=>e.wk).reverse().join(', ')}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:42px;line-height:1;color:${scoreColor(Math.round(avgScore))}">${Math.round(avgScore)}%</div>
+        <div style="font-size:9px;color:#7A746C;letter-spacing:2px;text-transform:uppercase">Avg Compliance</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:2px">
+      ${last4.reverse().map(e=>`
+        <div style="background:#1A1A1A;border:1px solid rgba(201,168,108,.13);padding:12px;text-align:center">
+          <div style="font-size:8px;color:#7A746C;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Week ${e.wk}</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:${e.score!==null&&e.score!==undefined?scoreColor(e.score):'#7A746C'}">${e.score!==null&&e.score!==undefined?e.score+'%':'—'}</div>
+          <div style="font-size:10px;color:#7A746C;margin-top:4px">${e.sessions_done||'0'}/${e.sessions_target||'0'} sessions</div>
+        </div>`).join('')}
+    </div>
+    <div style="font-size:10px;color:#7A746C;margin-top:10px;text-align:center">${totalSessions} of ${scheduledSessions} total sessions completed this month</div>
+  `;
+}
+
+async function generateMonthlySummaryPDF(){
+  const entries=(weeklyData[currentClient?.id]||[]).slice(0,4);
+  if(entries.length<1){alert('No weekly reviews to generate summary from.');return;}
+
+  const clientName=currentClient?.full_name||currentClient?.email||'Client';
+  const coachName=currentClient?.coach||'Coach';
+  const last4=entries.slice(0,4);
+  const avgScore=Math.round(last4.filter(e=>e.score!==null&&e.score!==undefined).reduce((a,e,_,arr)=>a+e.score/arr.length,0));
+  const totalSessions=last4.reduce((a,e)=>a+(parseInt(e.sessions_done)||0),0);
+  const scheduledSessions=last4.reduce((a,e)=>a+(parseInt(e.sessions_target)||0),0);
+  const scoreColor=s=>s>=80?'#2E7D52':s>=50?'#8B6020':'#8B2020';
+  const scoreColorLight=s=>s>=80?'#4CAF82':s>=50?'#C9A86C':'#CF6679';
+
+  const compLabel={full:'Full',partial:'Partial',missed:'Missed',yes:'Yes',no:'No',all:'All meals',most:'Most meals',some:'Some meals',none:'None',good:'Good',poor:'Poor',excellent:'Excellent',average:'Average'};
+
+  const weekRows=last4.reverse().map(e=>`
+    <tr style="border-bottom:1px solid #E0D9CC">
+      <td style="padding:10px 12px;font-weight:600">Week ${e.wk}</td>
+      <td style="padding:10px 12px;color:#555">${e.date||'—'}</td>
+      <td style="padding:10px 12px;text-align:center;font-weight:600;color:${scoreColor(e.score)}">${e.score!==null&&e.score!==undefined?e.score+'%':'—'}</td>
+      <td style="padding:10px 12px;text-align:center">${e.sessions_done||'0'} / ${e.sessions_target||'0'}</td>
+      <td style="padding:10px 12px;text-align:center">${compLabel[e.bw_compliance]||'—'}</td>
+      <td style="padding:10px 12px;text-align:center">${compLabel[e.meals_compliance]||'—'}</td>
+      <td style="padding:10px 12px;text-align:center">${compLabel[e.nutrition_adherence]||'—'}</td>
+    </tr>`).join('');
+
+  // Body comp rows — collect any assessments from the 4 weeks
+  const assessmentRows=last4.filter(e=>e.assessment_type&&e.assessment_type!=='no').map(e=>{
+    const a=e.assessment||{};
+    let details='';
+    if(a.dexa) details=Object.entries(a.dexa).filter(([k,v])=>v).map(([k,v])=>`${k.replace(/_/g,' ')}: ${v}`).join(' · ');
+    if(a.skinfolds&&Object.keys(a.skinfolds).length) details+=Object.entries(a.skinfolds).map(([k,v])=>`${k}: ${v}mm`).join(' · ');
+    if(a.circumferences&&Object.keys(a.circumferences).length) details+=Object.entries(a.circumferences).map(([k,v])=>`${k}: ${v}in`).join(' · ');
+    return `<tr style="border-bottom:1px solid #E0D9CC">
+      <td style="padding:8px 12px;font-weight:600">Week ${e.wk}</td>
+      <td style="padding:8px 12px;color:#555">${a.date||e.date||'—'}</td>
+      <td style="padding:8px 12px;color:#555;text-transform:capitalize">${e.assessment_type}</td>
+      <td style="padding:8px 12px;color:#555;font-size:11px">${details||'—'}</td>
+    </tr>`;
+  }).join('');
+
+  const html=`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1A1A1A;background:#fff;padding:48px;}
+  .header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:36px;padding-bottom:24px;border-bottom:3px solid #1A1A1A;}
+  .logo{font-size:32px;font-weight:900;letter-spacing:4px;text-transform:uppercase;}
+  .logo span{color:#8B6020;}
+  .report-title{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#7A746C;margin-top:4px;}
+  .client-block{text-align:right;}
+  .client-name{font-size:22px;font-weight:700;letter-spacing:1px;}
+  .client-meta{font-size:11px;color:#7A746C;letter-spacing:1px;margin-top:3px;}
+  .score-row{display:flex;gap:3px;margin-bottom:32px;}
+  .score-card{flex:1;padding:20px;text-align:center;border:1px solid #E0D9CC;}
+  .score-card.highlight{background:#1A1A1A;border-color:#1A1A1A;}
+  .score-label{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:#7A746C;margin-bottom:8px;}
+  .score-val{font-size:36px;font-weight:900;line-height:1;}
+  .score-card.highlight .score-label{color:#C9A86C;}
+  .score-card.highlight .score-val{color:#fff;}
+  .section-title{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#8B6020;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid #E0D9CC;}
+  table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:32px;}
+  thead tr{background:#1A1A1A;color:#fff;}
+  thead th{padding:10px 12px;text-align:left;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:400;}
+  tbody tr:last-child{border-bottom:none;}
+  .footer{margin-top:48px;padding-top:16px;border-top:1px solid #E0D9CC;display:flex;justify-content:space-between;font-size:10px;color:#7A746C;letter-spacing:1px;}
+  .no-assess{font-size:12px;color:#7A746C;padding:16px 0;font-style:italic;}
+</style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <div class="logo">E<span>LEMENTS</span></div>
+      <div class="report-title">Personal Training · Monthly Summary Report</div>
+    </div>
+    <div class="client-block">
+      <div class="client-name">${clientName}</div>
+      <div class="client-meta">Coach: ${coachName} · Generated: ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
+      <div class="client-meta">Weeks ${last4.map(e=>e.wk).join(', ')}</div>
+    </div>
+  </div>
+
+  <!-- Score summary cards -->
+  <div class="score-row">
+    <div class="score-card highlight">
+      <div class="score-label">Monthly Compliance</div>
+      <div class="score-val" style="color:${scoreColorLight(avgScore)}">${avgScore}%</div>
+    </div>
+    <div class="score-card">
+      <div class="score-label">Sessions Completed</div>
+      <div class="score-val">${totalSessions}</div>
+    </div>
+    <div class="score-card">
+      <div class="score-label">Sessions Scheduled</div>
+      <div class="score-val">${scheduledSessions}</div>
+    </div>
+    <div class="score-card">
+      <div class="score-label">Training Adherence</div>
+      <div class="score-val">${scheduledSessions>0?Math.round((totalSessions/scheduledSessions)*100):0}%</div>
+    </div>
+  </div>
+
+  <!-- Weekly breakdown table -->
+  <div class="section-title">Weekly Compliance Breakdown</div>
+  <table>
+    <thead><tr>
+      <th>Week</th><th>Date</th><th style="text-align:center">Score</th>
+      <th style="text-align:center">Sessions</th><th style="text-align:center">Bodyweight</th>
+      <th style="text-align:center">Meal Pics</th><th style="text-align:center">Nutrition</th>
+    </tr></thead>
+    <tbody>${weekRows}</tbody>
+  </table>
+
+  <!-- Body comp assessments -->
+  <div class="section-title">Body Composition Assessments</div>
+  ${assessmentRows ? `<table>
+    <thead><tr><th>Week</th><th>Date</th><th>Type</th><th>Measurements</th></tr></thead>
+    <tbody>${assessmentRows}</tbody>
+  </table>` : '<div class="no-assess">No body composition assessments recorded this month.</div>'}
+
+  <!-- Weekly scores chart (text-based) -->
+  <div class="section-title" style="margin-top:8px">Score Trend</div>
+  <div style="display:flex;gap:3px;align-items:flex-end;height:80px;margin-bottom:8px">
+    ${last4.map(e=>{
+      const h=e.score!==null&&e.score!==undefined?Math.max(Math.round(e.score*0.7),4):4;
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+        <div style="font-size:10px;font-weight:600;color:${scoreColor(e.score||0)}">${e.score!==null&&e.score!==undefined?e.score+'%':'—'}</div>
+        <div style="width:100%;height:${h}px;background:${scoreColor(e.score||0)};opacity:0.85"></div>
+        <div style="font-size:9px;color:#7A746C">Wk ${e.wk}</div>
+      </div>`;
+    }).join('')}
+  </div>
+
+  <div class="footer">
+    <div>ELEMENTS Personal Training · Santa Monica, CA</div>
+    <div>Confidential — For Coach Use Only</div>
+  </div>
+</body>
+</html>`;
+
+  // Open in new window and trigger print-to-PDF
+  const win=window.open('','_blank','width=900,height=700');
+  win.document.write(html);
+  win.document.close();
+  win.onload=()=>{
+    setTimeout(()=>{
+      win.focus();
+      win.print();
+    },500);
+  };
 }
 
 async function saveClient(){
