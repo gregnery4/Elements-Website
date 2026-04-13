@@ -1014,20 +1014,51 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       <!-- TAB 8: SUPPLEMENTS -->
       <div id="dptab-t8" style="display:none">
         <div class="dp-sec">
-          <div class="dp-sec-title">Current Supplement Protocol</div>
-          <div id="dp-supps-list"><div style="font-size:12px;color:var(--muted)">No supplements assigned yet.</div></div>
-        </div>
-        <div class="dp-sec" style="margin-top:20px">
-          <div class="dp-sec-title">Add Supplement</div>
-          <div class="edit-grid">
-            <div class="edit-field"><label>Name</label><input type="text" id="new-supp-name" placeholder="e.g. Omega-3 Fish Oil"></div>
-            <div class="edit-field"><label>Brand</label><input type="text" id="new-supp-brand" placeholder="e.g. Nutridyn Ultra Omega"></div>
-            <div class="edit-field"><label>Dose</label><input type="text" id="new-supp-dose" placeholder="e.g. 2 capsules"></div>
-            <div class="edit-field"><label>Timing</label><input type="text" id="new-supp-timing" placeholder="e.g. with meals"></div>
-            <div class="edit-field"><label>Icon (emoji)</label><input type="text" id="new-supp-icon" placeholder="💊"></div>
+          <div class="dp-sec-title">Supplement Protocol</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:14px">Select the supplements for this client's protocol, then hit Save Protocol.</div>
+
+          <!-- Pill grid -->
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-bottom:10px" id="supp-pills-wrap">
+            <label class="day-pill" id="supp-lbl-0"><input type="checkbox" id="supp-0" onchange="updateSuppPill(0)"> Alpha-Lipoic Acid</label>
+            <label class="day-pill" id="supp-lbl-1"><input type="checkbox" id="supp-1" onchange="updateSuppPill(1)"> B-Complex</label>
+            <label class="day-pill" id="supp-lbl-2"><input type="checkbox" id="supp-2" onchange="updateSuppPill(2)"> CoQ10 200mg</label>
+            <label class="day-pill" id="supp-lbl-3"><input type="checkbox" id="supp-3" onchange="updateSuppPill(3)"> Curcumin 400x</label>
+            <label class="day-pill" id="supp-lbl-4"><input type="checkbox" id="supp-4" onchange="updateSuppPill(4)"> D3 5000 with K2</label>
+            <label class="day-pill" id="supp-lbl-5"><input type="checkbox" id="supp-5" onchange="updateSuppPill(5)"> Digestive Complex</label>
+            <label class="day-pill" id="supp-lbl-6"><input type="checkbox" id="supp-6" onchange="updateSuppPill(6)"> Dynamic BCAA</label>
+            <label class="day-pill" id="supp-lbl-7"><input type="checkbox" id="supp-7" onchange="updateSuppPill(7)"> Dynamic Hydrate</label>
+            <label class="day-pill" id="supp-lbl-8"><input type="checkbox" id="supp-8" onchange="updateSuppPill(8)"> Dynamic Whey Protein</label>
+            <label class="day-pill" id="supp-lbl-9"><input type="checkbox" id="supp-9" onchange="updateSuppPill(9)"> Essential Multi</label>
+            <label class="day-pill" id="supp-lbl-10"><input type="checkbox" id="supp-10" onchange="updateSuppPill(10)"> L-Glutamine Powder</label>
+            <label class="day-pill" id="supp-lbl-11"><input type="checkbox" id="supp-11" onchange="updateSuppPill(11)"> Liposomal Glutathione</label>
+            <label class="day-pill" id="supp-lbl-12"><input type="checkbox" id="supp-12" onchange="updateSuppPill(12)"> Mag Calm Pro</label>
+            <label class="day-pill" id="supp-lbl-13"><input type="checkbox" id="supp-13" onchange="updateSuppPill(13)"> Magnesium Glycinate</label>
+            <label class="day-pill" id="supp-lbl-14"><input type="checkbox" id="supp-14" onchange="updateSuppPill(14)"> NAC-600</label>
+            <label class="day-pill" id="supp-lbl-15"><input type="checkbox" id="supp-15" onchange="updateSuppPill(15)"> Nutridyn Creatine Powder</label>
+            <label class="day-pill" id="supp-lbl-16"><input type="checkbox" id="supp-16" onchange="updateSuppPill(16)"> Nutridyn Fiber</label>
+            <label class="day-pill" id="supp-lbl-17"><input type="checkbox" id="supp-17" onchange="updateSuppPill(17)"> Omega Pure EPA-DHA 720</label>
+            <label class="day-pill" id="supp-lbl-18"><input type="checkbox" id="supp-18" onchange="updateSuppPill(18)"> Paleo Protein</label>
+            <label class="day-pill" id="supp-lbl-19"><input type="checkbox" id="supp-19" onchange="updateSuppPill(19)"> UltraBiotic Complete</label>
+            <label class="day-pill" id="supp-lbl-20"><input type="checkbox" id="supp-20" onchange="updateSuppPill(20)"> Vitamin C 1000 Complex</label>
+            <label class="day-pill" id="supp-lbl-21"><input type="checkbox" id="supp-21" onchange="updateSuppPill(21)"> Zinc Pro</label>
           </div>
-          <button class="save-btn" style="margin-top:8px" onclick="addSupplement()">Add to Protocol →</button>
-          <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-supp-msg"></div>
+
+          <!-- Saved badges -->
+          <div id="supp-pills-saved" style="display:none;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:20px">
+            <button onclick="saveSuppProtocol()" style="padding:8px 20px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600">Save Protocol</button>
+            <button onclick="editSuppProtocol()" id="supp-edit-btn" style="display:none;padding:8px 16px;background:transparent;color:var(--muted);border:1px solid var(--borderw);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase">Edit</button>
+            <span id="supp-pills-msg" style="font-size:10px;color:var(--green);min-height:16px"></span>
+          </div>
+
+          <!-- Dose/timing fields — appear after save -->
+          <div id="supp-detail-fields" style="display:none">
+            <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Dose & Timing</div>
+            <div id="supp-detail-grid" class="edit-grid"></div>
+            <button class="save-btn" style="margin-top:12px" onclick="saveSuppDetails()">Save Dose & Timing →</button>
+            <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-supp-msg"></div>
+          </div>
         </div>
       </div>
 
@@ -1231,12 +1262,7 @@ function openClient(id){
   renderMealFields();
 
   // Tab 8 — Supplements
-  const supps=c.supplements||[];
-  document.getElementById('dp-supps-list').innerHTML=supps.length?supps.map(s=>`
-    <div class="supp-row"><div class="supp-icon-sm">${s.icon||'💊'}</div>
-    <div class="supp-info"><div class="supp-nm">${s.name}</div><div class="supp-ds">${s.dose||''} · ${s.timing||''}</div></div>
-    <div class="toggle ${s.active?'on':''}" onclick="toggleSupp('${s.id}',this)"></div></div>`).join('')
-    :'<div style="font-size:12px;color:var(--muted)">No supplements assigned yet.</div>';
+  loadSuppProtocol(c.supplements||[]);
 
   // Weekly data
   renderWeeklyLog();
@@ -2651,30 +2677,114 @@ async function saveNutrition(){
   setTimeout(()=>msg.textContent='',3000);
 }
 
-async function addSupplement(){
-  if(!currentClient)return;
-  const msg=document.getElementById('dp-supp-msg');
-  const name=document.getElementById('new-supp-name').value.trim();
-  if(!name){msg.style.color='var(--red)';msg.textContent='Please enter a supplement name.';return;}
-  await sb.from('supplements').insert({
-    client_id:currentClient.id,
-    name,brand:document.getElementById('new-supp-brand').value,
-    dose:document.getElementById('new-supp-dose').value,
-    timing:document.getElementById('new-supp-timing').value,
-    icon:document.getElementById('new-supp-icon').value||'💊',
-    active:true,
-  });
-  msg.style.color='var(--green)';msg.textContent='✓ Supplement added.';
-  ['new-supp-name','new-supp-brand','new-supp-dose','new-supp-timing','new-supp-icon'].forEach(id=>document.getElementById(id).value='');
-  setTimeout(()=>msg.textContent='',3000);
-  await loadAll();
-  openClient(currentClient.id);
+// ── SUPPLEMENT PILL SYSTEM ──
+const SUPP_LIST=[
+  'Alpha-Lipoic Acid','B-Complex','CoQ10 200mg','Curcumin 400x','D3 5000 with K2',
+  'Digestive Complex','Dynamic BCAA','Dynamic Hydrate','Dynamic Whey Protein',
+  'Essential Multi','L-Glutamine Powder','Liposomal Glutathione','Mag Calm Pro',
+  'Magnesium Glycinate','NAC-600','Nutridyn Creatine Powder','Nutridyn Fiber',
+  'Omega Pure EPA-DHA 720','Paleo Protein','UltraBiotic Complete',
+  'Vitamin C 1000 Complex','Zinc Pro'
+];
+
+function updateSuppPill(i){
+  const cb=document.getElementById(`supp-${i}`);
+  const lbl=document.getElementById(`supp-lbl-${i}`);
+  if(cb.checked) lbl.classList.add('selected');
+  else lbl.classList.remove('selected');
 }
 
-async function toggleSupp(id,el){
-  el.classList.toggle('on');
-  const active=el.classList.contains('on');
-  await sb.from('supplements').update({active}).eq('id',id);
+function getSelectedSupps(){
+  return SUPP_LIST.filter((_,i)=>document.getElementById(`supp-${i}`)?.checked);
+}
+
+function saveSuppProtocol(){
+  const selected=getSelectedSupps();
+  const msg=document.getElementById('supp-pills-msg');
+  if(!selected.length){
+    msg.style.color='var(--red)';msg.textContent='Select at least one supplement.';
+    setTimeout(()=>msg.textContent='',2500);return;
+  }
+  // Hide grid, show badges
+  document.getElementById('supp-pills-wrap').style.display='none';
+  const savedEl=document.getElementById('supp-pills-saved');
+  savedEl.style.display='flex';
+  savedEl.innerHTML=selected.map(s=>`<span class="day-saved-badge">${s}</span>`).join('');
+  document.getElementById('supp-edit-btn').style.display='inline-block';
+  // Build dose/timing fields
+  const grid=document.getElementById('supp-detail-grid');
+  grid.innerHTML=selected.map(s=>`
+    <div class="edit-field"><label>${s} — Dose</label><input type="text" id="sd-dose-${s.replace(/[^a-z0-9]/gi,'').toLowerCase()}" placeholder="e.g. 2 capsules"></div>
+    <div class="edit-field"><label>${s} — Timing</label><input type="text" id="sd-timing-${s.replace(/[^a-z0-9]/gi,'').toLowerCase()}" placeholder="e.g. with breakfast"></div>
+  `).join('');
+  document.getElementById('supp-detail-fields').style.display='block';
+  msg.style.color='var(--green)';msg.textContent='✓ Protocol saved — add dose & timing below';
+  setTimeout(()=>msg.textContent='',3000);
+}
+
+function editSuppProtocol(){
+  document.getElementById('supp-pills-wrap').style.display='grid';
+  document.getElementById('supp-pills-saved').style.display='none';
+  document.getElementById('supp-edit-btn').style.display='none';
+  document.getElementById('supp-detail-fields').style.display='none';
+  document.getElementById('supp-pills-msg').textContent='';
+}
+
+async function saveSuppDetails(){
+  if(!currentClient)return;
+  const msg=document.getElementById('dp-supp-msg');
+  msg.textContent='Saving...';msg.style.color='var(--gold)';
+  const selected=getSelectedSupps();
+  // Delete existing supplements for this client and re-insert
+  await sb.from('supplements').delete().eq('client_id',currentClient.id);
+  const rows=selected.map(s=>{
+    const key=s.replace(/[^a-z0-9]/gi,'').toLowerCase();
+    return{
+      client_id:currentClient.id,
+      name:s,
+      dose:document.getElementById(`sd-dose-${key}`)?.value||'',
+      timing:document.getElementById(`sd-timing-${key}`)?.value||'',
+      active:true,
+    };
+  });
+  if(rows.length){
+    const{error}=await sb.from('supplements').insert(rows);
+    if(error){msg.style.color='var(--red)';msg.textContent='Error: '+error.message;return;}
+  }
+  msg.style.color='var(--green)';msg.textContent='✓ Supplement protocol saved.';
+  setTimeout(()=>msg.textContent='',3000);
+  await loadAll();
+}
+
+function loadSuppProtocol(supps){
+  // Reset all pills
+  SUPP_LIST.forEach((_,i)=>{
+    const cb=document.getElementById(`supp-${i}`);
+    const lbl=document.getElementById(`supp-lbl-${i}`);
+    if(cb){cb.checked=false;}
+    if(lbl) lbl.classList.remove('selected');
+  });
+  if(!supps||!supps.length) return;
+  // Check pills for saved supplements
+  supps.forEach(s=>{
+    const i=SUPP_LIST.findIndex(n=>n.toLowerCase()===s.name.toLowerCase());
+    if(i>=0){
+      const cb=document.getElementById(`supp-${i}`);
+      const lbl=document.getElementById(`supp-lbl-${i}`);
+      if(cb){cb.checked=true;}
+      if(lbl) lbl.classList.add('selected');
+    }
+  });
+  // Show saved state
+  saveSuppProtocol();
+  // Re-populate dose/timing
+  supps.forEach(s=>{
+    const key=s.name.replace(/[^a-z0-9]/gi,'').toLowerCase();
+    const doseEl=document.getElementById(`sd-dose-${key}`);
+    const timingEl=document.getElementById(`sd-timing-${key}`);
+    if(doseEl) doseEl.value=s.dose||'';
+    if(timingEl) timingEl.value=s.timing||'';
+  });
 }
 
 async function flashSave(btn){
