@@ -2327,7 +2327,9 @@ function renderWeeklyLog(){
     </div>
   `).join('');
   checkMonthlySummary();
-}(i){
+}
+
+function toggleWeekExpand(i){
   const body=document.getElementById(`wk-expand-${i}`);
   const chev=document.getElementById(`wk-chevron-${i}`);
   const open=body.style.display==='block';
