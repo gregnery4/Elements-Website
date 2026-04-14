@@ -1411,8 +1411,33 @@ function convertFoodsToPortions(foodsStr, targetProt, targetCarb, targetFat){
   const items = foodsStr.split(/[,;]+/).map(s => s.trim().toLowerCase()).filter(Boolean);
   const rows = [];
 
-  items.forEach(item => {
-    const match = FOOD_DB.find(f => f.k.some(k => item.includes(k) || k.includes(item)));
+  // ── PRE-PASS: handle egg cap and protein spillover ──
+  const MAX_EGGS = 4;
+  const EGG_PROTEIN_PER = 6.0; // g protein per egg
+
+  // Find egg item and other protein items
+  const matchedItems = items.map(item => ({
+    item,
+    match: FOOD_DB.find(f => f.k.some(k => item.includes(k) || k.includes(item)))
+  }));
+  const eggEntry   = matchedItems.find(e => e.match?.unit === 'egg');
+  const otherProts = matchedItems.filter(e => e !== eggEntry && e.match?.type === 'protein' && e.match?.unit !== 'egg');
+
+  // Calculate how much protein eggs will use (capped at 4)
+  let remainingProt = targetProt;
+  if(eggEntry && otherProts.length > 0){
+    const eggCount  = Math.min(MAX_EGGS, Math.round(targetProt / EGG_PROTEIN_PER));
+    const eggProtUsed = eggCount * EGG_PROTEIN_PER;
+    remainingProt = Math.max(0, targetProt - eggProtUsed);
+    // Store on eggEntry so the loop can use it
+    eggEntry._cappedCount = eggCount;
+    eggEntry._eggProtUsed = eggProtUsed;
+  }
+
+  // Distribute remaining protein evenly across other protein sources
+  const remainingProtPerSource = otherProts.length > 0 ? remainingProt / otherProts.length : targetProt;
+
+  matchedItems.forEach(({ item, match, _cappedCount, _eggProtUsed }) => {
     if(!match){
       rows.push(`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--borderw)">
         <span style="font-size:12px;color:var(--white);flex:1;text-transform:capitalize">${item}</span>
@@ -1423,11 +1448,11 @@ function convertFoodsToPortions(foodsStr, targetProt, targetCarb, targetFat){
 
     let portionStr, actualP, actualC, actualF, color, displayUnit;
 
-    // ── EGGS — show as count ──
+    // ── EGGS — capped at 4, spillover handled above ──
     if(match.unit === 'egg'){
-      const count = Math.round(targetProt / match.p);
+      const count = _cappedCount !== undefined ? _cappedCount : Math.min(MAX_EGGS, Math.round(targetProt / match.p));
       portionStr = `${count} egg${count !== 1 ? 's' : ''}`;
-      displayUnit = 'whole eggs';
+      displayUnit = `whole eggs${count === MAX_EGGS && otherProts.length > 0 ? ` (max — remaining protein → ${otherProts.map(o=>o.item).join(', ')})` : ''}`;
       actualP = Math.round(count * match.p);
       actualC = Math.round(count * match.c);
       actualF = Math.round(count * match.f);
@@ -1435,7 +1460,8 @@ function convertFoodsToPortions(foodsStr, targetProt, targetCarb, targetFat){
 
     // ── SCOOPS (protein powder) ──
     } else if(match.unit.includes('scoop')){
-      const scoops = targetProt / match.p;
+      const protTarget = otherProts.some(o=>o.item===item) ? remainingProtPerSource : targetProt;
+      const scoops = protTarget / match.p;
       portionStr = `${scoops.toFixed(1)} scoop${scoops !== 1 ? 's' : ''}`;
       displayUnit = match.unit;
       actualP = Math.round(scoops * match.p);
@@ -1443,10 +1469,11 @@ function convertFoodsToPortions(foodsStr, targetProt, targetCarb, targetFat){
       actualF = Math.round(scoops * match.f);
       color = 'var(--gold)';
 
-    // ── PROTEINS — always show in oz ──
+    // ── PROTEINS — always show in oz, use spillover amount if applicable ──
     } else if(match.type === 'protein'){
-      if(!targetProt || !match.p){ return; }
-      const oz = targetProt / match.p;
+      const protTarget = otherProts.some(o=>o.item===item) ? remainingProtPerSource : targetProt;
+      if(!protTarget || !match.p){ return; }
+      const oz = protTarget / match.p;
       portionStr = oz >= 16 ? `${(oz/16).toFixed(2)} lb` : `${oz.toFixed(1)} oz`;
       displayUnit = match.unit;
       actualP = Math.round(oz * match.p);
@@ -1457,7 +1484,6 @@ function convertFoodsToPortions(foodsStr, targetProt, targetCarb, targetFat){
     // ── CARBS — always show in grams ──
     } else if(match.type === 'carb'){
       if(!targetCarb || !match.c){ return; }
-      // match.c is grams of carb per oz — so grams needed = targetCarb / match.c * 28.35
       const grams = (targetCarb / match.c) * 28.35;
       portionStr = `${Math.round(grams)}g`;
       displayUnit = match.unit.replace('oz','g');
