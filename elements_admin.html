@@ -776,14 +776,6 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
               </div>
             </div>
             <div class="edit-field" style="margin-top:10px">
-              <label>Compliance</label>
-              <select id="wk-training-compliance">
-                <option value="full">✓ Full — All sessions completed</option>
-                <option value="partial">⚠ Partial — Missed 1 session</option>
-                <option value="missed">✗ Missed — 2+ sessions missed</option>
-              </select>
-            </div>
-            <div class="edit-field" style="margin-top:10px">
               <label>Training Notes</label>
               <input type="text" id="wk-training-notes" placeholder="e.g. Strong session Tuesday, felt fatigued Friday">
             </div>
@@ -845,7 +837,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
                 <input type="number" id="wk-meals" placeholder="4" min="0">
               </div>
               <div class="edit-field">
-                <label>Nutrition Adherence</label>
+                <label>Food Selection Adherence</label>
                 <select id="wk-nutrition-adherence">
                   <option value="full">✓ Full — On target all week</option>
                   <option value="good">✓ Good — On target 5–6 days</option>
@@ -2153,7 +2145,10 @@ const SECTION_SCORES={
 };
 
 function calcComplianceScore(){
-  const training=SECTION_SCORES.training_compliance[document.getElementById('wk-training-compliance')?.value]??null;
+  // Auto-calculate training compliance from sessions done vs scheduled
+  const done=parseInt(document.getElementById('wk-sessions-done')?.value)||0;
+  const target=parseInt(document.getElementById('wk-sessions-target')?.value)||0;
+  const training=target>0?Math.round((done/target)*100):null;
   // BW compliance: use auto-calculated % if override is 'auto', else use manual selection
   const bwOverride=document.getElementById('wk-bw-compliance')?.value;
   let bw;
@@ -2337,7 +2332,7 @@ function addWeeklyEntry(){
     wk,date,
     sessions_done:document.getElementById('wk-sessions-done').value,
     sessions_target:document.getElementById('wk-sessions-target').value,
-    training_compliance:document.getElementById('wk-training-compliance').value,
+    training_compliance:'auto',
     training_notes:document.getElementById('wk-training-notes').value,
     bw_days:getWkBWDays().join(', '),
     bw_compliance:document.getElementById('wk-bw-compliance').value,
