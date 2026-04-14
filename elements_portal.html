@@ -144,7 +144,7 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
 .supp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;}
 .supp-card{background:var(--c2);border:1px solid var(--border);padding:26px;transition:all .3s;}
 .supp-card:hover{border-color:rgba(201,168,108,.3);}
-.supp-card-icon{font-size:26px;margin-bottom:14px;}
+.supp-card-icon{width:36px;height:36px;background:var(--gold-dim);border:1px solid rgba(201,168,108,.25);display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:16px;}
 .supp-card-name{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;margin-bottom:4px;}
 .supp-card-brand{font-size:9px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
 .supp-card-dose{font-size:9px;color:var(--muted);letter-spacing:1px;padding:5px 12px;border:1px solid var(--border);display:inline-block;}
@@ -199,11 +199,13 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
     <nav class="sb-nav">
       <div class="sb-sec">Overview</div>
       <div class="sb-item on" onclick="showPage('dashboard',this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</div>
-      <div class="sb-sec">Training</div>
-      <div class="sb-item" onclick="showPage('sessions',this)"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Sessions</div>
-      <div class="sb-item" onclick="showPage('progress',this)"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Progress</div>
-      <div class="sb-sec">Health</div>
+      <div class="sb-sec">My Programme</div>
+      <div class="sb-item" onclick="showPage('nutrition',this)"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Nutrition Targets</div>
+      <div class="sb-item" onclick="showPage('mealplan',this)"><svg viewBox="0 0 24 24"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>Meal Plan</div>
       <div class="sb-item" onclick="showPage('supplements',this)"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg>Supplements</div>
+      <div class="sb-sec">My Progress</div>
+      <div class="sb-item" onclick="showPage('bodycomp',this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.38 8.38 0 0 1 13 0"/></svg>Body Composition</div>
+      <div class="sb-item" onclick="showPage('reviews',this)"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Weekly Reviews</div>
       <div class="sb-sec">Account</div>
       <div class="sb-item" onclick="showPage('settings',this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</div>
     </nav>
@@ -223,30 +225,34 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
         <div class="kcard"><div class="klbl">Body Weight</div><div class="kval" id="k-weight">—</div><div class="ksub">lbs</div></div>
         <div class="kcard"><div class="klbl">Body Fat</div><div class="kval" id="k-bf">—</div><div class="ksub">percent</div></div>
         <div class="kcard"><div class="klbl">Lean Mass</div><div class="kval" id="k-lean">—</div><div class="ksub">lbs</div></div>
-        <div class="kcard"><div class="klbl">Sleep Score</div><div class="kval" id="k-sleep">—</div><div class="ksub">avg %</div></div>
+        <div class="kcard"><div class="klbl">Daily Calories</div><div class="kval" id="k-cals">—</div><div class="ksub">target</div></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:3px;">
-        <div class="card"><div class="card-hd">Upcoming Sessions</div><div id="d-sessions"><div class="empty">No upcoming sessions yet.</div></div></div>
+        <div class="card"><div class="card-hd">Macro Targets</div><div id="d-macros"><div class="empty">No targets set yet.</div></div></div>
         <div class="card"><div class="card-hd">Active Supplements</div><div id="d-supps"><div class="empty">No protocol assigned yet.</div></div></div>
       </div>
-      <div class="card"><div class="card-hd">Recent Strength PRs</div><div id="d-prs"><div class="empty">No PRs recorded yet.</div></div></div>
+      <div class="card"><div class="card-hd">Latest Compliance Score</div><div id="d-compliance"><div class="empty">No reviews recorded yet.</div></div></div>
     </div>
 
-    <!-- SESSIONS -->
-    <div class="page" id="page-sessions">
-      <div class="pg-h"><h2>Your <span>Sessions</span></h2><p>All past and upcoming training sessions</p></div>
-      <div id="sess-list"><div class="empty">No sessions scheduled yet.</div></div>
-    </div>
-
-    <!-- PROGRESS -->
-    <div class="page" id="page-progress">
-      <div class="pg-h"><h2>Your <span>Progress</span></h2><p>Latest metrics and strength records</p></div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-bottom:3px;">
-        <div class="card"><div class="klbl">Body Weight</div><div class="kval" id="p-weight" style="font-size:44px;margin-top:8px;">—</div><div class="ksub">lbs</div></div>
-        <div class="card"><div class="klbl">Body Fat</div><div class="kval" id="p-bf" style="font-size:44px;margin-top:8px;">—</div><div class="ksub">percent</div></div>
-        <div class="card"><div class="klbl">Lean Mass</div><div class="kval" id="p-lean" style="font-size:44px;margin-top:8px;">—</div><div class="ksub">lbs</div></div>
+    <!-- NUTRITION TARGETS -->
+    <div class="page" id="page-nutrition">
+      <div class="pg-h"><h2>Your <span>Nutrition Targets</span></h2><p>Daily macro and calorie targets set by your coach</p></div>
+      <div class="krow">
+        <div class="kcard"><div class="klbl">Calories</div><div class="kval" id="nt-cals">—</div><div class="ksub">per day</div></div>
+        <div class="kcard"><div class="klbl">Protein</div><div class="kval" id="nt-prot">—</div><div class="ksub">grams</div></div>
+        <div class="kcard"><div class="klbl">Carbs</div><div class="kval" id="nt-carb">—</div><div class="ksub">grams</div></div>
+        <div class="kcard"><div class="klbl">Fats</div><div class="kval" id="nt-fat">—</div><div class="ksub">grams</div></div>
       </div>
-      <div class="card"><div class="card-hd">All-Time Strength PRs</div><div id="p-prs"><div class="empty">No PRs recorded yet.</div></div></div>
+      <div class="card" id="nt-notes-card" style="display:none">
+        <div class="card-hd">Coach Nutrition Notes</div>
+        <div id="nt-notes" style="font-size:13px;color:var(--muted);line-height:1.9"></div>
+      </div>
+    </div>
+
+    <!-- MEAL PLAN -->
+    <div class="page" id="page-mealplan">
+      <div class="pg-h"><h2>Your <span>Meal Plan</span></h2><p>Daily meal plan prescribed by your coach</p></div>
+      <div id="mp-content"><div class="empty">No meal plan assigned yet.</div></div>
     </div>
 
     <!-- SUPPLEMENTS -->
@@ -254,6 +260,27 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
       <div class="pg-h"><h2>Your <span>Supplements</span></h2><p>Protocol assigned by your coach</p></div>
       <div class="nd-banner"><div><h3>Shop Your Protocol</h3><p>Available through your personalized Nutridyn storefront. Free shipping over $75.</p></div><button class="nd-btn" onclick="window.open('https://nutridyn.com','_blank')">Shop Nutridyn →</button></div>
       <div class="supp-grid" id="supp-grid"><div class="empty" style="grid-column:1/-1">No supplement protocol assigned yet.</div></div>
+    </div>
+
+    <!-- BODY COMPOSITION -->
+    <div class="page" id="page-bodycomp">
+      <div class="pg-h"><h2>Body <span>Composition</span></h2><p>Your assessment history from coach records</p></div>
+      <div class="krow">
+        <div class="kcard"><div class="klbl">Total Mass</div><div class="kval" id="bc-mass">—</div><div class="ksub">lbs</div></div>
+        <div class="kcard"><div class="klbl">Body Fat</div><div class="kval" id="bc-bf">—</div><div class="ksub">percent</div></div>
+        <div class="kcard"><div class="klbl">Lean Mass</div><div class="kval" id="bc-lean">—</div><div class="ksub">lbs</div></div>
+        <div class="kcard"><div class="klbl">Fat Mass</div><div class="kval" id="bc-fat">—</div><div class="ksub">lbs</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px">
+        <div class="card"><div class="card-hd">Assessment History</div><div id="bc-history"><div class="empty">No assessments recorded yet.</div></div></div>
+        <div class="card"><div class="card-hd">Latest Metrics</div><div id="bc-latest"><div class="empty">No data yet.</div></div></div>
+      </div>
+    </div>
+
+    <!-- WEEKLY REVIEWS -->
+    <div class="page" id="page-reviews">
+      <div class="pg-h"><h2>Weekly <span>Reviews</span></h2><p>Your compliance scores and weekly check-ins</p></div>
+      <div id="reviews-content"><div class="empty">No weekly reviews yet.</div></div>
     </div>
 
     <!-- SETTINGS -->
@@ -349,60 +376,136 @@ async function loadApp(user){
   document.getElementById('s-occ').value=p?.occupation||'';
   document.getElementById('s-coach').textContent=p?.coach||'Gavin Regnery';
   document.getElementById('s-since').textContent=p?.start_date?new Date(p.start_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'—';
-  await Promise.all([loadMetrics(),loadSessions(),loadSupps(),loadPRs()]);
+  await Promise.all([loadMetrics(),loadNutrition(),loadMealPlan(),loadSupps(),loadBodyComp(),loadReviews()]);
   document.getElementById('app').classList.add('vis');
 }
 
 async function loadMetrics(){
   const{data}=await sb.from('client_metrics').select('*').eq('client_id',uid).order('recorded_at',{ascending:false}).limit(1);
   const m=data?.[0];if(!m)return;
-  ['k-weight','p-weight'].forEach(id=>document.getElementById(id).textContent=m.body_weight||'—');
-  ['k-bf','p-bf'].forEach(id=>document.getElementById(id).textContent=m.body_fat||'—');
-  ['k-lean','p-lean'].forEach(id=>document.getElementById(id).textContent=m.lean_mass||'—');
-  document.getElementById('k-sleep').textContent=m.sleep_score||'—';
+  document.getElementById('k-weight').textContent=m.body_weight||'—';
+  document.getElementById('k-bf').textContent=m.body_fat||'—';
+  document.getElementById('k-lean').textContent=m.lean_mass||'—';
 }
 
-async function loadSessions(){
-  const{data}=await sb.from('sessions').select('*').eq('client_id',uid).order('session_date',{ascending:false});
-  if(!data||!data.length)return;
-  const upcoming=data.filter(s=>s.status==='upcoming').slice(0,3);
-  if(upcoming.length){
-    document.getElementById('d-sessions').innerHTML=upcoming.map(s=>`
-      <div class="sess-item"><div class="sess-dot"></div>
-      <div style="flex:1"><div class="sess-date">${fmt(s.session_date)}</div><div class="sess-type">${s.session_type||'Training Session'}</div></div>
-      <div class="sess-time">${fmtT(s.session_date)}</div></div>`).join('');
+async function loadNutrition(){
+  const{data}=await sb.from('nutrition_targets').select('*').eq('client_id',uid).order('updated_at',{ascending:false}).limit(1);
+  const n=data?.[0];if(!n)return;
+  // Dashboard
+  document.getElementById('k-cals').textContent=n.calories||'—';
+  document.getElementById('d-macros').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;text-align:center">
+      <div style="padding:14px;background:var(--c3)"><div class="klbl">Protein</div><div class="kval" style="font-size:28px">${n.protein_g||'—'}g</div></div>
+      <div style="padding:14px;background:var(--c3)"><div class="klbl">Carbs</div><div class="kval" style="font-size:28px">${n.carbs_g||'—'}g</div></div>
+      <div style="padding:14px;background:var(--c3)"><div class="klbl">Fats</div><div class="kval" style="font-size:28px">${n.fat_g||'—'}g</div></div>
+    </div>`;
+  // Nutrition page
+  document.getElementById('nt-cals').textContent=n.calories||'—';
+  document.getElementById('nt-prot').textContent=n.protein_g?n.protein_g+'g':'—';
+  document.getElementById('nt-carb').textContent=n.carbs_g?n.carbs_g+'g':'—';
+  document.getElementById('nt-fat').textContent=n.fat_g?n.fat_g+'g':'—';
+  if(n.coach_notes){
+    document.getElementById('nt-notes-card').style.display='block';
+    document.getElementById('nt-notes').textContent=n.coach_notes;
   }
-  document.getElementById('sess-list').innerHTML=data.map(s=>`
-    <div class="sess-log-row">
-      <div style="font-size:10px;color:var(--muted)">${fmt(s.session_date)} · ${fmtT(s.session_date)}</div>
-      <div><div style="font-size:13px;font-weight:500">${s.session_type||'Training Session'}</div><div style="font-size:10px;color:var(--muted);margin-top:3px">with ${s.coach||'Coach'}</div></div>
-      <span class="stag ${s.status}">${s.status}</span>
-    </div>`).join('');
+}
+
+async function loadMealPlan(){
+  // Meal plan is stored in the meal_plans table (or nutrition_targets notes for now)
+  // Try to load from meal_plans table if it exists
+  const{data}=await sb.from('meal_plans').select('*').eq('client_id',uid).order('created_at',{ascending:false}).limit(1);
+  if(!data||!data.length){
+    document.getElementById('mp-content').innerHTML='<div class="empty">Your coach hasn\'t published a meal plan yet. Check back after your next session.</div>';
+    return;
+  }
+  const plan=data[0];
+  let html='';
+  try{
+    const meals=typeof plan.meals==='string'?JSON.parse(plan.meals):plan.meals;
+    html=meals.map((m,i)=>`
+      <div style="background:var(--c2);border:1px solid var(--border);padding:24px;margin-bottom:3px">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--borderw)">
+          <div>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px">Meal ${i+1}</span>
+            <span style="font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-left:12px">${m.type||'Whole Food'}</span>
+          </div>
+          <div style="font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase">Time: ${m.time||'—'}</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-bottom:${m.foods?'14px':'0'}">
+          <div style="padding:10px 14px;background:var(--c3);text-align:center">
+            <div class="klbl">Protein</div><div class="kval" style="font-size:26px">${m.protein||0}g</div>
+          </div>
+          <div style="padding:10px 14px;background:var(--c3);text-align:center">
+            <div class="klbl">Carbs</div><div class="kval" style="font-size:26px;background:linear-gradient(135deg,#3A6BA8,#5B8FD4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${m.carbs||0}g</div>
+          </div>
+          <div style="padding:10px 14px;background:var(--c3);text-align:center">
+            <div class="klbl">Fats</div><div class="kval" style="font-size:26px;background:linear-gradient(135deg,#8B3050,#CF6679);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${m.fats||0}g</div>
+          </div>
+        </div>
+        ${m.foods?`<div style="padding:10px 14px;background:var(--c3);font-size:11px;color:var(--muted)"><span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-right:10px">Food Preferences</span>${m.foods}</div>`:''}
+      </div>`).join('');
+  }catch(e){html='<div class="empty">Meal plan format error. Contact your coach.</div>';}
+  document.getElementById('mp-content').innerHTML=html;
 }
 
 async function loadSupps(){
   const{data}=await sb.from('supplements').select('*').eq('client_id',uid).eq('active',true);
   if(!data||!data.length)return;
-  const dashHTML=data.slice(0,4).map(s=>`
-    <div class="supp-item"><div class="supp-icon">${s.icon||'💊'}</div>
-    <div><div class="supp-nm">${s.name}</div><div class="supp-ds">${s.dose||''}</div></div></div>`).join('');
-  document.getElementById('d-supps').innerHTML=dashHTML;
+  document.getElementById('d-supps').innerHTML=data.slice(0,4).map(s=>`
+    <div class="supp-item">
+      <div class="supp-nm">💊 ${s.name}</div>
+      <div class="supp-ds">${s.dose||''}</div>
+    </div>`).join('');
   document.getElementById('supp-grid').innerHTML=data.map(s=>`
-    <div class="supp-card"><div class="supp-card-icon">${s.icon||'💊'}</div>
-    <div class="supp-card-name">${s.name}</div>
-    <div class="supp-card-brand">${s.brand||'Nutridyn'}</div>
-    <div class="supp-card-dose">${s.dose||''} · ${s.timing||''}</div></div>`).join('');
+    <div class="supp-card">
+      <div class="supp-card-icon">💊</div>
+      <div class="supp-card-name">${s.name}</div>
+      <div class="supp-card-brand">Nutridyn</div>
+      <div class="supp-card-dose">${[s.dose,s.timing].filter(Boolean).join(' · ')||'See coach for instructions'}</div>
+    </div>`).join('');
 }
 
-async function loadPRs(){
-  const{data}=await sb.from('strength_prs').select('*').eq('client_id',uid).order('recorded_at',{ascending:false});
+async function loadBodyComp(){
+  const{data}=await sb.from('client_metrics').select('*').eq('client_id',uid).order('recorded_at',{ascending:false});
   if(!data||!data.length)return;
-  const html=data.map(p=>`
-    <div class="pr-row"><div class="pr-lift">${p.lift}</div>
-    <div style="text-align:right"><div class="pr-wt">${p.weight_lb} lb</div>
-    <div class="pr-dt">${new Date(p.recorded_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div></div></div>`).join('');
-  document.getElementById('d-prs').innerHTML=html;
-  document.getElementById('p-prs').innerHTML=html;
+  const latest=data[0];
+  document.getElementById('bc-mass').textContent=latest.body_weight||'—';
+  document.getElementById('bc-bf').textContent=latest.body_fat||'—';
+  document.getElementById('bc-lean').textContent=latest.lean_mass||'—';
+  document.getElementById('bc-fat').textContent=latest.body_weight&&latest.lean_mass?Math.round((latest.body_weight-latest.lean_mass)*10)/10:'—';
+  // History
+  document.getElementById('bc-history').innerHTML=data.map(m=>`
+    <div style="display:flex;align-items:center;gap:16px;padding:10px 0;border-bottom:1px solid var(--borderw)">
+      <div style="font-size:10px;color:var(--muted);width:100px;flex-shrink:0">${new Date(m.recorded_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
+      <div style="flex:1;display:flex;gap:16px;flex-wrap:wrap">
+        ${m.body_weight?`<span style="font-size:11px"><span style="color:var(--muted)">Weight</span> ${m.body_weight}lbs</span>`:''}
+        ${m.body_fat?`<span style="font-size:11px"><span style="color:var(--muted)">BF</span> ${m.body_fat}%</span>`:''}
+        ${m.lean_mass?`<span style="font-size:11px"><span style="color:var(--muted)">Lean</span> ${m.lean_mass}lbs</span>`:''}
+      </div>
+    </div>`).join('');
+  // Latest detail
+  document.getElementById('bc-latest').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px">
+      ${[['Body Weight',latest.body_weight,'lbs'],['Body Fat %',latest.body_fat,'%'],['Lean Mass',latest.lean_mass,'lbs'],['Fat Mass',latest.body_weight&&latest.lean_mass?Math.round((latest.body_weight-latest.lean_mass)*10)/10:null,'lbs']].map(([lbl,val,unit])=>`
+        <div style="padding:14px;background:var(--c3)">
+          <div class="klbl">${lbl}</div>
+          <div class="kval" style="font-size:28px">${val||'—'}${val?'<span style="font-size:12px;color:var(--muted);font-family:Montserrat"> '+unit+'</span>':''}</div>
+        </div>`).join('')}
+    </div>
+    <div style="font-size:10px;color:var(--muted);margin-top:12px;letter-spacing:1px">Last updated: ${new Date(latest.recorded_at).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})}</div>`;
+}
+
+async function loadReviews(){
+  // Weekly reviews are stored client-side in admin for now
+  // Show a placeholder that explains this
+  document.getElementById('reviews-content').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:3px" id="rev-scores"></div>
+    <div class="card" id="rev-empty" style="display:none"><div class="empty">No weekly reviews yet. Your coach will add them after each week's check-in.</div></div>`;
+  // Try loading from a weekly_reviews table if it exists in future
+  document.getElementById('rev-empty').style.display='block';
+  // Dashboard compliance placeholder
+  document.getElementById('d-compliance').innerHTML=`
+    <div style="font-size:12px;color:var(--muted);padding:16px 0;text-align:center">Your weekly compliance scores will appear here after your first data review with your coach.</div>`;
 }
 
 async function saveProfile(){
@@ -428,7 +531,7 @@ async function changePass(){
 function fmt(d){return new Date(d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
 function fmtT(d){return new Date(d).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});}
 
-const pgTitles={dashboard:'Dashboard',sessions:'Sessions',progress:'Progress',supplements:'Supplements',settings:'Settings'};
+const pgTitles={dashboard:'Dashboard',nutrition:'Nutrition Targets',mealplan:'Meal Plan',supplements:'Supplements',bodycomp:'Body Composition',reviews:'Weekly Reviews',settings:'Settings'};
 function showPage(name,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('on'));
