@@ -792,20 +792,33 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           <!-- SECTION 2: Bodyweight Recording -->
           <div style="background:var(--c3);border:1px solid var(--border);padding:18px;margin-bottom:3px">
             <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:14px">2. Bodyweight Recording</div>
-            <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Check off each day bodyweight was recorded:</div>
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:12px" id="wk-bw-days-wrap">
-              <label class="day-pill" id="wk-bw-lbl-mon"><input type="checkbox" id="wk-bw-mon" onchange="updateWkBWDay('mon')"> Mon</label>
-              <label class="day-pill" id="wk-bw-lbl-tue"><input type="checkbox" id="wk-bw-tue" onchange="updateWkBWDay('tue')"> Tue</label>
-              <label class="day-pill" id="wk-bw-lbl-wed"><input type="checkbox" id="wk-bw-wed" onchange="updateWkBWDay('wed')"> Wed</label>
-              <label class="day-pill" id="wk-bw-lbl-thu"><input type="checkbox" id="wk-bw-thu" onchange="updateWkBWDay('thu')"> Thu</label>
-              <label class="day-pill" id="wk-bw-lbl-fri"><input type="checkbox" id="wk-bw-fri" onchange="updateWkBWDay('fri')"> Fri</label>
-              <label class="day-pill" id="wk-bw-lbl-sat"><input type="checkbox" id="wk-bw-sat" onchange="updateWkBWDay('sat')"> Sat</label>
-              <label class="day-pill" id="wk-bw-lbl-sun"><input type="checkbox" id="wk-bw-sun" onchange="updateWkBWDay('sun')"> Sun</label>
+
+            <!-- Scheduled days reference (from Summary tab) -->
+            <div id="wk-bw-scheduled-ref" style="margin-bottom:14px">
+              <div style="font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Scheduled Days (from Summary)</div>
+              <div id="wk-bw-scheduled-badges" style="display:flex;flex-wrap:wrap;gap:6px">
+                <span style="font-size:11px;color:var(--muted);font-style:italic">No days set in Summary tab yet.</span>
+              </div>
             </div>
+
+            <!-- Completed days — only shows scheduled days -->
+            <div id="wk-bw-completed-section">
+              <div style="font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Check off days actually completed:</div>
+              <div style="display:flex;flex-wrap:wrap;gap:2px;margin-bottom:12px" id="wk-bw-days-wrap"></div>
+            </div>
+
+            <!-- Auto-grade -->
+            <div id="wk-bw-grade" style="display:none;padding:10px 14px;margin-bottom:12px;background:var(--c2);border:1px solid var(--border)">
+              <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-right:10px">Compliance</span>
+              <span id="wk-bw-grade-val" style="font-family:'Bebas Neue',sans-serif;font-size:22px"></span>
+              <span id="wk-bw-grade-label" style="font-size:10px;color:var(--muted);margin-left:8px"></span>
+            </div>
+
             <div class="edit-grid">
               <div class="edit-field">
-                <label>All Scheduled Days Recorded?</label>
+                <label>Override Compliance (optional)</label>
                 <select id="wk-bw-compliance">
+                  <option value="auto">Auto — calculated from days above</option>
                   <option value="yes">✓ Yes — All days recorded</option>
                   <option value="partial">⚠ Partial — Missed some days</option>
                   <option value="no">✗ No — Not recorded</option>
@@ -1281,6 +1294,7 @@ function dpTab(name,el){
   if(el)el.classList.add('on');
   if(name==='t5')syncMealTotals();
   if(name==='t11')generateMealPlan();
+  if(name==='t6')loadBWScheduledDays();
 }
 
 function generateMealPlan(){
@@ -2140,7 +2154,16 @@ const SECTION_SCORES={
 
 function calcComplianceScore(){
   const training=SECTION_SCORES.training_compliance[document.getElementById('wk-training-compliance')?.value]??null;
-  const bw=SECTION_SCORES.bw_compliance[document.getElementById('wk-bw-compliance')?.value]??null;
+  // BW compliance: use auto-calculated % if override is 'auto', else use manual selection
+  const bwOverride=document.getElementById('wk-bw-compliance')?.value;
+  let bw;
+  if(bwOverride==='auto'||!bwOverride){
+    const scheduled=getBWDays();
+    const completed=getWkBWDays();
+    bw=scheduled.length>0?Math.round((completed.length/scheduled.length)*100):null;
+  } else {
+    bw=SECTION_SCORES.bw_compliance[bwOverride]??null;
+  }
   const meals=SECTION_SCORES.meals_compliance[document.getElementById('wk-meals-compliance')?.value]??null;
   const nutrition=SECTION_SCORES.nutrition_adherence[document.getElementById('wk-nutrition-adherence')?.value]??null;
 
@@ -2172,25 +2195,64 @@ function calcComplianceScore(){
   return total;
 }
 function updateWkBWDay(key){
-  const cb=document.getElementById('wk-bw-'+key);
-  const lbl=document.getElementById('wk-bw-lbl-'+key);
-  if(cb.checked) lbl.classList.add('selected');
-  else lbl.classList.remove('selected');
+  const cb=document.getElementById(`wk-bw-cb-${key}`);
+  const lbl=document.getElementById(`wk-bw-lbl-${key}`);
+  if(cb&&lbl){
+    if(cb.checked) lbl.classList.add('selected');
+    else lbl.classList.remove('selected');
+  }
+  calcBWCompliance();
 }
 
 function getWkBWDays(){
-  const days=['mon','tue','wed','thu','fri','sat','sun'];
-  const names={mon:'Mon',tue:'Tue',wed:'Wed',thu:'Thu',fri:'Fri',sat:'Sat',sun:'Sun'};
-  return days.filter(k=>document.getElementById('wk-bw-'+k)?.checked).map(k=>names[k]);
+  const wrap=document.getElementById('wk-bw-days-wrap');
+  if(!wrap) return [];
+  return Array.from(wrap.querySelectorAll('input[type=checkbox]'))
+    .filter(cb=>cb.checked).map(cb=>cb.value);
+}
+
+function loadBWScheduledDays(){
+  const scheduledDays=getBWDays();
+  const badgesEl=document.getElementById('wk-bw-scheduled-badges');
+  const wrap=document.getElementById('wk-bw-days-wrap');
+  if(!wrap) return;
+  if(!scheduledDays.length){
+    if(badgesEl) badgesEl.innerHTML='<span style="font-size:11px;color:var(--muted);font-style:italic">No days set in Summary tab yet.</span>';
+    wrap.innerHTML='<span style="font-size:11px;color:var(--muted);font-style:italic">Set bodyweight recording days in the Summary tab first.</span>';
+    return;
+  }
+  if(badgesEl) badgesEl.innerHTML=scheduledDays.map(d=>`<span class="day-saved-badge">${d}</span>`).join('');
+  wrap.innerHTML=scheduledDays.map(d=>{
+    const key=d.toLowerCase().slice(0,3);
+    return `<label class="day-pill" id="wk-bw-lbl-${key}" style="min-width:80px">
+      <input type="checkbox" id="wk-bw-cb-${key}" value="${d}" onchange="updateWkBWDay('${key}')"> ${d}
+    </label>`;
+  }).join('');
+}
+
+function calcBWCompliance(){
+  const scheduledDays=getBWDays();
+  const completedDays=getWkBWDays();
+  const gradeEl=document.getElementById('wk-bw-grade');
+  const gradeVal=document.getElementById('wk-bw-grade-val');
+  const gradeLabel=document.getElementById('wk-bw-grade-label');
+  if(!scheduledDays.length||!gradeEl) return;
+  gradeEl.style.display='block';
+  const pct=Math.round((completedDays.length/scheduledDays.length)*100);
+  gradeVal.textContent=pct+'%';
+  gradeVal.style.color=pct===100?'var(--green)':pct>=50?'var(--gold)':'var(--red)';
+  gradeLabel.textContent=`${completedDays.length} of ${scheduledDays.length} days completed`;
 }
 
 function resetWkBWDays(){
-  ['mon','tue','wed','thu','fri','sat','sun'].forEach(k=>{
-    const cb=document.getElementById('wk-bw-'+k);
-    const lbl=document.getElementById('wk-bw-lbl-'+k);
-    if(cb) cb.checked=false;
+  const wrap=document.getElementById('wk-bw-days-wrap');
+  if(wrap) wrap.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+    cb.checked=false;
+    const lbl=document.getElementById(`wk-bw-lbl-${cb.id.replace('wk-bw-cb-','')}`);
     if(lbl) lbl.classList.remove('selected');
   });
+  const gradeEl=document.getElementById('wk-bw-grade');
+  if(gradeEl) gradeEl.style.display='none';
 }
 
 // ── ASSESSMENT TOGGLE ──
