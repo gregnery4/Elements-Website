@@ -608,7 +608,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
         <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
           <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:8px">Client Program PDF</div>
           <div style="font-size:11px;color:var(--muted);margin-bottom:14px">Generates a branded PDF with the meal plan and supplement protocol. Click generate, then use your browser's print dialog (Cmd+P / Ctrl+P) to save as PDF.</div>
-          <button onclick="generateClientProgramPDF(this)" style="padding:12px 28px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;font-weight:600;transition:all .3s">Generate &amp; Print PDF →</button>
+          <button onclick="generateClientProgramPDF()" style="padding:12px 28px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;font-weight:600;transition:all .3s">Generate &amp; Print PDF →</button>
           <span id="pdf-gen-msg" style="font-size:10px;color:var(--green);margin-left:14px;min-height:16px"></span>
         </div>
       </div>
@@ -1082,10 +1082,12 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
 <div id="print-container" style="display:none"></div>
 
 <style>
+body.printing > *:not(#print-container) { display: none !important; }
+body.printing #print-container { display: block !important; }
 @media print {
   body > *:not(#print-container) { display: none !important; }
   #print-container { display: block !important; }
-  #print-container * { visibility: visible; }
+  #print-container * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   @page { margin: 0.5in; size: letter; }
 }
 </style>
@@ -2822,7 +2824,6 @@ function generateClientProgramPDF(){
 </body>
 </html>`;
 
-  // Inject into hidden print container and print
   const msg = document.getElementById('pdf-gen-msg');
   const container = document.getElementById('print-container');
   container.innerHTML = html
@@ -2833,12 +2834,18 @@ function generateClientProgramPDF(){
     .replace('<body>','')
     .replace('</body>','');
 
-  if(msg){ msg.textContent = '✓ Ready — opening print dialog...'; msg.style.color='var(--green)'; }
+  if(msg){ msg.textContent = '✓ Opening print dialog...'; msg.style.color='var(--green)'; }
+
+  document.body.classList.add('printing');
+  container.style.display='block';
 
   setTimeout(() => {
     window.print();
-    if(msg) setTimeout(()=>{ msg.textContent=''; container.innerHTML=''; },3000);
-  }, 300);
+    document.body.classList.remove('printing');
+    container.style.display='none';
+    container.innerHTML='';
+    if(msg) setTimeout(()=>msg.textContent='',2000);
+  }, 400);
 }
 
 // ── MONTHLY SUMMARY ──
