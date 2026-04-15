@@ -1078,17 +1078,26 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
   </div>
 </div>
 
-<!-- Print container — hidden normally, shown only when printing -->
-<div id="print-container" style="display:none"></div>
+<!-- PDF Preview Overlay -->
+<div id="pdf-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:#fff;overflow-y:auto;">
+  <div style="position:sticky;top:0;z-index:2;background:#1a1a1a;padding:14px 24px;display:flex;align-items:center;justify-content:space-between">
+    <span style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:#C9A86C">CLIENT PROGRAM — PRINT PREVIEW</span>
+    <div style="display:flex;gap:10px">
+      <button onclick="window.print()" style="padding:9px 22px;background:linear-gradient(135deg,#A8813A,#7D5C20);color:#fff;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:600">Print / Save PDF</button>
+      <button onclick="document.getElementById('pdf-overlay').style.display='none'" style="padding:9px 18px;background:#333;color:#aaa;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase">✕ Close</button>
+    </div>
+  </div>
+  <div id="pdf-content" style="max-width:900px;margin:0 auto;padding:40px;font-family:Arial,sans-serif;color:#111"></div>
+</div>
 
 <style>
-body.printing > *:not(#print-container) { display: none !important; }
-body.printing #print-container { display: block !important; }
 @media print {
-  body > *:not(#print-container) { display: none !important; }
-  #print-container { display: block !important; }
-  #print-container * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  @page { margin: 0.5in; size: letter; }
+  body > *:not(#pdf-overlay) { display: none !important; }
+  #pdf-overlay { position:static !important; overflow:visible !important; }
+  #pdf-overlay > div:first-child { display:none !important; }
+  #pdf-content { padding:0 !important; }
+  @page { margin:0.5in; size:letter; }
+  * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
 }
 </style>
 
@@ -2591,15 +2600,14 @@ function toggleWeekExpand(i){
 }
 
 function generateClientProgramPDF(){
-  // Debug check
   const msg = document.getElementById('pdf-gen-msg');
-  const setMsg = (t,c='var(--green)')=>{ if(msg){msg.textContent=t;msg.style.color=c;} };
-
+  const setMsg = (t,col='var(--green)')=>{ if(msg){msg.textContent=t;msg.style.color=col;} };
   if(!currentClient){ setMsg('Open a client first.','var(--red)'); return; }
+  setMsg('Building...');
+  setTimeout(()=>_buildAndOpenPDF(currentClient, setMsg), 50);
+}
 
-  setMsg('Building PDF...');
-
-  const c = currentClient;
+function _buildAndOpenPDF(c, setMsg){
   const clientName = c.full_name || c.email || 'Client';
   const coachName  = c.coach || 'Gavin Regnery';
 
@@ -2718,17 +2726,12 @@ function generateClientProgramPDF(){
   </div>
   </body></html>`;
 
-  // Open in new tab using data URI — works without popup permissions
-  const encoded = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
-  const a = document.createElement('a');
-  a.href = encoded;
-  a.target = '_blank';
-  a.rel = 'noopener';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setMsg('✓ Opened in new tab — use Cmd+P to save as PDF');
-  setTimeout(()=>setMsg(''),4000);
+  // Inject into overlay and show
+  document.getElementById('pdf-content').innerHTML = html;
+  document.getElementById('pdf-overlay').style.display = 'block';
+  document.getElementById('pdf-overlay').scrollTop = 0;
+  setMsg('✓ Preview ready — click Print / Save PDF');
+  setTimeout(()=>setMsg(''), 4000);
 }
 
 // ── MONTHLY SUMMARY ──
@@ -2919,11 +2922,9 @@ async function generateMonthlySummaryPDF(){
 </html>`;
 
   // Open in new window and trigger print-to-PDF
-  const container=document.getElementById('print-container');
-  container.innerHTML=html
-    .replace('<!DOCTYPE html>','').replace(/<html[^>]*>/,'').replace('</html>','')
-    .replace(/<head>[\s\S]*<\/head>/,'').replace('<body>','').replace('</body>','');
-  setTimeout(()=>{window.print();setTimeout(()=>container.innerHTML='',3000);},300);
+  document.getElementById('pdf-content').innerHTML=html;
+  document.getElementById('pdf-overlay').style.display='block';
+  document.getElementById('pdf-overlay').scrollTop=0;
 }
 
 async function saveClient(){
