@@ -1060,9 +1060,9 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
 
           <!-- Dose/timing fields — appear after save -->
           <div id="supp-detail-fields" style="display:none">
-            <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Dose & Timing</div>
+            <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Dose & Meals</div>
             <div id="supp-detail-grid" class="edit-grid"></div>
-            <button class="save-btn" style="margin-top:12px" onclick="saveSuppDetails()">Save Dose & Timing →</button>
+            <button class="save-btn" style="margin-top:12px" onclick="saveSuppDetails()">Save Dose & Meals →</button>
             <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-supp-msg"></div>
           </div>
         </div>
@@ -2894,15 +2894,61 @@ function saveSuppProtocol(){
   savedEl.style.display='flex';
   savedEl.innerHTML=selected.map(s=>`<span class="day-saved-badge">${s}</span>`).join('');
   document.getElementById('supp-edit-btn').style.display='inline-block';
-  // Build dose/timing fields
+
+  // Get meal count from Meal Design tab
+  const mealCount=parseInt(document.getElementById('dp-meal-count')?.value)||4;
+
+  // Build dose + meal checkboxes for each supplement
   const grid=document.getElementById('supp-detail-grid');
-  grid.innerHTML=selected.map(s=>`
-    <div class="edit-field"><label>${s} — Dose</label><input type="text" id="sd-dose-${s.replace(/[^a-z0-9]/gi,'').toLowerCase()}" placeholder="e.g. 2 capsules"></div>
-    <div class="edit-field"><label>${s} — Timing</label><input type="text" id="sd-timing-${s.replace(/[^a-z0-9]/gi,'').toLowerCase()}" placeholder="e.g. with breakfast"></div>
-  `).join('');
+  grid.innerHTML=selected.map(s=>{
+    const key=s.replace(/[^a-z0-9]/gi,'').toLowerCase();
+    const mealBoxes=Array.from({length:mealCount},(_,i)=>`
+      <label style="display:flex;align-items:center;gap:5px;padding:6px 10px;background:var(--c3);border:1px solid var(--borderw);cursor:pointer;font-size:10px;color:var(--muted);transition:all .2s;white-space:nowrap" id="sm-lbl-${key}-${i+1}">
+        <input type="checkbox" id="sm-${key}-${i+1}" onchange="updateSuppMealStyle('${key}',${i+1})" style="accent-color:var(--gold-mid)"> M${i+1}
+      </label>`).join('');
+    return `
+      <div style="grid-column:1/-1;background:var(--c2);border:1px solid var(--border);padding:14px;margin-bottom:2px">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">${s}</div>
+        <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+          <div class="edit-field" style="margin:0;flex:0 0 160px">
+            <label>Dose</label>
+            <input type="text" id="sd-dose-${key}" placeholder="e.g. 2 capsules">
+          </div>
+          <div>
+            <div style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px">With Meal</div>
+            <div style="display:flex;gap:2px;flex-wrap:wrap">${mealBoxes}</div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
   document.getElementById('supp-detail-fields').style.display='block';
-  msg.style.color='var(--green)';msg.textContent='✓ Protocol saved — add dose & timing below';
+  msg.style.color='var(--green)';msg.textContent='✓ Protocol saved — add dose & meals below';
   setTimeout(()=>msg.textContent='',3000);
+}
+
+function updateSuppMealStyle(key, mealNum){
+  const cb=document.getElementById(`sm-${key}-${mealNum}`);
+  const lbl=document.getElementById(`sm-lbl-${key}-${mealNum}`);
+  if(!cb||!lbl)return;
+  if(cb.checked){
+    lbl.style.borderColor='var(--gold-mid)';
+    lbl.style.color='var(--gold)';
+    lbl.style.background='var(--gold-dim)';
+  } else {
+    lbl.style.borderColor='var(--borderw)';
+    lbl.style.color='var(--muted)';
+    lbl.style.background='var(--c3)';
+  }
+}
+
+function getSuppMeals(key){
+  const mealCount=parseInt(document.getElementById('dp-meal-count')?.value)||4;
+  const checked=[];
+  for(let i=1;i<=mealCount;i++){
+    if(document.getElementById(`sm-${key}-${i}`)?.checked) checked.push(`M${i}`);
+  }
+  return checked.join(', ');
 }
 
 function editSuppProtocol(){
@@ -2918,7 +2964,6 @@ async function saveSuppDetails(){
   const msg=document.getElementById('dp-supp-msg');
   msg.textContent='Saving...';msg.style.color='var(--gold)';
   const selected=getSelectedSupps();
-  // Delete existing supplements for this client and re-insert
   await sb.from('supplements').delete().eq('client_id',currentClient.id);
   const rows=selected.map(s=>{
     const key=s.replace(/[^a-z0-9]/gi,'').toLowerCase();
@@ -2926,7 +2971,7 @@ async function saveSuppDetails(){
       client_id:currentClient.id,
       name:s,
       dose:document.getElementById(`sd-dose-${key}`)?.value||'',
-      timing:document.getElementById(`sd-timing-${key}`)?.value||'',
+      timing:getSuppMeals(key), // stores e.g. "M1, M3"
       active:true,
     };
   });
@@ -2940,7 +2985,6 @@ async function saveSuppDetails(){
 }
 
 function loadSuppProtocol(supps){
-  // Reset all pills
   SUPP_LIST.forEach((_,i)=>{
     const cb=document.getElementById(`supp-${i}`);
     const lbl=document.getElementById(`supp-lbl-${i}`);
@@ -2948,7 +2992,6 @@ function loadSuppProtocol(supps){
     if(lbl) lbl.classList.remove('selected');
   });
   if(!supps||!supps.length) return;
-  // Check pills for saved supplements
   supps.forEach(s=>{
     const i=SUPP_LIST.findIndex(n=>n.toLowerCase()===s.name.toLowerCase());
     if(i>=0){
@@ -2958,15 +3001,23 @@ function loadSuppProtocol(supps){
       if(lbl) lbl.classList.add('selected');
     }
   });
-  // Show saved state
   saveSuppProtocol();
-  // Re-populate dose/timing
+  // Re-populate dose and meal checkboxes
   supps.forEach(s=>{
     const key=s.name.replace(/[^a-z0-9]/gi,'').toLowerCase();
     const doseEl=document.getElementById(`sd-dose-${key}`);
-    const timingEl=document.getElementById(`sd-timing-${key}`);
     if(doseEl) doseEl.value=s.dose||'';
-    if(timingEl) timingEl.value=s.timing||'';
+    // Restore meal checkboxes from saved timing string e.g. "M1, M3"
+    if(s.timing){
+      const savedMeals=s.timing.split(',').map(m=>m.trim()); // ["M1","M3"]
+      savedMeals.forEach(m=>{
+        const mNum=parseInt(m.replace('M',''));
+        if(!isNaN(mNum)){
+          const cb=document.getElementById(`sm-${key}-${mNum}`);
+          if(cb){cb.checked=true;updateSuppMealStyle(key,mNum);}
+        }
+      });
+    }
   });
 }
 
