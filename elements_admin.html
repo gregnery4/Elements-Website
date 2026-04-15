@@ -604,7 +604,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             </div>
           </div>
         </div>
-        <button class="save-btn" onclick="flashSave(this)">Save Overview →</button>
+        <button class="save-btn" onclick="saveOverview(this)">Save Overview →</button>
       </div>
 
       <!-- TAB 3: GOAL SETTING CALCULATOR -->
@@ -711,7 +711,8 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           </div>
           <div id="meal-fields"></div>
         </div>
-        <button class="save-btn" onclick="flashSave(this)">Save Meal Plan →</button>
+        <button class="save-btn" onclick="saveMealPlan(this)">Save Meal Plan →</button>
+        <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="mp-save-msg"></div>
       </div>
 
       <!-- TAB 11: MEAL PLAN PREVIEW -->
@@ -1155,12 +1156,14 @@ async function loadAll(){
   const{data,error}=await sb.from('profiles').select(`
     id,full_name,email,coach,start_date,occupation,phone,age,
     client_metrics(body_weight,body_fat,lean_mass,recorded_at),
-    supplements(id,name,brand,dose,timing,icon,active),
-    nutrition_targets(calories,protein_g,carbs_g,fat_g,water_l,meal_timing,coach_notes)
+    supplements(id,name,brand,dose,timing,active),
+    nutrition_targets(calories,protein_g,carbs_g,fat_g,protein_pct,carb_pct,fat_pct,ref_weight,maintenance_multiplier,coach_notes),
+    client_overview(goal,protocol_start,protocol_end,phase_duration_weeks,training_frequency,training_method,training_focus,nutrition_approach,tracking_responsibility,bw_recording_days,circumference_frequency,skinfold_frequency,dexa_frequency),
+    meal_plans(meals,meal_count,updated_at),
+    weekly_reviews(id,week_number,week_start_date,sessions_done,sessions_target,training_notes,bw_days_completed,bw_compliance,meals_compliance,meals_logged,nutrition_adherence,nutrition_notes,assessment_type,assessment_date,assessment_data,compliance_score,created_at)
   `).eq('role','client').order('created_at',{ascending:false});
 
   if(error) console.error('loadAll error:',error.message);
-
   allClients=data||[];
   renderOverview();
   renderClientTable();
@@ -1269,8 +1272,67 @@ function openClient(id){
   // Tab 8 — Supplements
   loadSuppProtocol(c.supplements||[]);
 
-  // Weekly data
+  // Weekly data — load from Supabase into local state
+  const savedReviews=c.weekly_reviews||[];
+  if(savedReviews.length){
+    weeklyData[c.id]=savedReviews.map(r=>({
+      wk:String(r.week_number),
+      date:r.week_start_date,
+      sessions_done:r.sessions_done,
+      sessions_target:r.sessions_target,
+      training_notes:r.training_notes,
+      bw_days:r.bw_days_completed,
+      bw_compliance:r.bw_compliance,
+      meals_compliance:r.meals_compliance,
+      meals_logged:r.meals_logged,
+      nutrition_adherence:r.nutrition_adherence,
+      nut_notes:r.nutrition_notes,
+      assessment_type:r.assessment_type||'no',
+      assessment:r.assessment_data?JSON.parse(r.assessment_data):{},
+      score:r.compliance_score,
+    })).sort((a,b)=>parseInt(b.wk)-parseInt(a.wk));
+  }
   renderWeeklyLog();
+
+  // Overview — load saved values into form
+  const ov=c.client_overview?.[0]||c.client_overview||null;
+  if(ov){
+    if(ov.goal) document.getElementById('ov-goal-1').value=ov.goal;
+    if(ov.protocol_start) document.getElementById('ov-start-1').value=ov.protocol_start;
+    if(ov.protocol_end) document.getElementById('ov-end-1').value=ov.protocol_end;
+    if(ov.phase_duration_weeks) document.getElementById('ov-dur-1').value=ov.phase_duration_weeks;
+    if(ov.training_frequency) document.getElementById('ov-freq').value=ov.training_frequency;
+    if(ov.training_method) document.getElementById('ov-method').value=ov.training_method;
+    if(ov.training_focus) document.getElementById('ov-priority').value=ov.training_focus;
+    if(ov.nutrition_approach) document.getElementById('ov-nut-approach').value=ov.nutrition_approach;
+    if(ov.tracking_responsibility) document.getElementById('ov-tracking').value=ov.tracking_responsibility;
+    if(ov.bw_recording_days) setBWDays(ov.bw_recording_days);
+    if(ov.circumference_frequency) document.getElementById('ov-circ-freq').value=ov.circumference_frequency;
+    if(ov.skinfold_frequency) document.getElementById('ov-skin-freq').value=ov.skinfold_frequency;
+    if(ov.dexa_frequency) document.getElementById('ov-dexa-freq').value=ov.dexa_frequency;
+  }
+
+  // Meal Plan — load into meal design fields
+  const mp=c.meal_plans?.[0]||c.meal_plans||null;
+  if(mp?.meals){
+    try{
+      const meals=typeof mp.meals==='string'?JSON.parse(mp.meals):mp.meals;
+      if(document.getElementById('dp-meal-count')) document.getElementById('dp-meal-count').value=mp.meal_count||meals.length;
+      renderMealFields();
+      setTimeout(()=>{
+        meals.forEach((m,idx)=>{
+          const i=idx+1;
+          if(document.getElementById(`m${i}-prot`)) document.getElementById(`m${i}-prot`).value=m.protein||'';
+          if(document.getElementById(`m${i}-carb`)) document.getElementById(`m${i}-carb`).value=m.carbs||'';
+          if(document.getElementById(`m${i}-fat`)) document.getElementById(`m${i}-fat`).value=m.fats||'';
+          if(document.getElementById(`m${i}-time`)) document.getElementById(`m${i}-time`).value=m.time||'';
+          if(document.getElementById(`m${i}-type`)) document.getElementById(`m${i}-type`).value=m.type||'Whole Food';
+          if(document.getElementById(`m${i}-foods`)) document.getElementById(`m${i}-foods`).value=m.foods||'';
+        });
+        updateMealTotals();
+      },100);
+    }catch(e){console.warn('Meal plan parse error:',e);}
+  }
 
   document.getElementById('detail-overlay').classList.add('open');
   document.body.style.overflow='hidden';
@@ -2312,7 +2374,7 @@ function toggleWkAssessment(){
 // ── WEEKLY ENTRY ──
 const weeklyData={};
 
-function addWeeklyEntry(){
+async function addWeeklyEntry(){
   const msg=document.getElementById('wk-msg');
   const wk=document.getElementById('wk-num').value;
   const date=document.getElementById('wk-date').value;
@@ -2372,15 +2434,34 @@ function addWeeklyEntry(){
   };
 
   if(!weeklyData[currentClient?.id]) weeklyData[currentClient.id]=[];
-  // replace if same week number exists
   const idx=weeklyData[currentClient.id].findIndex(e=>e.wk===wk);
   if(idx>-1) weeklyData[currentClient.id][idx]=entry;
   else weeklyData[currentClient.id].push(entry);
   weeklyData[currentClient.id].sort((a,b)=>parseInt(b.wk)-parseInt(a.wk));
 
+  // Persist to Supabase
+  const{error:wkErr}=await sb.from('weekly_reviews').upsert({
+    client_id:currentClient.id,
+    week_number:parseInt(wk),
+    week_start_date:date||null,
+    sessions_done:parseInt(entry.sessions_done)||null,
+    sessions_target:parseInt(entry.sessions_target)||null,
+    training_notes:entry.training_notes||null,
+    bw_days_completed:entry.bw_days||null,
+    bw_compliance:entry.bw_compliance||null,
+    meals_compliance:entry.meals_compliance||null,
+    meals_logged:parseInt(entry.meals_logged)||null,
+    nutrition_adherence:entry.nutrition_adherence||null,
+    nutrition_notes:entry.nut_notes||null,
+    assessment_type:entry.assessment_type||'no',
+    assessment_date:entry.assessment?.date||null,
+    assessment_data:entry.assessment?JSON.stringify(entry.assessment):null,
+    compliance_score:entry.score||null,
+  },{onConflict:'client_id,week_number'});
+  if(wkErr) console.warn('Weekly review save error:',wkErr.message);
+
   renderWeeklyLog();
 
-  // reset form
   ['wk-num','wk-date','wk-meals','wk-training-notes','wk-nut-notes','wk-assessment-date','wk-sessions-done','wk-sessions-target'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('wk-assessment-details').style.display='none';
   document.getElementById('wk-assessment-taken').value='no';
@@ -2874,6 +2955,61 @@ async function flashSave(btn){
   const orig=btn.textContent;
   btn.textContent='✓ Saved!';btn.style.background='linear-gradient(135deg,#2A5040,#1A3A28)';
   setTimeout(()=>{btn.textContent=orig;btn.style.background='';},2000);
+}
+
+async function saveOverview(){
+  if(!currentClient)return;
+  const btn=event.target;
+  btn.textContent='Saving...';btn.disabled=true;
+  const{error}=await sb.from('client_overview').upsert({
+    client_id:currentClient.id,
+    goal:document.getElementById('ov-goal-1')?.value||null,
+    protocol_start:document.getElementById('ov-start-1')?.value||null,
+    protocol_end:document.getElementById('ov-end-1')?.value||null,
+    phase_duration_weeks:parseInt(document.getElementById('ov-dur-1')?.value)||null,
+    training_frequency:document.getElementById('ov-freq')?.value||null,
+    training_method:document.getElementById('ov-method')?.value||null,
+    training_focus:document.getElementById('ov-priority')?.value||null,
+    nutrition_approach:document.getElementById('ov-nut-approach')?.value||null,
+    tracking_responsibility:document.getElementById('ov-tracking')?.value||null,
+    bw_recording_days:getBWDays()||null,
+    circumference_frequency:document.getElementById('ov-circ-freq')?.value||null,
+    skinfold_frequency:document.getElementById('ov-skin-freq')?.value||null,
+    dexa_frequency:document.getElementById('ov-dexa-freq')?.value||null,
+    updated_at:new Date().toISOString(),
+  },{onConflict:'client_id'});
+  btn.disabled=false;
+  if(error){btn.textContent='Error — try again';btn.style.background='var(--red)';console.error(error);}
+  else{btn.textContent='✓ Saved!';btn.style.background='linear-gradient(135deg,#2A5040,#1A3A28)';}
+  setTimeout(()=>{btn.textContent='Save Overview →';btn.style.background='';},2500);
+}
+
+async function saveMealPlan(){
+  if(!currentClient)return;
+  const msg=document.getElementById('mp-save-msg');
+  msg.textContent='Saving...';msg.style.color='var(--gold)';
+  const count=parseInt(document.getElementById('dp-meal-count')?.value)||4;
+  const meals=[];
+  for(let i=1;i<=count;i++){
+    meals.push({
+      meal:i,
+      time:document.getElementById(`m${i}-time`)?.value||'',
+      type:document.getElementById(`m${i}-type`)?.value||'Whole Food',
+      protein:parseInt(document.getElementById(`m${i}-prot`)?.value)||0,
+      carbs:parseInt(document.getElementById(`m${i}-carb`)?.value)||0,
+      fats:parseInt(document.getElementById(`m${i}-fat`)?.value)||0,
+      foods:document.getElementById(`m${i}-foods`)?.value||'',
+    });
+  }
+  const{error}=await sb.from('meal_plans').upsert({
+    client_id:currentClient.id,
+    meals:JSON.stringify(meals),
+    meal_count:count,
+    updated_at:new Date().toISOString(),
+  },{onConflict:'client_id'});
+  if(error){msg.style.color='var(--red)';msg.textContent='Error: '+error.message;return;}
+  msg.style.color='var(--green)';msg.textContent='✓ Meal plan saved — visible in client portal.';
+  setTimeout(()=>msg.textContent='',4000);
 }
 
 function sendMsg(){
