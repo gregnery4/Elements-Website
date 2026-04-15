@@ -241,7 +241,7 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
         <div class="kcard"><div class="klbl">Calories</div><div class="kval" id="nt-cals">—</div><div class="ksub">per day</div></div>
         <div class="kcard"><div class="klbl">Protein</div><div class="kval" id="nt-prot">—</div><div class="ksub">grams</div></div>
         <div class="kcard"><div class="klbl">Carbs</div><div class="kval" id="nt-carb">—</div><div class="ksub">grams</div></div>
-        <div class="kcard"><div class="klbl">Fats</div><div class="kval" id="nt-fat">—</div><div class="ksub">grams</div></div>
+        <div class="kcard"><div class="klbl">Additional Fats</div><div class="kval" id="nt-fat">—</div><div class="ksub">grams</div></div>
       </div>
       <div class="card" id="nt-notes-card" style="display:none">
         <div class="card-hd">Coach Nutrition Notes</div>
@@ -397,7 +397,7 @@ async function loadNutrition(){
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;text-align:center">
       <div style="padding:14px;background:var(--c3)"><div class="klbl">Protein</div><div class="kval" style="font-size:28px">${n.protein_g||'—'}g</div></div>
       <div style="padding:14px;background:var(--c3)"><div class="klbl">Carbs</div><div class="kval" style="font-size:28px">${n.carbs_g||'—'}g</div></div>
-      <div style="padding:14px;background:var(--c3)"><div class="klbl">Fats</div><div class="kval" style="font-size:28px">${n.fat_g||'—'}g</div></div>
+      <div style="padding:14px;background:var(--c3)"><div class="klbl">Additional Fats</div><div class="kval" style="font-size:28px">${n.fat_g||'—'}g</div></div>
     </div>`;
   // Nutrition page
   document.getElementById('nt-cals').textContent=n.calories||'—';
@@ -439,7 +439,7 @@ async function loadMealPlan(){
             <div class="klbl">Carbs</div><div class="kval" style="font-size:26px;background:linear-gradient(135deg,#3A6BA8,#5B8FD4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${m.carbs||0}g</div>
           </div>
           <div style="padding:10px 14px;background:var(--c3);text-align:center">
-            <div class="klbl">Fats</div><div class="kval" style="font-size:26px;background:linear-gradient(135deg,#8B3050,#CF6679);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${m.fats||0}g</div>
+            <div class="klbl">Add. Fats</div><div class="kval" style="font-size:26px;background:linear-gradient(135deg,#8B3050,#CF6679);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${m.fats||0}g</div>
           </div>
         </div>
         ${m.foods?`<div style="padding:10px 14px;background:var(--c3);font-size:11px;color:var(--muted)"><span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-right:10px">Food Preferences</span>${m.foods}</div>`:''}
