@@ -605,12 +605,11 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           </div>
         </div>
         <button class="save-btn" onclick="saveOverview(this)">Save Overview →</button>
-        <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-          <div>
-            <div style="font-size:10px;color:var(--muted);letter-spacing:1px">Generate a fully branded PDF with the client's complete meal plan and supplement protocol.</div>
-            <div style="font-size:9px;color:var(--muted);margin-top:4px;opacity:.7">Downloads as .html → open the file → Cmd+P / Ctrl+P → Save as PDF</div>
-          </div>
-          <button onclick="generateClientProgramPDF()" style="padding:12px 28px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;font-weight:600;white-space:nowrap;margin-left:20px;transition:all .3s" onmouseover="this.style.background='linear-gradient(135deg,var(--gold),var(--gold-mid))'" onmouseout="this.style.background='linear-gradient(135deg,var(--gold-mid),var(--gold-dark))'">Download Client Program PDF →</button>
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+          <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:8px">Client Program PDF</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:14px">Generates a branded PDF with the meal plan and supplement protocol. Click generate, then use your browser's print dialog (Cmd+P / Ctrl+P) to save as PDF.</div>
+          <button onclick="generateClientProgramPDF(this)" style="padding:12px 28px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;font-weight:600;transition:all .3s">Generate &amp; Print PDF →</button>
+          <span id="pdf-gen-msg" style="font-size:10px;color:var(--green);margin-left:14px;min-height:16px"></span>
         </div>
       </div>
 
@@ -1078,6 +1077,18 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
     </div>
   </div>
 </div>
+
+<!-- Print container — hidden normally, shown only when printing -->
+<div id="print-container" style="display:none"></div>
+
+<style>
+@media print {
+  body > *:not(#print-container) { display: none !important; }
+  #print-container { display: block !important; }
+  #print-container * { visibility: visible; }
+  @page { margin: 0.5in; size: letter; }
+}
+</style>
 
 <script>
 // ── SUPABASE ──
@@ -2811,16 +2822,23 @@ function generateClientProgramPDF(){
 </body>
 </html>`;
 
-  // Download as HTML file that opens print dialog when opened
-  const blob = new Blob([html], {type:'text/html'});
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = `${(currentClient.full_name||'Client').replace(/\s+/g,'-')}-Program.html`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  // Inject into hidden print container and print
+  const msg = document.getElementById('pdf-gen-msg');
+  const container = document.getElementById('print-container');
+  container.innerHTML = html
+    .replace('<!DOCTYPE html>','')
+    .replace(/<html[^>]*>/,'')
+    .replace('</html>','')
+    .replace(/<head>[\s\S]*<\/head>/,'')
+    .replace('<body>','')
+    .replace('</body>','');
+
+  if(msg){ msg.textContent = '✓ Ready — opening print dialog...'; msg.style.color='var(--green)'; }
+
+  setTimeout(() => {
+    window.print();
+    if(msg) setTimeout(()=>{ msg.textContent=''; container.innerHTML=''; },3000);
+  }, 300);
 }
 
 // ── MONTHLY SUMMARY ──
@@ -3011,15 +3029,11 @@ async function generateMonthlySummaryPDF(){
 </html>`;
 
   // Open in new window and trigger print-to-PDF
-  const blob=new Blob([html],{type:'text/html'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download=`${(currentClient?.full_name||'Client').replace(/\s+/g,'-')}-Monthly-Summary.html`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  const container=document.getElementById('print-container');
+  container.innerHTML=html
+    .replace('<!DOCTYPE html>','').replace(/<html[^>]*>/,'').replace('</html>','')
+    .replace(/<head>[\s\S]*<\/head>/,'').replace('<body>','').replace('</body>','');
+  setTimeout(()=>{window.print();setTimeout(()=>container.innerHTML='',3000);},300);
 }
 
 async function saveClient(){
