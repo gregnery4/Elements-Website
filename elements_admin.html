@@ -665,7 +665,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
               <div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Calories</div><div style="font-family:'Bebas Neue',sans-serif;font-size:28px;background:linear-gradient(135deg,#D4A853,#8B6020);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text" id="res-cals">—</div></div>
               <div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Protein</div><div style="font-family:'Bebas Neue',sans-serif;font-size:28px;background:linear-gradient(135deg,#D4A853,#8B6020);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text" id="res-prot">—</div><div style="font-size:9px;color:var(--muted)">grams</div></div>
               <div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Carbs</div><div style="font-family:'Bebas Neue',sans-serif;font-size:28px;background:linear-gradient(135deg,#D4A853,#8B6020);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text" id="res-carb">—</div><div style="font-size:9px;color:var(--muted)">grams</div></div>
-              <div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Fats</div><div style="font-family:'Bebas Neue',sans-serif;font-size:28px;background:linear-gradient(135deg,#D4A853,#8B6020);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text" id="res-fat">—</div><div style="font-size:9px;color:var(--muted)">grams</div></div>
+              <div><div style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Additional Fats</div><div style="font-family:'Bebas Neue',sans-serif;font-size:28px;background:linear-gradient(135deg,#D4A853,#8B6020);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text" id="res-fat">—</div><div style="font-size:9px;color:var(--muted)">grams</div></div>
             </div>
           </div>
         </div>
@@ -700,7 +700,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
               <div style="font-size:11px;margin-top:6px;font-weight:500" id="meal-rem-carb">— remaining</div>
             </div>
             <div id="meal-card-fat" style="background:var(--c3);border:1px solid var(--border);padding:14px;text-align:center;transition:border-color .3s">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Fats</div>
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Additional Fats</div>
               <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1" id="meal-tot-fat">—</div>
               <div style="font-size:9px;color:var(--muted);margin-top:4px">grams target</div>
               <div style="height:2px;background:var(--c4);margin-top:8px"><div id="meal-bar-fat" style="height:2px;background:linear-gradient(90deg,#8B3050,#CF6679);width:0%;transition:width .3s"></div></div>
@@ -1425,7 +1425,7 @@ function generateMealPlan(){
     <div style="text-align:center"><div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Total Calories</div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold)">${totCals}</div></div>
     <div style="text-align:center"><div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Total Protein</div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold)">${totProt}g</div></div>
     <div style="text-align:center"><div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Total Carbs</div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold)">${totCarb}g</div></div>
-    <div style="text-align:center"><div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Total Fats</div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold)">${totFat}g</div></div>
+    <div style="text-align:center"><div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Total Add. Fats</div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold)">${totFat}g</div></div>
   </div>`;
 
   document.getElementById('meal-plan-output').innerHTML=html||'<div style="font-size:12px;color:var(--muted);padding:20px 0;text-align:center">No meal data found. Fill in the Meal Design tab first.</div>';
@@ -1954,7 +1954,7 @@ function renderMealFields(){
       <div class="edit-grid">
         <div class="edit-field"><label>Protein (g)</label><input type="number" id="m${i}-prot" placeholder="0" step="1" oninput="updateMealTotals()"></div>
         <div class="edit-field"><label>Carbs (g)</label><input type="number" id="m${i}-carb" placeholder="0" step="1" oninput="updateMealTotals()"></div>
-        <div class="edit-field"><label>Fats (g)</label><input type="number" id="m${i}-fat" placeholder="0" step="1" oninput="updateMealTotals()"></div>
+        <div class="edit-field"><label>Additional Fats (g)</label><input type="number" id="m${i}-fat" placeholder="0" step="1" oninput="updateMealTotals()"></div>
         <div class="edit-field">
           <label>Time</label>
           <input type="text" id="m${i}-time" value="${times[i-1]||''}"
@@ -2814,7 +2814,7 @@ function _doBuildPDF(jsPDF, c, setMsg){
 
     // ── Daily Nutrition Targets ──
     secBar('Daily Nutrition Targets');
-    [['CALORIES',cals],['PROTEIN',resProt+'g'],['CARBS',resCarb+'g'],['FATS',resFat+'g']].forEach(([l,v],i)=>{
+    [['CALORIES',cals],['PROTEIN',resProt+'g'],['CARBS',resCarb+'g'],['ADD. FATS',resFat+'g']].forEach(([l,v],i)=>{
       const x=M+i*(col/4);
       doc.setFillColor(...BLK);doc.rect(x,y,col/4-1,16,'F');
       doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...GOLD);doc.text(l,x+col/8,y+4.5,{align:'center'});
@@ -2874,7 +2874,7 @@ function _doBuildPDF(jsPDF, c, setMsg){
 
       // Macro row
       const b3=col/3;
-      const macroLabels=[['PROTEIN',mp+'g',GOLD],['CARBS',mc+'g',[70,120,195]],['FATS',mf+'g',[160,60,90]]];
+      const macroLabels=[['PROTEIN',mp+'g',GOLD],['CARBS',mc+'g',[70,120,195]],['ADD. FATS',mf+'g',[160,60,90]]];
       macroLabels.forEach(([l,v,clr],idx)=>{
         const x=M+idx*b3;
         const isLast=idx===2;
