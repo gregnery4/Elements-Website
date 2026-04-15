@@ -2273,7 +2273,7 @@ function calcComplianceScore(){
   const bwOverride=document.getElementById('wk-bw-compliance')?.value;
   let bw;
   if(bwOverride==='auto'||!bwOverride){
-    const scheduled=getBWDays();
+    const scheduled=getBWDays().split(',').map(s=>s.trim()).filter(Boolean);
     const completed=getWkBWDays();
     bw=scheduled.length>0?Math.round((completed.length/scheduled.length)*100):null;
   } else {
@@ -2327,7 +2327,8 @@ function getWkBWDays(){
 }
 
 function loadBWScheduledDays(){
-  const scheduledDays=getBWDays();
+  const raw=getBWDays();
+  const scheduledDays=raw?raw.split(',').map(s=>s.trim()).filter(Boolean):[];
   const badgesEl=document.getElementById('wk-bw-scheduled-badges');
   const wrap=document.getElementById('wk-bw-days-wrap');
   if(!wrap) return;
@@ -2346,7 +2347,8 @@ function loadBWScheduledDays(){
 }
 
 function calcBWCompliance(){
-  const scheduledDays=getBWDays();
+  const raw=getBWDays();
+  const scheduledDays=raw?raw.split(',').map(s=>s.trim()).filter(Boolean):[];
   const completedDays=getWkBWDays();
   const gradeEl=document.getElementById('wk-bw-grade');
   const gradeVal=document.getElementById('wk-bw-grade-val');
@@ -2653,7 +2655,7 @@ function _doBuildPDF(jsPDF, c, setMsg){
       const foc=document.getElementById('ov-priority')?.value||'—';
       const nutA=document.getElementById('ov-nut-approach')?.value||'—';
       const nutT=document.getElementById('ov-tracking')?.value||'—';
-      const bwD=getBWDays().join(', ')||'—';
+      const bwD=getBWDays()||'—';
       const cals=document.getElementById('dp-cals')?.value||'—';
       const prot=document.getElementById('res-prot')?.textContent||'—';
       const carb=document.getElementById('res-carb')?.textContent||'—';
