@@ -2576,7 +2576,7 @@ function toggleWeekExpand(i){
   if(chev) chev.textContent=open?'▼':'▲';
 }
 
-async function generateClientProgramPDF(){
+function generateClientProgramPDF(){
   if(!currentClient) return;
   const c = currentClient;
   const clientName = c.full_name || c.email || 'Client';
@@ -2810,10 +2810,12 @@ async function generateClientProgramPDF(){
 </body>
 </html>`;
 
-  const win = window.open('','_blank','width=900,height=750');
+  const win = window.open('','_blank');
+  if(!win){ alert('Please allow popups for this site to download the PDF.'); return; }
+  win.document.open();
   win.document.write(html);
   win.document.close();
-  win.onload = () => setTimeout(() => { win.focus(); win.print(); }, 600);
+  setTimeout(() => { win.focus(); win.print(); }, 800);
 }
 
 // ── MONTHLY SUMMARY ──
@@ -3004,15 +3006,12 @@ async function generateMonthlySummaryPDF(){
 </html>`;
 
   // Open in new window and trigger print-to-PDF
-  const win=window.open('','_blank','width=900,height=700');
+  const win=window.open('','_blank');
+  if(!win){ alert('Please allow popups for this site to download the PDF.'); return; }
+  win.document.open();
   win.document.write(html);
   win.document.close();
-  win.onload=()=>{
-    setTimeout(()=>{
-      win.focus();
-      win.print();
-    },500);
-  };
+  setTimeout(()=>{win.focus();win.print();},800);
 }
 
 async function saveClient(){
