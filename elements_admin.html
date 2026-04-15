@@ -1481,11 +1481,14 @@ function convertFoodsToPortions(foodsStr, targetProt, targetCarb, targetFat){
   const MAX_EGGS = 4;
   const EGG_PROTEIN_PER = 6.0; // g protein per egg
 
-  // Find egg item and other protein items
-  const matchedItems = items.map(item => ({
-    item,
-    match: FOOD_DB.find(f => f.k.some(k => item.includes(k) || k.includes(item)))
-  }));
+  // Parse items — strip optional quantity suffix e.g. "bell pepper-2" → {item:'bell pepper', forcedQty:2}
+  const matchedItems = items.map(raw => {
+    const qtyMatch = raw.match(/^(.*?)-(\d+(?:\.\d+)?)$/);
+    const item = qtyMatch ? qtyMatch[1].trim() : raw;
+    const forcedQty = qtyMatch ? parseFloat(qtyMatch[2]) : null;
+    const match = FOOD_DB.find(f => f.k.some(k => item.includes(k) || k.includes(item)));
+    return { item, raw, forcedQty, match };
+  });
   const eggEntry   = matchedItems.find(e => e.match?.unit === 'egg');
   const otherProts = matchedItems.filter(e => e !== eggEntry && e.match?.type === 'protein' && e.match?.unit !== 'egg');
 
@@ -1503,7 +1506,7 @@ function convertFoodsToPortions(foodsStr, targetProt, targetCarb, targetFat){
   // Distribute remaining protein evenly across other protein sources
   const remainingProtPerSource = otherProts.length > 0 ? remainingProt / otherProts.length : targetProt;
 
-  matchedItems.forEach(({ item, match, _cappedCount, _eggProtUsed }) => {
+  matchedItems.forEach(({ item, forcedQty, match, _cappedCount, _eggProtUsed }) => {
     if(!match){
       rows.push(`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--borderw)">
         <span style="font-size:12px;color:var(--white);flex:1;text-transform:capitalize">${item}</span>
@@ -1551,12 +1554,12 @@ function convertFoodsToPortions(foodsStr, targetProt, targetCarb, targetFat){
     } else if(match.type === 'carb'){
       if(!targetCarb || !match.c){ return; }
       if(match.unit === 'handful'){
-        // match.c is carbs per oz; gramsPerUnit is grams per handful
         const ozPerHandful = match.gramsPerUnit / 28.35;
         const carbsPerHandful = ozPerHandful * match.c;
-        const handfuls = Math.round(targetCarb / carbsPerHandful);
+        // Use forced qty if specified (e.g. "broccoli-2"), otherwise auto-calculate from target
+        const handfuls = forcedQty !== null ? forcedQty : Math.round(targetCarb / carbsPerHandful);
         portionStr = `${handfuls} handful${handfuls !== 1 ? 's' : ''}`;
-        displayUnit = 'handfuls';
+        displayUnit = forcedQty !== null ? 'handfuls (fixed)' : 'handfuls';
         actualP = Math.round(handfuls * ozPerHandful * match.p);
         actualC = Math.round(handfuls * carbsPerHandful);
         actualF = Math.round(handfuls * ozPerHandful * match.f);
