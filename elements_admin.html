@@ -1099,6 +1099,11 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
   @page { margin:0.5in; size:letter; }
   * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
 }
+#pdf-content h1{font-size:28px;letter-spacing:3px;text-transform:uppercase;font-family:Arial,sans-serif}
+#pdf-content h2{font-size:16px;letter-spacing:2px;text-transform:uppercase;margin:28px 0 12px;padding-bottom:6px;border-bottom:2px solid #111;font-family:Arial,sans-serif}
+#pdf-content table{width:100%;border-collapse:collapse}
+#pdf-content thead th{background:#111;color:#fff;padding:9px 12px;text-align:left;font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:400}
+#pdf-content *{font-family:Arial,sans-serif;box-sizing:border-box}
 </style>
 
 <script>
@@ -2660,21 +2665,7 @@ function _buildAndOpenPDF(c, setMsg){
     <td style="padding:9px 12px;border-bottom:1px solid #eee;color:#555">${s.timing||'—'}</td></tr>`).join('')
     : '<tr><td colspan="3" style="padding:16px;color:#888;font-style:italic">No supplements assigned.</td></tr>';
 
-  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-  <title>${clientName} — Elements Program</title>
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:Arial,sans-serif;color:#111;padding:32px;font-size:13px}
-    h1{font-size:28px;letter-spacing:3px;text-transform:uppercase}
-    h2{font-size:16px;letter-spacing:2px;text-transform:uppercase;margin:28px 0 12px;padding-bottom:6px;border-bottom:2px solid #111}
-    table{width:100%;border-collapse:collapse}
-    thead th{background:#111;color:#fff;padding:9px 12px;text-align:left;font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:400}
-    @media print{body{padding:0.3in} .no-print{display:none} @page{margin:0.4in;size:letter}}
-  </style></head><body>
-  <div class="no-print" style="background:#f5f5f5;padding:14px 20px;margin-bottom:24px;border:1px solid #ddd;border-radius:4px;display:flex;align-items:center;justify-content:space-between">
-    <span style="font-size:13px;color:#333">Press <strong>Cmd+P</strong> (Mac) or <strong>Ctrl+P</strong> (Windows) then choose <strong>Save as PDF</strong></span>
-    <button onclick="window.print()" style="padding:8px 20px;background:#111;color:#fff;border:none;cursor:pointer;font-size:12px;letter-spacing:1px">Print / Save PDF</button>
-  </div>
+  const html = `
   <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid #111">
     <div>
       <h1>E<span style="color:#c9a86c">LEMENTS</span></h1>
@@ -2723,10 +2714,8 @@ function _buildAndOpenPDF(c, setMsg){
   <div style="margin-top:40px;padding-top:12px;border-top:1px solid #ddd;display:flex;justify-content:space-between;font-size:10px;color:#aaa">
     <span>ELEMENTS Personal Training · Santa Monica, CA</span>
     <span>Confidential — Client Copy</span>
-  </div>
-  </body></html>`;
+  </div>`;
 
-  // Inject into overlay and show
   document.getElementById('pdf-content').innerHTML = html;
   document.getElementById('pdf-overlay').style.display = 'block';
   document.getElementById('pdf-overlay').scrollTop = 0;
