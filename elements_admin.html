@@ -2617,190 +2617,409 @@ function generateClientProgramPDF(){
 
 function _doBuildPDF(jsPDF, c, setMsg){
   try{
-      const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-      const W=doc.internal.pageSize.getWidth();
-      const margin=14; const col=W-margin*2;
-      let y=margin;
-      const c=currentClient;
-      const clientName=c.full_name||c.email||'Client';
-      const coachName=c.coach||'Gavin Regnery';
+    const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const W=doc.internal.pageSize.getWidth();
+    const M=14; const col=W-M*2;
+    let y=M;
 
-      // helper functions
-      const gold=[168,129,58]; const black=[26,26,26]; const white=[255,255,255];
-      const lgrey=[245,243,240]; const mgrey=[138,130,120]; const dkgrey=[80,80,80];
-      const newPage=()=>{doc.addPage();y=margin;};
-      const checkY=(h)=>{if(y+h>275)newPage();};
-      const hline=(yy,r=black)=>{doc.setDrawColor(...r);doc.setLineWidth(0.2);doc.line(margin,yy,W-margin,yy);};
+    // ── Colours ──
+    const GOLD=[168,129,58]; const BLK=[26,26,26]; const WHT=[255,255,255];
+    const LG=[245,243,240]; const MG=[138,130,120]; const DG=[80,80,80];
 
-      // ── HEADER ──
-      doc.setFillColor(...black);doc.rect(0,0,W,28,`F`);
-      doc.setFontSize(18);doc.setFont('helvetica','bold');
-      doc.setTextColor(...white);doc.text('ELEMENTS',margin,12);
-      doc.setFontSize(7);doc.setFont('helvetica','normal');
-      doc.setTextColor(...gold);doc.text('PERSONAL TRAINING · SANTA MONICA',margin,17);
-      doc.setFontSize(11);doc.setFont('helvetica','bold');
-      doc.setTextColor(...white);doc.text(clientName,W-margin,10,{align:'right'});
-      doc.setFontSize(7);doc.setFont('helvetica','normal');
-      doc.setTextColor(180,160,120);
-      doc.text(`Coach: ${coachName} · ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}`,W-margin,15,{align:'right'});
-      y=34;
+    // ── Helpers ──
+    const newPage=()=>{
+      // footer before new page
+      doc.setFillColor(...BLK);doc.rect(0,286,W,11,'F');
+      doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...MG);
+      doc.text('ELEMENTS Personal Training · Santa Monica, CA',M,291);
+      doc.text('Confidential — Client Copy',W-M,291,{align:'right'});
+      doc.addPage();y=M;
+    };
+    const checkY=(h)=>{if(y+h>282)newPage();};
 
-      // ── OVERVIEW ──
-      const goal=document.getElementById('ov-goal-1')?.value||'—';
-      const pDur=document.getElementById('ov-dur-1')?.value||'—';
-      const pStart=document.getElementById('ov-start-1')?.value||'—';
-      const pEnd=document.getElementById('ov-end-1')?.value||'—';
-      const freq=document.getElementById('ov-freq')?.value||'—';
-      const meth=document.getElementById('ov-method')?.value||'—';
-      const foc=document.getElementById('ov-priority')?.value||'—';
-      const nutA=document.getElementById('ov-nut-approach')?.value||'—';
-      const nutT=document.getElementById('ov-tracking')?.value||'—';
-      const bwD=getBWDays()||'—';
-      const cals=document.getElementById('dp-cals')?.value||'—';
-      const prot=document.getElementById('res-prot')?.textContent||'—';
-      const carb=document.getElementById('res-carb')?.textContent||'—';
-      const fat=document.getElementById('res-fat')?.textContent||'—';
+    const secBar=(title)=>{
+      checkY(10);
+      doc.setFillColor(...BLK);doc.rect(M,y,col,7,'F');
+      doc.setFillColor(...GOLD);doc.rect(M,y,2,7,'F');
+      doc.setFontSize(7.5);doc.setFont('helvetica','bold');
+      doc.setTextColor(...WHT);doc.text(title.toUpperCase(),M+5,y+5);
+      y+=10;
+    };
 
-      // Section title helper
-      const secTitle=(title)=>{
-        checkY(8);
-        doc.setFillColor(...gold);doc.rect(margin,y,col,0.6,'F');
-        y+=3;
-        doc.setFontSize(7);doc.setFont('helvetica','bold');
-        doc.setTextColor(...gold);doc.text(title.toUpperCase(),margin,y);
-        y+=5;
-      };
+    const kv=(label,val,x,w,bold=false)=>{
+      checkY(6);
+      doc.setFontSize(6.5);doc.setFont('helvetica','normal');doc.setTextColor(...MG);
+      doc.text(label,x,y);
+      doc.setFont('helvetica',bold?'bold':'normal');doc.setTextColor(...BLK);
+      const lines=doc.splitTextToSize(String(val||'—'),w-2);
+      doc.text(lines,x+w,y,{align:'right'});
+      y+=Math.max(5.5,lines.length*3.8);
+      doc.setDrawColor(220,215,210);doc.setLineWidth(0.1);doc.line(x,y-0.5,x+w,y-0.5);
+    };
 
-      // Key stats row
-      const stats=[['Goal',goal],['Phase',pDur+' wks'],['Start',pStart],['End',pEnd]];
-      const bw=col/4;
-      stats.forEach(([l,v],i)=>{
-        const x=margin+i*bw;
-        doc.setFillColor(...lgrey);doc.rect(x,y,bw-1,14,'F');
-        doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...mgrey);doc.text(l,x+bw/2,y+4,{align:'center'});
-        doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...black);doc.text(String(v),x+bw/2,y+10,{align:'center'});
-      });
-      y+=18;
+    // ── Gather all data ──
+    const clientName=c.full_name||c.email||'Client';
+    const coachName =c.coach||'Gavin Regnery';
+    const email     =document.getElementById('dp-email')?.value||c.email||'—';
+    const phone     =document.getElementById('dp-phone')?.value||'—';
+    const age       =document.getElementById('dp-age')?.value||'—';
+    const trainAge  =document.getElementById('dp-training-age')?.value||'—';
+    const sex       =document.getElementById('dp-sex')?.value||'—';
+    const trainDays =getTrainingDays()||'—';
+    const trainTime =document.getElementById('dp-training-time')?.value||'—';
 
-      // Two col info
-      const infoRow=(label,val,x,width)=>{
-        checkY(6);
-        doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...mgrey);doc.text(label,x,y);
-        doc.setFont('helvetica','bold');doc.setTextColor(...black);
-        const lines=doc.splitTextToSize(String(val),width-2);
-        doc.text(lines,x+width-2,y,{align:'right'});
-        y+=Math.max(5,lines.length*4);
-        doc.setDrawColor(220,215,210);doc.setLineWidth(0.1);doc.line(x,y-1,x+width,y-1);
-      };
+    // Measurements
+    const bw        =document.getElementById('dp-weight')?.value||document.getElementById('bc-total-mass')?.value||'—';
+    const bf        =document.getElementById('dp-bf')?.value||document.getElementById('bc-bf')?.value||'—';
+    const lbm       =document.getElementById('dp-lean')?.value||document.getElementById('bc-lean')?.value||'—';
+    const fatMass   =document.getElementById('dp-fat-mass')?.value||document.getElementById('bc-fat-mass')?.value||'—';
+    const bmc       =document.getElementById('bc-bmc')?.value||'—';
+    const viscFat   =document.getElementById('bc-visc-fat')?.value||'—';
+    const rmr       =document.getElementById('bc-rmr')?.value||'—';
 
-      secTitle('Training & Nutrition');
-      const hw=(col-4)/2;
-      const y0=y;
-      [['Frequency',freq],['Method',meth],['Focus',foc]].forEach(([l,v])=>infoRow(l,v,margin,hw));
-      const y1=y; y=y0;
-      [['Approach',nutA],['Tracking',nutT],['BW Days',bwD]].forEach(([l,v])=>infoRow(l,v,margin+hw+4,hw));
-      y=Math.max(y1,y)+4;
+    // Goal
+    const goal      =document.getElementById('ov-goal-1')?.value||'—';
+    const pDur      =document.getElementById('ov-dur-1')?.value||'—';
+    const pStart    =document.getElementById('ov-start-1')?.value||'—';
+    const pEnd      =document.getElementById('ov-end-1')?.value||'—';
+    const goalBF    =document.getElementById('dp-goal-bf')?.value||'—';
+    const goalWt    =document.getElementById('dp-goal-wt')?.value||'—';
+    const wtLose    =bw!=='—'&&goalWt!=='—'?(parseFloat(bw)-parseFloat(goalWt)).toFixed(1):'—';
+    const wkLoss    =wtLose!=='—'&&pDur!=='—'?(parseFloat(wtLose)/parseFloat(pDur)).toFixed(2):'—';
 
-      // Macro targets
-      secTitle('Daily Nutrition Targets');
-      const mw=col/4;
-      const macros=[['Calories',cals,'kcal'],['Protein',prot,''],['Carbs',carb,''],['Fats',fat,'']];
-      macros.forEach(([l,v,u],i)=>{
-        const x=margin+i*mw;
-        doc.setFillColor(...black);doc.rect(x,y,mw-1,16,'F');
-        doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...gold);doc.text(l,x+mw/2,y+4,{align:'center'});
-        doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(...white);doc.text(String(v),x+mw/2,y+11,{align:'center'});
-      });
-      y+=20;
+    // Nutrition
+    const cals      =document.getElementById('dp-cals')?.value||'—';
+    const resProt   =(document.getElementById('res-prot')?.textContent||'—').replace('g','').trim();
+    const resCarb   =(document.getElementById('res-carb')?.textContent||'—').replace('g','').trim();
+    const resFat    =(document.getElementById('res-fat')?.textContent||'—').replace('g','').trim();
 
-      // ── MEAL PLAN ──
-      doc.addPage(); y=margin;
-      doc.setFillColor(...black);doc.rect(0,0,W,14,'F');
-      doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(...white);doc.text('MEAL PLAN',margin,10);
-      doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(...gold);doc.text(`${clientName} · ${document.getElementById('dp-meal-count')?.value||4} meals/day`,W-margin,10,{align:'right'});
-      y=20;
+    // Training/nutrition params
+    const freq      =document.getElementById('ov-freq')?.value||'—';
+    const meth      =document.getElementById('ov-method')?.value||'—';
+    const foc       =document.getElementById('ov-priority')?.value||'—';
+    const nutA      =document.getElementById('ov-nut-approach')?.value||'—';
+    const nutT      =document.getElementById('ov-tracking')?.value||'—';
 
-      const mealCount=parseInt(document.getElementById('dp-meal-count')?.value)||4;
-      for(let i=1;i<=mealCount;i++){
-        const mp=parseInt(document.getElementById(`m${i}-prot`)?.value)||0;
-        const mc=parseInt(document.getElementById(`m${i}-carb`)?.value)||0;
-        const mf=parseInt(document.getElementById(`m${i}-fat`)?.value)||0;
-        const mt=document.getElementById(`m${i}-time`)?.value||'';
-        const mtype=document.getElementById(`m${i}-type`)?.value||'Whole Food';
-        const mfood=document.getElementById(`m${i}-foods`)?.value||'';
-        const mkcal=(mp*4)+(mc*4)+(mf*9);
-        checkY(30);
-        // Meal header
-        doc.setFillColor(...black);doc.rect(margin,y,col,8,'F');
-        doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(...white);doc.text(`MEAL ${i}  ·  ${mtype}`,margin+2,y+5.5);
-        doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(...gold);
-        doc.text(`${mt}${mkcal?' · '+mkcal+' cal':''}`,W-margin-2,y+5.5,{align:'right'});
-        y+=9;
-        // Macro boxes
-        const bw3=col/3;
-        [[mp+'g','Protein',gold],[mc+'g','Carbs',[58,107,180]],[mf+'g','Fats',[139,48,80]]].forEach(([v,l,clr],idx)=>{
-          const x=margin+idx*bw3;
-          doc.setFillColor(...lgrey);doc.rect(x,y,bw3-0.5,10,'F');
-          doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...mgrey);doc.text(l,x+bw3/2,y+3.5,{align:'center'});
-          doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...clr);doc.text(v,x+bw3/2,y+8.5,{align:'center'});
-        });
-        y+=11;
-        if(mfood){
-          doc.setFillColor(250,248,245);doc.rect(margin,y,col,7,'F');
-          doc.setFontSize(6);doc.setFont('helvetica','bold');doc.setTextColor(...gold);doc.text('FOOD PREFERENCES  ',margin+2,y+4.5);
-          doc.setFont('helvetica','normal');doc.setTextColor(...dkgrey);
-          const fl=doc.splitTextToSize(mfood,col-30);
-          doc.text(fl,margin+32,y+4.5);
-          y+=Math.max(8,fl.length*4+2);
+    // Meals & supps
+    const mealCount =parseInt(document.getElementById('dp-meal-count')?.value)||4;
+    const supps     =c.supplements||[];
+
+    // Build supplement-per-meal lookup  {1:[{name,dose}], 2:[...], ...}
+    const suppByMeal={};
+    supps.forEach(s=>{
+      if(!s.timing) return;
+      s.timing.split(',').map(m=>m.trim()).forEach(m=>{
+        const n=parseInt(m.replace(/M/i,''));
+        if(!isNaN(n)){
+          if(!suppByMeal[n]) suppByMeal[n]=[];
+          suppByMeal[n].push({name:s.name,dose:s.dose||''});
         }
-        y+=3;
+      });
+    });
+
+    // ════════════════════════════════════════
+    // PAGE 1 — CLIENT OVERVIEW
+    // ════════════════════════════════════════
+
+    // Header band
+    doc.setFillColor(...BLK);doc.rect(0,0,W,26,'F');
+    doc.setFillColor(...GOLD);doc.rect(0,26,W,1.5,'F');
+    doc.setFontSize(20);doc.setFont('helvetica','bold');
+    doc.setTextColor(...WHT);doc.text('ELEMENTS',M,14);
+    doc.setFontSize(7);doc.setFont('helvetica','normal');
+    doc.setTextColor(...GOLD);doc.text('PERSONAL TRAINING · SANTA MONICA',M,20);
+    doc.setFontSize(12);doc.setFont('helvetica','bold');
+    doc.setTextColor(...WHT);doc.text(clientName,W-M,13,{align:'right'});
+    doc.setFontSize(7);doc.setFont('helvetica','normal');
+    doc.setTextColor(180,160,120);
+    doc.text(`Coach: ${coachName} · ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}`,W-M,19,{align:'right'});
+    y=34;
+
+    // ── Client Information ──
+    secBar('Client Information');
+    const hw=(col-4)/2;
+    const y0=y;
+    [['Email',email],['Phone',phone],['Age',age+' yrs'],['Training Age',trainAge+' yrs'],['Sex',sex]].forEach(([l,v])=>kv(l,v,M,hw));
+    const y1=y; y=y0;
+    [['Training Days',trainDays],['Training Time',trainTime],['Coach',coachName]].forEach(([l,v])=>kv(l,v,M+hw+4,hw));
+    y=Math.max(y1,y)+4;
+
+    // ── Current Measurements ──
+    secBar('Current Body Composition');
+    const measCols=4;
+    const mw=col/measCols;
+    const measData=[
+      ['Body Weight',bw,'lbs'],['Body Fat',bf,'%'],
+      ['Lean Mass',lbm,'lbs'],['Fat Mass',fatMass,'lbs'],
+      ['BMC',bmc,'lbs'],['Visceral Fat',viscFat,'lbs'],['RMR',rmr,'kcal/day'],
+    ];
+    // First row big stats
+    measData.slice(0,4).forEach(([l,v,u],i)=>{
+      const x=M+i*mw;
+      doc.setFillColor(...LG);doc.rect(x,y,mw-1,16,'F');
+      doc.setFillColor(...GOLD);doc.rect(x,y,mw-1,1.5,'F');
+      doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text(l,x+mw/2,y+6,{align:'center'});
+      doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(...BLK);doc.text(String(v),x+mw/2,y+12,{align:'center'});
+      doc.setFontSize(5.5);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text(u,x+mw/2,y+15.5,{align:'center'});
+    });
+    y+=19;
+    // Second row smaller stats
+    const mw3=col/3;
+    measData.slice(4).forEach(([l,v,u],i)=>{
+      const x=M+i*mw3;
+      doc.setFillColor(238,235,230);doc.rect(x,y,mw3-1,10,'F');
+      doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text(l,x+mw3/2,y+4,{align:'center'});
+      doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(...BLK);doc.text(String(v)+' '+u,x+mw3/2,y+9,{align:'center'});
+    });
+    y+=14;
+
+    // ── Phase Goal Breakdown ──
+    secBar(`Phase Goal Breakdown — ${goal}`);
+    const gw=col/4;
+    [['Phase Duration',pDur+' wks'],['Start Date',pStart],['End Date',pEnd],['Goal BF%',goalBF+'%']].forEach(([l,v],i)=>{
+      const x=M+i*gw;
+      doc.setFillColor(...BLK);doc.rect(x,y,gw-1,16,'F');
+      doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...GOLD);doc.text(l,x+gw/2,y+5,{align:'center'});
+      doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...WHT);doc.text(String(v),x+gw/2,y+12,{align:'center'});
+    });
+    y+=19;
+    // Weight loss breakdown
+    if(wtLose!=='—'){
+      checkY(12);
+      const tw=col/3;
+      [['Current Weight',bw+' lbs'],['Goal Weight',goalWt+' lbs'],['Weight to Lose',wtLose+' lbs'],].forEach(([l,v],i)=>{
+        const x=M+i*tw;
+        doc.setFillColor(...LG);doc.rect(x,y,tw-1,10,'F');
+        doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text(l,x+tw/2,y+4,{align:'center'});
+        doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(...BLK);doc.text(String(v),x+tw/2,y+9,{align:'center'});
+      });
+      y+=13;
+      if(wkLoss!=='—'){
+        checkY(7);
+        doc.setFillColor(250,248,244);doc.rect(M,y,col,7,'F');
+        doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text('Target weekly deficit:',M+3,y+4.5);
+        doc.setFont('helvetica','bold');doc.setTextColor(...BLK);doc.text(wkLoss+' lbs / week',M+45,y+4.5);
+        doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text('  ·  '+pDur+' week phase  ·  '+goal,M+80,y+4.5);
+        y+=10;
       }
+    }
 
-      // ── SUPPLEMENTS ──
-      doc.addPage(); y=margin;
-      doc.setFillColor(...black);doc.rect(0,0,W,14,'F');
-      doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(...white);doc.text('SUPPLEMENT PROTOCOL',margin,10);
-      doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(...gold);doc.text(`${clientName} · Nutridyn`,W-margin,10,{align:'right'});
-      y=20;
+    // ── Daily Nutrition Targets ──
+    secBar('Daily Nutrition Targets');
+    [['CALORIES',cals,'kcal'],['PROTEIN',resProt+'g',''],['CARBS',resCarb+'g',''],['FATS',resFat+'g','']].forEach(([l,v],i)=>{
+      const x=M+i*(col/4);
+      doc.setFillColor(...BLK);doc.rect(x,y,col/4-1,16,'F');
+      doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...GOLD);doc.text(l,x+col/8,y+4.5,{align:'center'});
+      doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(...WHT);doc.text(String(v),x+col/8,y+12.5,{align:'center'});
+    });
+    y+=19;
 
-      const supps=c.supplements||[];
-      if(!supps.length){
-        doc.setFontSize(10);doc.setFont('helvetica','italic');doc.setTextColor(...mgrey);
-        doc.text('No supplements assigned.',margin,y);y+=10;
-      } else {
-        // Header row
-        doc.setFillColor(...black);doc.rect(margin,y,col,7,'F');
-        doc.setFontSize(6);doc.setFont('helvetica','bold');doc.setTextColor(...white);
-        doc.text('Supplement',margin+2,y+5);doc.text('Dose',margin+100,y+5);doc.text('With Meals',margin+140,y+5);
-        y+=8;
-        supps.forEach((s,idx)=>{
-          checkY(8);
-          if(idx%2===0){doc.setFillColor(...lgrey);}else{doc.setFillColor(...white);}
-          doc.rect(margin,y,col,7,'F');
-          doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...black);doc.text(s.name||'',margin+2,y+5);
-          doc.setFont('helvetica','normal');doc.setTextColor(...dkgrey);doc.text(s.dose||'—',margin+100,y+5);doc.text(s.timing||'—',margin+140,y+5);
-          y+=7;
+    // ── Training ──
+    secBar('Training Parameters');
+    const y2=y;
+    [['Frequency',freq],['Method',meth],['Focus',foc]].forEach(([l,v])=>kv(l,v,M,hw));
+    const y3=y; y=y2;
+    [['Nutrition Approach',nutA],['Tracking',nutT]].forEach(([l,v])=>kv(l,v,M+hw+4,hw));
+    y=Math.max(y3,y)+4;
+
+    // ════════════════════════════════════════
+    // PAGES 2+ — MEAL PLAN WITH SUPPLEMENTS
+    // ════════════════════════════════════════
+    newPage();
+
+    // Page header
+    doc.setFillColor(...BLK);doc.rect(0,0,W,14,'F');
+    doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(...WHT);doc.text('MEAL PLAN',M,10);
+    doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(...GOLD);
+    doc.text(`${clientName} · ${mealCount} meals per day`,W-M,10,{align:'right'});
+    y=20;
+
+    for(let i=1;i<=mealCount;i++){
+      const mp=parseInt(document.getElementById(`m${i}-prot`)?.value)||0;
+      const mc=parseInt(document.getElementById(`m${i}-carb`)?.value)||0;
+      const mf=parseInt(document.getElementById(`m${i}-fat`)?.value)||0;
+      const mt=document.getElementById(`m${i}-time`)?.value||'';
+      const mtype=document.getElementById(`m${i}-type`)?.value||'Whole Food';
+      const mfood=document.getElementById(`m${i}-foods`)?.value||'';
+      const mkcal=(mp*4)+(mc*4)+(mf*9);
+      const mealSupps=suppByMeal[i]||[];
+
+      // Estimate height needed
+      const foodLines=mfood?doc.splitTextToSize(mfood,col-4).length:0;
+      const suppLines=mealSupps.length;
+      const estH=10+12+(mfood?5+foodLines*3.5:0)+(suppLines>0?6+suppLines*5.5:0)+6;
+      checkY(estH);
+
+      // Meal header
+      doc.setFillColor(...BLK);doc.rect(M,y,col,9,'F');
+      doc.setFillColor(...GOLD);doc.rect(M,y,3,9,'F');
+      doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...WHT);
+      doc.text(`MEAL ${i}`,M+6,y+6.5);
+      doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(...GOLD);
+      doc.text(mtype,M+28,y+6.5);
+      doc.setFontSize(7);doc.setTextColor(200,185,150);
+      doc.text(`${mt}${mkcal?' · '+mkcal+' cal':''}`,W-M-2,y+6.5,{align:'right'});
+      y+=10;
+
+      // Macro boxes
+      const b3=col/3;
+      [[mp+'g','Protein',GOLD],[mc+'g','Carbs',[58,107,180]],[mf+'g','Fats',[139,48,80]]].forEach(([v,l,clr],idx)=>{
+        const x=M+idx*b3;
+        doc.setFillColor(...LG);doc.rect(x,y,b3-0.5,11,'F');
+        doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text(l,x+b3/2,y+4,{align:'center'});
+        doc.setFontSize(9.5);doc.setFont('helvetica','bold');doc.setTextColor(...clr);doc.text(v,x+b3/2,y+9.5,{align:'center'});
+      });
+      y+=12;
+
+      // Food portions
+      if(mfood){
+        // Parse foods and get portions
+        const portionData=_getFoodPortionsText(mfood,mp,mc,mf);
+        checkY(5+portionData.length*5);
+        doc.setFillColor(250,248,244);doc.rect(M,y,col,5+portionData.length*5,'F');
+        doc.setFontSize(6);doc.setFont('helvetica','bold');doc.setTextColor(...GOLD);
+        doc.text('FOODS & PORTIONS',M+2,y+3.8);
+        y+=6;
+        portionData.forEach(({name,portion,macros})=>{
+          doc.setFontSize(7.5);doc.setFont('helvetica','bold');doc.setTextColor(...BLK);
+          doc.text(name,M+4,y);
+          doc.setFont('helvetica','normal');doc.setTextColor(...GOLD);
+          doc.text(portion,M+75,y);
+          doc.setTextColor(...MG);doc.setFontSize(6.5);
+          doc.text(macros,M+105,y);
+          y+=5;
         });
+        y+=2;
       }
 
-      // Footer on all pages
-      const totalPages=doc.internal.getNumberOfPages();
-      for(let p=1;p<=totalPages;p++){
-        doc.setPage(p);
-        doc.setFillColor(...black);doc.rect(0,285,W,12,'F');
-        doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...mgrey);
-        doc.text('ELEMENTS Personal Training · Santa Monica, CA',margin,291);
-        doc.text(`Page ${p} of ${totalPages}`,W/2,291,{align:'center'});
-        doc.text('Confidential — Client Copy',W-margin,291,{align:'right'});
+      // Supplements for this meal
+      if(mealSupps.length){
+        checkY(5+mealSupps.length*5.5);
+        doc.setFillColor(26,26,26,0.05);
+        doc.setFillColor(235,232,228);doc.rect(M,y,col,5+mealSupps.length*5.5,'F');
+        doc.setFontSize(6);doc.setFont('helvetica','bold');doc.setTextColor(...GOLD);
+        doc.text('SUPPLEMENTS WITH THIS MEAL',M+2,y+3.8);
+        y+=6;
+        mealSupps.forEach(s=>{
+          doc.setFontSize(7.5);doc.setFont('helvetica','bold');doc.setTextColor(...BLK);
+          doc.text(s.name,M+4,y);
+          doc.setFont('helvetica','normal');doc.setTextColor(...DG);
+          doc.text(s.dose,M+100,y);
+          y+=5.5;
+        });
+        y+=2;
       }
+      y+=4;
+    }
 
-      doc.save(`${c.full_name?.replace(/\s+/g,'-')||'Client'}-Program.pdf`);
-      setMsg('✓ PDF downloaded!');
-      setTimeout(()=>setMsg(''),4000);
+    // Any supps not tied to a meal
+    const unassigned=supps.filter(s=>!s.timing||s.timing.trim()==='');
+    if(unassigned.length){
+      checkY(10+unassigned.length*7);
+      secBar('Additional Supplements (No Meal Assigned)');
+      doc.setFillColor(...BLK);doc.rect(M,y,col,7,'F');
+      doc.setFontSize(6);doc.setFont('helvetica','bold');doc.setTextColor(...WHT);
+      doc.text('Supplement',M+2,y+5);doc.text('Dose',M+100,y+5);
+      y+=8;
+      unassigned.forEach((s,idx)=>{
+        doc.setFillColor(idx%2===0?...LG:...WHT);doc.rect(M,y,col,7,'F');
+        doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...BLK);doc.text(s.name||'',M+2,y+5);
+        doc.setFont('helvetica','normal');doc.setTextColor(...DG);doc.text(s.dose||'—',M+100,y+5);
+        y+=7;
+      });
+    }
+
+    // Footer on all pages
+    const totalPages=doc.internal.getNumberOfPages();
+    for(let p=1;p<=totalPages;p++){
+      doc.setPage(p);
+      doc.setFillColor(...BLK);doc.rect(0,286,W,11,'F');
+      doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...MG);
+      doc.text('ELEMENTS Personal Training · Santa Monica, CA',M,291);
+      doc.text(`Page ${p} of ${totalPages}`,W/2,291,{align:'center'});
+      doc.text('Confidential — Client Copy',W-M,291,{align:'right'});
+    }
+
+    doc.save(`${clientName.replace(/\s+/g,'-')}-Program.pdf`);
+    setMsg('✓ PDF downloaded!');
+    setTimeout(()=>setMsg(''),4000);
   }catch(e){
     setMsg('Error: '+e.message,'var(--red)');
     console.error('PDF error:',e);
   }
+}
+
+// Plain-text food portion calculator for PDF
+function _getFoodPortionsText(foodsStr, targetProt, targetCarb, targetFat){
+  const results=[];
+  const MAX_EGGS=4;
+  const items=foodsStr.split(/[,;]+/).map(s=>s.trim().toLowerCase()).filter(Boolean);
+
+  const matchedItems=items.map(raw=>{
+    const qtyMatch=raw.match(/^(.*?)-(\d+(?:\.\d+)?)$/);
+    const item=qtyMatch?qtyMatch[1].trim():raw;
+    const forcedQty=qtyMatch?parseFloat(qtyMatch[2]):null;
+    const match=FOOD_DB.find(f=>f.k.some(k=>item.includes(k)||k.includes(item)));
+    return{item,forcedQty,match};
+  });
+
+  const eggEntry=matchedItems.find(e=>e.match?.unit==='egg');
+  const otherProts=matchedItems.filter(e=>e!==eggEntry&&e.match?.type==='protein'&&e.match?.unit!=='egg');
+  let remainingProt=targetProt;
+  if(eggEntry&&otherProts.length>0){
+    const eggCount=Math.min(MAX_EGGS,Math.round(targetProt/6.0));
+    eggEntry._cappedCount=eggCount;
+    remainingProt=Math.max(0,targetProt-eggCount*6.0);
+  }
+  const remainingProtPerSource=otherProts.length>0?remainingProt/otherProts.length:targetProt;
+
+  matchedItems.forEach(({item,forcedQty,match,_cappedCount})=>{
+    if(!match){results.push({name:item,portion:'—',macros:'not in database'});return;}
+    let portion='',macros='';
+    if(match.unit==='egg'){
+      const count=_cappedCount!==undefined?_cappedCount:Math.min(MAX_EGGS,Math.round(targetProt/match.p));
+      portion=`${count} whole egg${count!==1?'s':''}`;
+      macros=`${Math.round(count*match.p)}P · ${Math.round(count*match.c)}C · ${Math.round(count*match.f)}F`;
+    } else if(match.unit.includes('scoop')){
+      const protTarget=otherProts.some(o=>o.item===item)?remainingProtPerSource:targetProt;
+      const scoops=protTarget/match.p;
+      portion=`${scoops.toFixed(1)} scoop${scoops!==1?'s':''}`;
+      macros=`${Math.round(scoops*match.p)}P · ${Math.round(scoops*match.c)}C · ${Math.round(scoops*match.f)}F`;
+    } else if(match.type==='protein'){
+      const protTarget=otherProts.some(o=>o.item===item)?remainingProtPerSource:targetProt;
+      if(!protTarget||!match.p){return;}
+      const oz=protTarget/match.p;
+      portion=oz>=16?`${(oz/16).toFixed(2)} lb`:`${oz.toFixed(1)} oz`;
+      macros=`${Math.round(oz*match.p)}P · ${Math.round(oz*match.c)}C · ${Math.round(oz*match.f)}F`;
+    } else if(match.type==='carb'){
+      if(!targetCarb||!match.c){return;}
+      if(match.unit==='handful'){
+        const ozPH=match.gramsPerUnit/28.35;
+        const carbsPH=ozPH*match.c;
+        const handfuls=forcedQty!==null?forcedQty:Math.round(targetCarb/carbsPH);
+        portion=`${handfuls} handful${handfuls!==1?'s':''}`;
+        macros=`${Math.round(handfuls*ozPH*match.p)}P · ${Math.round(handfuls*carbsPH)}C · ${Math.round(handfuls*ozPH*match.f)}F`;
+      } else {
+        const grams=(targetCarb/match.c)*28.35;
+        portion=`${Math.round(grams)}g`;
+        const oz=grams/28.35;
+        macros=`${Math.round(oz*match.p)}P · ${Math.round(oz*match.c)}C · ${Math.round(oz*match.f)}F`;
+      }
+    } else {
+      if(!targetFat||!match.f){return;}
+      if(match.unit.includes('tbsp')){
+        const tbsp=targetFat/match.f;
+        portion=`${tbsp.toFixed(1)} tbsp`;
+        macros=`${Math.round(tbsp*match.p)}P · ${Math.round(tbsp*match.c)}C · ${Math.round(tbsp*match.f)}F`;
+      } else {
+        const oz=targetFat/match.f;
+        portion=`${oz.toFixed(1)} oz`;
+        macros=`${Math.round(oz*match.p)}P · ${Math.round(oz*match.c)}C · ${Math.round(oz*match.f)}F`;
+      }
+    }
+    results.push({name:item.replace(/^\w/,s=>s.toUpperCase()),portion,macros});
+  });
+  return results;
 }
 
 async function saveClient(){
