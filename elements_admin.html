@@ -2591,261 +2591,144 @@ function toggleWeekExpand(i){
 }
 
 function generateClientProgramPDF(){
-  if(!currentClient) return;
+  // Debug check
+  const msg = document.getElementById('pdf-gen-msg');
+  const setMsg = (t,c='var(--green)')=>{ if(msg){msg.textContent=t;msg.style.color=c;} };
+
+  if(!currentClient){ setMsg('Open a client first.','var(--red)'); return; }
+
+  setMsg('Building PDF...');
+
   const c = currentClient;
   const clientName = c.full_name || c.email || 'Client';
   const coachName  = c.coach || 'Gavin Regnery';
-  const startDate  = c.start_date ? new Date(c.start_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '—';
 
-  // ── Gather Summary data ──
+  // Gather data
   const goal      = document.getElementById('ov-goal-1')?.value || '—';
-  const pStart    = document.getElementById('ov-start-1')?.value ? new Date(document.getElementById('ov-start-1').value).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '—';
-  const pEnd      = document.getElementById('ov-end-1')?.value   ? new Date(document.getElementById('ov-end-1').value).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '—';
   const pDur      = document.getElementById('ov-dur-1')?.value || '—';
+  const pStart    = document.getElementById('ov-start-1')?.value || '';
+  const pEnd      = document.getElementById('ov-end-1')?.value || '';
   const trainFreq = document.getElementById('ov-freq')?.value || '—';
   const trainMeth = document.getElementById('ov-method')?.value || '—';
   const trainFoc  = document.getElementById('ov-priority')?.value || '—';
   const nutAppr   = document.getElementById('ov-nut-approach')?.value || '—';
   const nutTrack  = document.getElementById('ov-tracking')?.value || '—';
   const bwDays    = getBWDays().join(', ') || '—';
-  const circFreq  = document.getElementById('ov-circ-freq')?.value || '—';
-  const skinFreq  = document.getElementById('ov-skin-freq')?.value || '—';
-  const dexaFreq  = document.getElementById('ov-dexa-freq')?.value || '—';
-
-  // ── Gather Nutrition data ──
   const cals      = document.getElementById('dp-cals')?.value || '—';
-  const resProt   = document.getElementById('res-prot')?.textContent?.replace('g','') || '—';
-  const resCarb   = document.getElementById('res-carb')?.textContent?.replace('g','') || '—';
-  const resFat    = document.getElementById('res-fat')?.textContent?.replace('g','') || '—';
+  const resProt   = document.getElementById('res-prot')?.textContent || '—';
+  const resCarb   = document.getElementById('res-carb')?.textContent || '—';
+  const resFat    = document.getElementById('res-fat')?.textContent || '—';
+  const mealCount = parseInt(document.getElementById('dp-meal-count')?.value)||4;
+  const supps     = c.supplements||[];
 
-  // ── Gather Meal Plan data ──
-  const mealCount = parseInt(document.getElementById('dp-meal-count')?.value) || 4;
-  const meals = [];
+  // Build meals HTML
+  let mealsHTML = '';
   for(let i=1;i<=mealCount;i++){
-    meals.push({
-      num:i,
-      time:document.getElementById(`m${i}-time`)?.value||'',
-      type:document.getElementById(`m${i}-type`)?.value||'Whole Food',
-      prot:document.getElementById(`m${i}-prot`)?.value||'0',
-      carb:document.getElementById(`m${i}-carb`)?.value||'0',
-      fat:document.getElementById(`m${i}-fat`)?.value||'0',
-      foods:document.getElementById(`m${i}-foods`)?.value||'',
-    });
-  }
-
-  // ── Gather Supplements ──
-  const supps = c.supplements||[];
-
-  // ── Build HTML ──
-  const mealRows = meals.map(m => {
-    const cals_m = (parseInt(m.prot)*4)+(parseInt(m.carb)*4)+(parseInt(m.fat)*9);
-    return `
-    <div style="break-inside:avoid;margin-bottom:16px;border:1px solid #E0D9CC">
-      <div style="background:#1A1A1A;padding:12px 18px;display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <span style="font-family:'Helvetica Neue',sans-serif;font-weight:900;font-size:15px;letter-spacing:2px;color:#F0EDE8;text-transform:uppercase">Meal ${m.num}</span>
-          <span style="font-size:10px;color:#C9A86C;letter-spacing:2px;text-transform:uppercase;margin-left:12px">${m.type}</span>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:11px;color:#C9A86C;letter-spacing:1.5px;text-transform:uppercase">${m.time||'—'}</div>
-          ${cals_m?`<div style="font-size:10px;color:#8A8278;margin-top:2px">${cals_m} cal</div>`:''}
-        </div>
+    const prot = document.getElementById(`m${i}-prot`)?.value||'0';
+    const carb = document.getElementById(`m${i}-carb`)?.value||'0';
+    const fat  = document.getElementById(`m${i}-fat`)?.value||'0';
+    const time = document.getElementById(`m${i}-time`)?.value||'';
+    const type = document.getElementById(`m${i}-type`)?.value||'Whole Food';
+    const food = document.getElementById(`m${i}-foods`)?.value||'';
+    const kcal = (parseInt(prot)*4)+(parseInt(carb)*4)+(parseInt(fat)*9);
+    mealsHTML += `<div style="border:1px solid #ddd;margin-bottom:12px;page-break-inside:avoid">
+      <div style="background:#111;color:#fff;padding:10px 16px;display:flex;justify-content:space-between">
+        <span style="font-weight:700;letter-spacing:1px">MEAL ${i} &nbsp;<span style="font-weight:400;font-size:11px;color:#c9a86c">${type}</span></span>
+        <span style="color:#c9a86c;font-size:12px">${time}${kcal?' &nbsp;·&nbsp; '+kcal+' cal':''}</span>
       </div>
-      <div style="padding:14px 18px;background:#fff">
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:${m.foods?'12px':'0'}">
-          <div style="text-align:center;padding:10px;background:#F8F6F2;border:1px solid #E0D9CC">
-            <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#8A8278;margin-bottom:4px">Protein</div>
-            <div style="font-size:22px;font-weight:900;color:#1A1A1A">${m.prot}g</div>
-          </div>
-          <div style="text-align:center;padding:10px;background:#F8F6F2;border:1px solid #E0D9CC">
-            <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#8A8278;margin-bottom:4px">Carbs</div>
-            <div style="font-size:22px;font-weight:900;color:#3A6BA8">${m.carb}g</div>
-          </div>
-          <div style="text-align:center;padding:10px;background:#F8F6F2;border:1px solid #E0D9CC">
-            <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#8A8278;margin-bottom:4px">Fats</div>
-            <div style="font-size:22px;font-weight:900;color:#8B3050">${m.fat}g</div>
-          </div>
-        </div>
-        ${m.foods?`<div style="padding:10px 14px;background:#F8F6F2;border:1px solid #E0D9CC;font-size:11px;color:#555"><span style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#8B6020;margin-right:8px">Food Preferences</span>${m.foods}</div>`:''}
+      <div style="display:flex;gap:0;border-bottom:${food?'1px solid #ddd':'none'}">
+        <div style="flex:1;padding:12px;text-align:center;border-right:1px solid #ddd"><div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1px">Protein</div><div style="font-size:24px;font-weight:700">${prot}g</div></div>
+        <div style="flex:1;padding:12px;text-align:center;border-right:1px solid #ddd"><div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1px">Carbs</div><div style="font-size:24px;font-weight:700;color:#3a6ba8">${carb}g</div></div>
+        <div style="flex:1;padding:12px;text-align:center"><div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1px">Fats</div><div style="font-size:24px;font-weight:700;color:#8b3050">${fat}g</div></div>
       </div>
+      ${food?`<div style="padding:10px 16px;font-size:12px;color:#555"><b style="color:#8b6020">Food Preferences:</b> ${food}</div>`:''}
     </div>`;
-  }).join('');
-
-  const suppRows = supps.length ? supps.map(s=>`
-    <tr style="border-bottom:1px solid #E0D9CC">
-      <td style="padding:10px 14px;font-size:12px;font-weight:600">${s.name}</td>
-      <td style="padding:10px 14px;font-size:12px;color:#555">${s.dose||'—'}</td>
-      <td style="padding:10px 14px;font-size:12px;color:#555">${s.timing||'—'}</td>
-    </tr>`).join('')
-  : `<tr><td colspan="3" style="padding:20px;text-align:center;color:#8A8278;font-style:italic;font-size:12px">No supplements assigned.</td></tr>`;
-
-  const html = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<style>
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1A1A1A;background:#fff;}
-  @media print{
-    body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-    .page-break{page-break-before:always;}
   }
-  .gold{color:#8B6020;}
-  .muted{color:#8A8278;}
-  table{width:100%;border-collapse:collapse;}
-  thead tr{background:#1A1A1A;color:#fff;}
-  thead th{padding:10px 14px;text-align:left;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:400;}
-</style>
-</head>
-<body>
 
-<!-- ── PAGE 1: COVER + OVERVIEW ── -->
-<div style="padding:0;min-height:100vh;display:flex;flex-direction:column">
+  // Build supps HTML
+  let suppsHTML = supps.length ? supps.map(s=>`
+    <tr><td style="padding:9px 12px;border-bottom:1px solid #eee;font-weight:600">${s.name}</td>
+    <td style="padding:9px 12px;border-bottom:1px solid #eee;color:#555">${s.dose||'—'}</td>
+    <td style="padding:9px 12px;border-bottom:1px solid #eee;color:#555">${s.timing||'—'}</td></tr>`).join('')
+    : '<tr><td colspan="3" style="padding:16px;color:#888;font-style:italic">No supplements assigned.</td></tr>';
 
-  <!-- Header -->
-  <div style="background:#1A1A1A;padding:36px 48px;display:flex;justify-content:space-between;align-items:center">
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>${clientName} — Elements Program</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:Arial,sans-serif;color:#111;padding:32px;font-size:13px}
+    h1{font-size:28px;letter-spacing:3px;text-transform:uppercase}
+    h2{font-size:16px;letter-spacing:2px;text-transform:uppercase;margin:28px 0 12px;padding-bottom:6px;border-bottom:2px solid #111}
+    table{width:100%;border-collapse:collapse}
+    thead th{background:#111;color:#fff;padding:9px 12px;text-align:left;font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:400}
+    @media print{body{padding:0.3in} .no-print{display:none} @page{margin:0.4in;size:letter}}
+  </style></head><body>
+  <div class="no-print" style="background:#f5f5f5;padding:14px 20px;margin-bottom:24px;border:1px solid #ddd;border-radius:4px;display:flex;align-items:center;justify-content:space-between">
+    <span style="font-size:13px;color:#333">Press <strong>Cmd+P</strong> (Mac) or <strong>Ctrl+P</strong> (Windows) then choose <strong>Save as PDF</strong></span>
+    <button onclick="window.print()" style="padding:8px 20px;background:#111;color:#fff;border:none;cursor:pointer;font-size:12px;letter-spacing:1px">Print / Save PDF</button>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid #111">
     <div>
-      <div style="font-size:36px;font-weight:900;letter-spacing:5px;text-transform:uppercase;color:#fff">E<span style="color:#C9A86C">LEMENTS</span></div>
-      <div style="font-size:10px;letter-spacing:4px;text-transform:uppercase;color:#8A8278;margin-top:4px">Personal Training · Santa Monica</div>
+      <h1>E<span style="color:#c9a86c">LEMENTS</span></h1>
+      <div style="font-size:10px;color:#888;letter-spacing:3px;text-transform:uppercase;margin-top:3px">Personal Training · Santa Monica</div>
     </div>
     <div style="text-align:right">
-      <div style="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#C9A86C;margin-bottom:6px">Client Program</div>
-      <div style="font-size:24px;font-weight:700;color:#fff">${clientName}</div>
-      <div style="font-size:11px;color:#8A8278;margin-top:4px">Coach: ${coachName} · Start: ${startDate}</div>
+      <div style="font-size:18px;font-weight:700">${clientName}</div>
+      <div style="font-size:11px;color:#888;margin-top:3px">Coach: ${coachName} · ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
     </div>
   </div>
-
-  <!-- Gold bar -->
-  <div style="height:4px;background:linear-gradient(90deg,#8B6020,#C9A86C,#8B6020)"></div>
-
-  <!-- Program Overview -->
-  <div style="padding:36px 48px;flex:1">
-    <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#8B6020;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #1A1A1A">Program Overview</div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;margin-bottom:24px">
-      <div style="background:#F8F6F2;border:1px solid #E0D9CC;padding:18px">
-        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#8A8278;margin-bottom:8px">Goal</div>
-        <div style="font-size:18px;font-weight:700">${goal}</div>
-      </div>
-      <div style="background:#F8F6F2;border:1px solid #E0D9CC;padding:18px">
-        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#8A8278;margin-bottom:8px">Phase Duration</div>
-        <div style="font-size:18px;font-weight:700">${pDur} weeks</div>
-      </div>
-      <div style="background:#F8F6F2;border:1px solid #E0D9CC;padding:18px">
-        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#8A8278;margin-bottom:8px">Period</div>
-        <div style="font-size:11px;font-weight:600;margin-top:4px">${pStart}</div>
-        <div style="font-size:10px;color:#8A8278">to ${pEnd}</div>
-      </div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
-      <!-- Training -->
-      <div>
-        <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#8B6020;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #E0D9CC">Training Parameters</div>
-        ${[['Frequency',trainFreq],['Method',trainMeth],['Focus',trainFoc]].map(([l,v])=>`
-        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F0EDE8;font-size:11px">
-          <span style="color:#8A8278">${l}</span><span style="font-weight:600">${v}</span>
-        </div>`).join('')}
-      </div>
-      <!-- Nutrition approach -->
-      <div>
-        <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#8B6020;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #E0D9CC">Nutrition Approach</div>
-        ${[['Approach',nutAppr],['Tracking',nutTrack],['BW Recording',bwDays]].map(([l,v])=>`
-        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F0EDE8;font-size:11px">
-          <span style="color:#8A8278">${l}</span><span style="font-weight:600;text-align:right;max-width:60%">${v}</span>
-        </div>`).join('')}
-      </div>
-    </div>
-
-    <!-- Assessment Schedule -->
-    <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#8B6020;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #E0D9CC">Body Composition Assessment Schedule</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-bottom:32px">
-      ${[['Circumference',circFreq],['Skinfolds',skinFreq],['DEXA Scan',dexaFreq]].map(([l,v])=>`
-      <div style="background:#F8F6F2;border:1px solid #E0D9CC;padding:14px;text-align:center">
-        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#8A8278;margin-bottom:6px">${l}</div>
-        <div style="font-size:13px;font-weight:700">${v}</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:24px">
+    ${[['Goal',goal],['Phase',pDur+' wks'],['Start',pStart||'—'],['End',pEnd||'—']].map(([l,v])=>`
+    <div style="border:1px solid #ddd;padding:12px;text-align:center">
+      <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">${l}</div>
+      <div style="font-size:14px;font-weight:700">${v}</div>
+    </div>`).join('')}
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+    <div>
+      <h2>Training</h2>
+      ${[['Frequency',trainFreq],['Method',trainMeth],['Focus',trainFoc]].map(([l,v])=>`
+      <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #eee;font-size:12px">
+        <span style="color:#888">${l}</span><span style="font-weight:600">${v}</span>
       </div>`).join('')}
     </div>
-
-    <!-- Daily Targets -->
-    <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#8B6020;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #E0D9CC">Daily Nutrition Targets</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px">
-      ${[['Calories',cals,'per day'],['Protein',resProt+'g','daily'],['Carbs',resCarb+'g','daily'],['Fats',resFat+'g','daily']].map(([l,v,s])=>`
-      <div style="background:#1A1A1A;padding:18px;text-align:center">
-        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#C9A86C;margin-bottom:6px">${l}</div>
-        <div style="font-size:26px;font-weight:900;color:#fff">${v}</div>
-        <div style="font-size:9px;color:#8A8278;margin-top:4px">${s}</div>
+    <div>
+      <h2>Nutrition Approach</h2>
+      ${[['Approach',nutAppr],['Tracking',nutTrack],['BW Days',bwDays]].map(([l,v])=>`
+      <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #eee;font-size:12px">
+        <span style="color:#888">${l}</span><span style="font-weight:600;text-align:right;max-width:55%">${v}</span>
       </div>`).join('')}
     </div>
   </div>
-</div>
-
-<!-- ── PAGE 2: MEAL PLAN ── -->
-<div class="page-break" style="padding:36px 48px">
-  <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:24px;padding-bottom:12px;border-bottom:2px solid #1A1A1A">
-    <div>
-      <div style="font-size:26px;font-weight:900;letter-spacing:3px;text-transform:uppercase">MEAL PLAN</div>
-      <div style="font-size:10px;color:#8A8278;letter-spacing:2px;text-transform:uppercase;margin-top:3px">${clientName} · ${mealCount} meals per day</div>
-    </div>
-    <div style="font-size:10px;color:#8B6020;letter-spacing:2px;text-transform:uppercase">Elements Personal Training</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:32px">
+    ${[['Calories',cals],['Protein',resProt],['Carbs',resCarb],['Fats',resFat]].map(([l,v])=>`
+    <div style="background:#111;color:#fff;padding:14px;text-align:center">
+      <div style="font-size:9px;color:#c9a86c;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">${l}</div>
+      <div style="font-size:22px;font-weight:700">${v}</div>
+    </div>`).join('')}
   </div>
-  ${mealRows}
-</div>
-
-<!-- ── PAGE 3: SUPPLEMENT PROTOCOL ── -->
-<div class="page-break" style="padding:36px 48px">
-  <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:24px;padding-bottom:12px;border-bottom:2px solid #1A1A1A">
-    <div>
-      <div style="font-size:26px;font-weight:900;letter-spacing:3px;text-transform:uppercase">SUPPLEMENT PROTOCOL</div>
-      <div style="font-size:10px;color:#8A8278;letter-spacing:2px;text-transform:uppercase;margin-top:3px">${clientName} · Prescribed by ${coachName}</div>
-    </div>
-    <div style="font-size:10px;color:#8B6020;letter-spacing:2px;text-transform:uppercase">Nutridyn · Elements Personal Training</div>
+  <h2>Meal Plan</h2>
+  ${mealsHTML}
+  <h2 style="margin-top:32px">Supplement Protocol</h2>
+  <table><thead><tr><th>Supplement</th><th>Dose</th><th>With Meals</th></tr></thead>
+  <tbody>${suppsHTML}</tbody></table>
+  <div style="margin-top:40px;padding-top:12px;border-top:1px solid #ddd;display:flex;justify-content:space-between;font-size:10px;color:#aaa">
+    <span>ELEMENTS Personal Training · Santa Monica, CA</span>
+    <span>Confidential — Client Copy</span>
   </div>
-  <table>
-    <thead><tr>
-      <th>Supplement</th><th>Dose</th><th>With Meals</th>
-    </tr></thead>
-    <tbody>${suppRows}</tbody>
-  </table>
+  </body></html>`;
 
-  <div style="margin-top:32px;padding:20px 24px;background:#F8F6F2;border:1px solid #E0D9CC">
-    <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#8B6020;margin-bottom:10px">Shop Your Protocol</div>
-    <div style="font-size:11px;color:#555;line-height:1.7">All supplements are available through your personalized Nutridyn storefront at <strong>nutridyn.com</strong>. Free shipping on orders over $75. Contact your coach for a direct product link.</div>
-  </div>
-
-  <!-- Footer -->
-  <div style="margin-top:48px;padding-top:16px;border-top:1px solid #E0D9CC;display:flex;justify-content:space-between;align-items:center">
-    <div style="font-size:10px;color:#8A8278;letter-spacing:1px">ELEMENTS Personal Training · Santa Monica, CA</div>
-    <div style="font-size:10px;color:#8A8278;letter-spacing:1px">Generated ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
-    <div style="font-size:10px;color:#8A8278;letter-spacing:1px">Confidential — Client Copy</div>
-  </div>
-</div>
-
-</body>
-</html>`;
-
-  const msg = document.getElementById('pdf-gen-msg');
-  const container = document.getElementById('print-container');
-  container.innerHTML = html
-    .replace('<!DOCTYPE html>','')
-    .replace(/<html[^>]*>/,'')
-    .replace('</html>','')
-    .replace(/<head>[\s\S]*<\/head>/,'')
-    .replace('<body>','')
-    .replace('</body>','');
-
-  if(msg){ msg.textContent = '✓ Opening print dialog...'; msg.style.color='var(--green)'; }
-
-  document.body.classList.add('printing');
-  container.style.display='block';
-
-  setTimeout(() => {
-    window.print();
-    document.body.classList.remove('printing');
-    container.style.display='none';
-    container.innerHTML='';
-    if(msg) setTimeout(()=>msg.textContent='',2000);
-  }, 400);
+  // Open in new tab using data URI — works without popup permissions
+  const encoded = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
+  const a = document.createElement('a');
+  a.href = encoded;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setMsg('✓ Opened in new tab — use Cmd+P to save as PDF');
+  setTimeout(()=>setMsg(''),4000);
 }
 
 // ── MONTHLY SUMMARY ──
