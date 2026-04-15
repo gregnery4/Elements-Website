@@ -624,7 +624,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             <div class="edit-field"><label>Goal Body Fat %</label><input type="number" id="dp-goal-bf" step="0.5" placeholder="15" oninput="calcGoals()"></div>
             <div class="edit-field"><label>Goal Body Weight (lbs)</label><input type="number" id="dp-goal-weight" step="0.1" placeholder="auto" readonly style="opacity:.6"></div>
             <div class="edit-field"><label>Required Weight Loss (lbs)</label><input type="number" id="dp-wt-loss" step="0.1" placeholder="auto" readonly style="opacity:.6"></div>
-            <div class="edit-field"><label>Phase Duration (wks)</label><input type="number" id="dp-phase-wks" placeholder="13" oninput="calcGoals()"></div>
+            <div class="edit-field"><label>Phase Duration (wks)</label><input type="number" id="dp-phase-wks" placeholder="13" oninput="calcGoals();const ovDur=document.getElementById('ov-dur-1');if(ovDur)ovDur.value=this.value;"></div>
             <div class="edit-field"><label>BW % Reduction / Week</label><input type="number" id="dp-bw-pct" step="0.001" placeholder="auto" readonly style="opacity:.6"></div>
           </div>
         </div>
@@ -1300,7 +1300,11 @@ function openClient(id){
     if(ov.goal) document.getElementById('ov-goal-1').value=ov.goal;
     if(ov.protocol_start) document.getElementById('ov-start-1').value=ov.protocol_start;
     if(ov.protocol_end) document.getElementById('ov-end-1').value=ov.protocol_end;
-    if(ov.phase_duration_weeks) document.getElementById('ov-dur-1').value=ov.phase_duration_weeks;
+    if(ov.phase_duration_weeks){
+      document.getElementById('ov-dur-1').value=ov.phase_duration_weeks;
+      const phaseWks=document.getElementById('dp-phase-wks');
+      if(phaseWks) phaseWks.value=ov.phase_duration_weeks;
+    }
     if(ov.training_frequency) document.getElementById('ov-freq').value=ov.training_frequency;
     if(ov.training_method) document.getElementById('ov-method').value=ov.training_method;
     if(ov.training_focus) document.getElementById('ov-priority').value=ov.training_focus;
