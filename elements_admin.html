@@ -2922,7 +2922,7 @@ function _doBuildPDF(jsPDF, c, setMsg){
       doc.text('Supplement',M+2,y+5);doc.text('Dose',M+100,y+5);
       y+=8;
       unassigned.forEach((s,idx)=>{
-        doc.setFillColor(idx%2===0?...LG:...WHT);doc.rect(M,y,col,7,'F');
+        if(idx%2===0){doc.setFillColor(...LG);}else{doc.setFillColor(...WHT);}doc.rect(M,y,col,7,'F');
         doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...BLK);doc.text(s.name||'',M+2,y+5);
         doc.setFont('helvetica','normal');doc.setTextColor(...DG);doc.text(s.dose||'—',M+100,y+5);
         y+=7;
