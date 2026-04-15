@@ -2665,8 +2665,15 @@ function _doBuildPDF(jsPDF, c, setMsg){
     const age       =document.getElementById('dp-age')?.value||'—';
     const trainAge  =document.getElementById('dp-training-age')?.value||'—';
     const sex       =document.getElementById('dp-sex')?.value||'—';
-    const trainDays =getTrainingDays()||'—';
-    const trainTime =document.getElementById('dp-training-time')?.value||'—';
+    const trainDaysRaw=getTrainingDays()||'—';
+    const trainDays=trainDaysRaw.split(',').map(d=>d.trim().slice(0,3)).join(', ');
+    const trainTimeRaw=document.getElementById('dp-training-time')?.value||'';
+    const trainTime=trainTimeRaw?(()=>{
+      const [h,m]=trainTimeRaw.split(':').map(Number);
+      const ampm=h>=12?'PM':'AM';
+      const h12=h%12||12;
+      return `${h12}:${String(m).padStart(2,'0')} ${ampm}`;
+    })():'—';
 
     // Measurements
     const bw        =document.getElementById('dp-weight')?.value||document.getElementById('bc-total-mass')?.value||'—';
