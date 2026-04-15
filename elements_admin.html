@@ -1454,6 +1454,10 @@ const FOOD_DB = [
   {k:['strawberry','strawberries','berries'],type:'carb',   p:0.2,  c:2.2,  f:0.1,  unit:'oz'},
   {k:['tomato','tomatoes'],                 type:'carb',    p:0.2,  c:1.1,  f:0.1,  unit:'oz'},
   {k:['zucchini','courgette'],              type:'carb',    p:0.4,  c:1.0,  f:0.1,  unit:'oz'},
+  {k:['bell pepper','pepper','peppers'],    type:'carb',    p:0.2,  c:1.4,  f:0.1,  unit:'handful', gramsPerUnit:30},
+  {k:['onion','onions'],                    type:'carb',    p:0.3,  c:2.5,  f:0.1,  unit:'handful', gramsPerUnit:30},
+  {k:['asparagus'],                         type:'carb',    p:0.7,  c:0.8,  f:0.1,  unit:'handful', gramsPerUnit:40},
+  {k:['broccoli'],                          type:'carb',    p:0.8,  c:1.8,  f:0.1,  unit:'handful', gramsPerUnit:40},
   {k:['banana'],                            type:'carb',    p:0.3,  c:6.7,  f:0.1,  unit:'oz'},
   {k:['apple'],                             type:'carb',    p:0.1,  c:3.9,  f:0.1,  unit:'oz'},
   {k:['bread'],                             type:'carb',    p:2.5,  c:13.5, f:1.0,  unit:'slice (1oz)'},
@@ -1543,16 +1547,28 @@ function convertFoodsToPortions(foodsStr, targetProt, targetCarb, targetFat){
       actualF = Math.round(oz * match.f);
       color = 'var(--gold)';
 
-    // ── CARBS — always show in grams ──
+    // ── CARBS — handfuls or grams ──
     } else if(match.type === 'carb'){
       if(!targetCarb || !match.c){ return; }
-      const grams = (targetCarb / match.c) * 28.35;
-      portionStr = `${Math.round(grams)}g`;
-      displayUnit = match.unit.replace('oz','g');
-      const oz = grams / 28.35;
-      actualP = Math.round(oz * match.p);
-      actualC = Math.round(oz * match.c);
-      actualF = Math.round(oz * match.f);
+      if(match.unit === 'handful'){
+        // match.c is carbs per oz; gramsPerUnit is grams per handful
+        const ozPerHandful = match.gramsPerUnit / 28.35;
+        const carbsPerHandful = ozPerHandful * match.c;
+        const handfuls = Math.round(targetCarb / carbsPerHandful);
+        portionStr = `${handfuls} handful${handfuls !== 1 ? 's' : ''}`;
+        displayUnit = 'handfuls';
+        actualP = Math.round(handfuls * ozPerHandful * match.p);
+        actualC = Math.round(handfuls * carbsPerHandful);
+        actualF = Math.round(handfuls * ozPerHandful * match.f);
+      } else {
+        const grams = (targetCarb / match.c) * 28.35;
+        portionStr = `${Math.round(grams)}g`;
+        displayUnit = match.unit.replace('oz','g');
+        const oz = grams / 28.35;
+        actualP = Math.round(oz * match.p);
+        actualC = Math.round(oz * match.c);
+        actualF = Math.round(oz * match.f);
+      }
       color = '#5B8FD4';
 
     // ── FATS — tbsp for liquids, oz for solids ──
