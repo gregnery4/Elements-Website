@@ -451,6 +451,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       <div class="dp-tab" onclick="dpTab('t8',this)">7. Supplement Protocol</div>
       <div class="dp-tab" onclick="dpTab('t2',this)">8. Summary</div>
       <div class="dp-tab" onclick="dpTab('t6',this)">9. Data Review</div>
+      <div class="dp-tab" onclick="dpTab('t9',this)">10. Elements Protocols</div>
     </div>
     <div class="dp-body">
 
@@ -1074,6 +1075,39 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
         </div>
       </div>
 
+      <!-- TAB 10: ELEMENTS PROTOCOLS -->
+      <div id="dptab-t9" style="display:none">
+        <div class="dp-sec">
+          <div class="dp-sec-title">Elements Protocols — All</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:20px">Save the current state of tabs 2–8 as a named protocol. Apply any saved protocol back to this client at any time.</div>
+
+          <!-- Save current state -->
+          <div style="background:var(--c3);border:1px solid var(--border);padding:20px;margin-bottom:3px">
+            <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:14px">Save Current Protocol</div>
+            <div class="edit-grid">
+              <div class="edit-field" style="grid-column:1/-1">
+                <label>Protocol Name</label>
+                <input type="text" id="proto-name" placeholder="e.g. Fat Loss Phase 1 — April 2026">
+              </div>
+              <div class="edit-field">
+                <label>Notes (optional)</label>
+                <input type="text" id="proto-notes" placeholder="e.g. Starting point, 9 week cut">
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:12px">
+              <button class="save-btn" style="margin-top:0" onclick="saveProtocol()">Save Protocol →</button>
+              <span id="proto-save-msg" style="font-size:10px;color:var(--green);min-height:16px"></span>
+            </div>
+          </div>
+
+          <!-- Protocol list -->
+          <div style="margin-top:20px">
+            <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Saved Protocols</div>
+            <div id="proto-list"><div style="font-size:12px;color:var(--muted);padding:20px 0">No protocols saved yet.</div></div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -1169,7 +1203,8 @@ async function loadAll(){
     nutrition_targets(calories,protein_g,carbs_g,fat_g,protein_pct,carb_pct,fat_pct,ref_weight,maintenance_multiplier,coach_notes),
     client_overview(goal,protocol_start,protocol_end,phase_duration_weeks,training_frequency,training_method,training_focus,nutrition_approach,tracking_responsibility,bw_recording_days,circumference_frequency,skinfold_frequency,dexa_frequency),
     meal_plans(meals,meal_count,updated_at),
-    weekly_reviews(id,week_number,week_start_date,sessions_done,sessions_target,training_notes,bw_days_completed,bw_compliance,meals_compliance,meals_logged,nutrition_adherence,nutrition_notes,assessment_type,assessment_date,assessment_data,compliance_score,created_at)
+    weekly_reviews(id,week_number,week_start_date,sessions_done,sessions_target,training_notes,bw_days_completed,bw_compliance,meals_compliance,meals_logged,nutrition_adherence,nutrition_notes,assessment_type,assessment_date,assessment_data,compliance_score,created_at),
+    protocols(id,name,notes,goal,calories,protein_g,carbs_g,fat_g,phase_duration_weeks,body_weight,body_fat,meal_count,created_at)
   `).eq('role','client').order('created_at',{ascending:false});
 
   if(error) console.error('loadAll error:',error.message);
@@ -1362,6 +1397,7 @@ function dpTab(name,el){
   if(name==='t5')syncMealTotals();
   if(name==='t11')generateMealPlan();
   if(name==='t6')loadBWScheduledDays();
+  if(name==='t9')loadProtocols();
 }
 
 function generateMealPlan(){
@@ -3311,6 +3347,249 @@ function loadSuppProtocol(supps){
       });
     }
   });
+}
+
+// ── PROTOCOLS ──────────────────────────────────────────────
+
+function gatherCurrentProtocol(){
+  // Gather full state of tabs 2-8
+  const mealCount=parseInt(document.getElementById('dp-meal-count')?.value)||4;
+  const meals=[];
+  for(let i=1;i<=mealCount;i++){
+    meals.push({
+      meal:i,
+      time:document.getElementById(`m${i}-time`)?.value||'',
+      type:document.getElementById(`m${i}-type`)?.value||'Whole Food',
+      protein:parseInt(document.getElementById(`m${i}-prot`)?.value)||0,
+      carbs:parseInt(document.getElementById(`m${i}-carb`)?.value)||0,
+      fats:parseInt(document.getElementById(`m${i}-fat`)?.value)||0,
+      foods:document.getElementById(`m${i}-foods`)?.value||'',
+    });
+  }
+  const supps=(currentClient?.supplements||[]).map(s=>({name:s.name,dose:s.dose,timing:s.timing}));
+  return {
+    // Body comp
+    body_weight:parseFloat(document.getElementById('dp-weight')?.value)||null,
+    body_fat:parseFloat(document.getElementById('dp-bf')?.value)||null,
+    lean_mass:parseFloat(document.getElementById('dp-lean')?.value)||null,
+    fat_mass:parseFloat(document.getElementById('dp-fat-mass')?.value)||null,
+    // Goal setting
+    goal_bf:parseFloat(document.getElementById('dp-goal-bf')?.value)||null,
+    goal_weight:parseFloat(document.getElementById('dp-goal-wt')?.value)||null,
+    phase_duration_weeks:parseInt(document.getElementById('dp-phase-wks')?.value)||null,
+    // Nutrition
+    calories:parseInt(document.getElementById('dp-cals')?.value)||null,
+    protein_g:parseInt(document.getElementById('res-prot')?.textContent)||null,
+    carbs_g:parseInt(document.getElementById('res-carb')?.textContent)||null,
+    fat_g:parseInt(document.getElementById('res-fat')?.textContent)||null,
+    protein_pct:parseFloat(document.getElementById('dp-prot-pct')?.value)||null,
+    carb_pct:parseFloat(document.getElementById('dp-carb-pct')?.value)||null,
+    fat_pct:parseFloat(document.getElementById('dp-fat-pct')?.value)||null,
+    ref_weight:parseFloat(document.getElementById('dp-ref-weight')?.value)||null,
+    maintenance_multiplier:parseFloat(document.getElementById('dp-maint-mult')?.value)||null,
+    // Meals
+    meal_count:mealCount,
+    meals:JSON.stringify(meals),
+    // Supplements
+    supplements:JSON.stringify(supps),
+    // Summary
+    goal:document.getElementById('ov-goal-1')?.value||null,
+    protocol_start:document.getElementById('ov-start-1')?.value||null,
+    protocol_end:document.getElementById('ov-end-1')?.value||null,
+    training_frequency:document.getElementById('ov-freq')?.value||null,
+    training_method:document.getElementById('ov-method')?.value||null,
+    training_focus:document.getElementById('ov-priority')?.value||null,
+    nutrition_approach:document.getElementById('ov-nut-approach')?.value||null,
+    tracking_responsibility:document.getElementById('ov-tracking')?.value||null,
+    bw_recording_days:getBWDays()||null,
+  };
+}
+
+async function saveProtocol(){
+  if(!currentClient) return;
+  const msg=document.getElementById('proto-save-msg');
+  const name=document.getElementById('proto-name')?.value.trim();
+  const notes=document.getElementById('proto-notes')?.value.trim();
+  if(!name){msg.style.color='var(--red)';msg.textContent='Enter a protocol name.';return;}
+  msg.style.color='var(--gold)';msg.textContent='Saving...';
+  const data=gatherCurrentProtocol();
+  const{error}=await sb.from('protocols').insert({
+    client_id:currentClient.id,
+    name,notes:notes||null,
+    ...data,
+  });
+  if(error){msg.style.color='var(--red)';msg.textContent='Error: '+error.message;return;}
+  msg.style.color='var(--green)';msg.textContent='✓ Protocol saved.';
+  document.getElementById('proto-name').value='';
+  document.getElementById('proto-notes').value='';
+  setTimeout(()=>msg.textContent='',3000);
+  await loadProtocols();
+}
+
+async function loadProtocols(){
+  if(!currentClient) return;
+  const{data,error}=await sb.from('protocols')
+    .select('*')
+    .eq('client_id',currentClient.id)
+    .order('created_at',{ascending:false});
+  const container=document.getElementById('proto-list');
+  if(!container) return;
+  if(error||!data?.length){
+    container.innerHTML='<div style="font-size:12px;color:var(--muted);padding:20px 0">No protocols saved yet.</div>';
+    return;
+  }
+  container.innerHTML=data.map((p,idx)=>`
+    <div style="background:var(--c2);border:1px solid var(--border);margin-bottom:2px;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer" onclick="toggleProtoExpand('${p.id}')">
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--white)">${p.name}</div>
+          <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:3px">
+            ${new Date(p.created_at).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'})}
+            ${p.goal?' · '+p.goal:''}
+            ${p.phase_duration_weeks?' · '+p.phase_duration_weeks+' wks':''}
+            ${p.calories?' · '+p.calories+' cal':''}
+          </div>
+          ${p.notes?`<div style="font-size:10px;color:var(--muted);margin-top:4px;font-style:italic">${p.notes}</div>`:''}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button onclick="event.stopPropagation();applyProtocol('${p.id}')" style="padding:7px 16px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;font-weight:600;white-space:nowrap">Apply to Client →</button>
+          <button onclick="event.stopPropagation();deleteProtocol('${p.id}')" style="padding:7px 12px;background:transparent;color:var(--muted);border:1px solid var(--borderw);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:1px;text-transform:uppercase">Delete</button>
+          <span id="proto-chevron-${p.id}" style="color:var(--muted);font-size:10px">▼</span>
+        </div>
+      </div>
+      <!-- Expanded detail -->
+      <div id="proto-expand-${p.id}" style="display:none;padding:0 18px 16px;border-top:1px solid var(--borderw)">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:14px;margin-bottom:12px">
+          ${[['Calories',p.calories||'—'],['Protein',p.protein_g?p.protein_g+'g':'—'],['Carbs',p.carbs_g?p.carbs_g+'g':'—'],['Add. Fats',p.fat_g?p.fat_g+'g':'—']].map(([l,v])=>`
+          <div style="background:var(--c3);padding:10px;text-align:center">
+            <div style="font-size:8px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">${l}</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold)">${v}</div>
+          </div>`).join('')}
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:11px">
+          <div>
+            ${[['Body Weight',p.body_weight?p.body_weight+' lbs':'—'],['Body Fat',p.body_fat?p.body_fat+'%':'—'],['Lean Mass',p.lean_mass?p.lean_mass+' lbs':'—'],['Goal BF%',p.goal_bf?p.goal_bf+'%':'—'],['Phase',p.phase_duration_weeks?p.phase_duration_weeks+' wks':'—']].map(([l,v])=>`
+            <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--borderw)">
+              <span style="color:var(--muted)">${l}</span><span style="font-weight:500">${v}</span>
+            </div>`).join('')}
+          </div>
+          <div>
+            ${[['Training',p.training_frequency||'—'],['Method',p.training_method||'—'],['Nutrition',p.nutrition_approach||'—'],['Tracking',p.tracking_responsibility||'—'],['Meals',p.meal_count?p.meal_count+' per day':'—']].map(([l,v])=>`
+            <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--borderw)">
+              <span style="color:var(--muted)">${l}</span><span style="font-weight:500;text-align:right;max-width:55%">${v}</span>
+            </div>`).join('')}
+          </div>
+        </div>
+        ${p.meals?(()=>{
+          try{
+            const meals=typeof p.meals==='string'?JSON.parse(p.meals):p.meals;
+            return `<div style="margin-top:12px;font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Meals</div>
+            <div style="display:grid;grid-template-columns:repeat(${Math.min(meals.length,4)},1fr);gap:2px">
+              ${meals.map(m=>`<div style="background:var(--c3);padding:8px;text-align:center">
+                <div style="font-size:8px;color:var(--muted)">Meal ${m.meal}${m.time?' · '+m.time:''}</div>
+                <div style="font-size:9px;color:var(--gold);margin-top:3px">${m.protein}P · ${m.carbs}C · ${m.fats}F</div>
+                ${m.foods?`<div style="font-size:7px;color:var(--muted);margin-top:3px;font-style:italic">${m.foods.slice(0,40)}${m.foods.length>40?'...':''}</div>`:''}
+              </div>`).join('')}
+            </div>`;
+          }catch(e){return '';}
+        })():''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleProtoExpand(id){
+  const body=document.getElementById(`proto-expand-${id}`);
+  const chev=document.getElementById(`proto-chevron-${id}`);
+  const open=body.style.display==='block';
+  body.style.display=open?'none':'block';
+  if(chev) chev.textContent=open?'▼':'▲';
+}
+
+async function applyProtocol(id){
+  if(!currentClient) return;
+  const{data:p,error}=await sb.from('protocols').select('*').eq('id',id).single();
+  if(error||!p){alert('Could not load protocol.');return;}
+  if(!confirm(`Apply "${p.name}" to ${currentClient.full_name||'this client'}? This will overwrite tabs 2–8.`)) return;
+
+  // ── Body Composition ──
+  if(p.body_weight) document.getElementById('dp-weight').value=p.body_weight;
+  if(p.body_fat)    document.getElementById('dp-bf').value=p.body_fat;
+
+  // ── Goal Setting ──
+  if(p.goal_bf)              document.getElementById('dp-goal-bf').value=p.goal_bf;
+  if(p.goal_weight)          document.getElementById('dp-goal-wt').value=p.goal_weight;
+  if(p.phase_duration_weeks){
+    document.getElementById('dp-phase-wks').value=p.phase_duration_weeks;
+    const ovDur=document.getElementById('ov-dur-1');
+    if(ovDur) ovDur.value=p.phase_duration_weeks;
+  }
+  calcGoals();
+
+  // ── Nutrition ──
+  if(p.protein_pct)           document.getElementById('dp-prot-pct').value=p.protein_pct;
+  if(p.carb_pct)              document.getElementById('dp-carb-pct').value=p.carb_pct;
+  if(p.fat_pct)               document.getElementById('dp-fat-pct').value=p.fat_pct;
+  if(p.ref_weight)            document.getElementById('dp-ref-weight').value=p.ref_weight;
+  if(p.maintenance_multiplier)document.getElementById('dp-maint-mult').value=p.maintenance_multiplier;
+  calcCalories();
+
+  // ── Meal Design ──
+  if(p.meal_count && p.meals){
+    try{
+      const meals=typeof p.meals==='string'?JSON.parse(p.meals):p.meals;
+      document.getElementById('dp-meal-count').value=p.meal_count;
+      renderMealFields();
+      setTimeout(()=>{
+        meals.forEach((m,idx)=>{
+          const i=idx+1;
+          if(document.getElementById(`m${i}-prot`)) document.getElementById(`m${i}-prot`).value=m.protein||'';
+          if(document.getElementById(`m${i}-carb`)) document.getElementById(`m${i}-carb`).value=m.carbs||'';
+          if(document.getElementById(`m${i}-fat`))  document.getElementById(`m${i}-fat`).value=m.fats||'';
+          if(document.getElementById(`m${i}-time`)) document.getElementById(`m${i}-time`).value=m.time||'';
+          if(document.getElementById(`m${i}-type`)) document.getElementById(`m${i}-type`).value=m.type||'Whole Food';
+          if(document.getElementById(`m${i}-foods`))document.getElementById(`m${i}-foods`).value=m.foods||'';
+        });
+        updateMealTotals();
+      },150);
+    }catch(e){}
+  }
+
+  // ── Supplements ──
+  if(p.supplements){
+    try{
+      const supps=typeof p.supplements==='string'?JSON.parse(p.supplements):p.supplements;
+      // Delete existing and re-insert
+      await sb.from('supplements').delete().eq('client_id',currentClient.id);
+      if(supps.length){
+        await sb.from('supplements').insert(supps.map(s=>({
+          client_id:currentClient.id,
+          name:s.name,dose:s.dose||'',timing:s.timing||'',active:true
+        })));
+      }
+    }catch(e){}
+  }
+
+  // ── Summary ──
+  if(p.goal)                  document.getElementById('ov-goal-1').value=p.goal;
+  if(p.protocol_start)        document.getElementById('ov-start-1').value=p.protocol_start;
+  if(p.protocol_end)          document.getElementById('ov-end-1').value=p.protocol_end;
+  if(p.training_frequency)    document.getElementById('ov-freq').value=p.training_frequency;
+  if(p.training_method)       document.getElementById('ov-method').value=p.training_method;
+  if(p.training_focus)        document.getElementById('ov-priority').value=p.training_focus;
+  if(p.nutrition_approach)    document.getElementById('ov-nut-approach').value=p.nutrition_approach;
+  if(p.tracking_responsibility)document.getElementById('ov-tracking').value=p.tracking_responsibility;
+  if(p.bw_recording_days)     setBWDays(p.bw_recording_days);
+
+  // Reload client data
+  await loadAll();
+  alert(`✓ "${p.name}" applied to ${currentClient.full_name||'client'}. Review each tab and save to persist changes.`);
+}
+
+async function deleteProtocol(id){
+  if(!confirm('Delete this protocol? This cannot be undone.')) return;
+  await sb.from('protocols').delete().eq('id',id);
+  await loadProtocols();
 }
 
 async function flashSave(btn){
