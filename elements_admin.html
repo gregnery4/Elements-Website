@@ -2726,7 +2726,7 @@ function _doBuildPDF(jsPDF, c, setMsg){
     const pStart    =document.getElementById('ov-start-1')?.value||'—';
     const pEnd      =document.getElementById('ov-end-1')?.value||'—';
     const goalBF    =document.getElementById('dp-goal-bf')?.value||'—';
-    const goalWt    =document.getElementById('dp-goal-wt')?.value||'—';
+    const goalWt    =document.getElementById('dp-goal-weight')?.value||'—';
     const wtLose    =bw!=='—'&&goalWt!=='—'?(parseFloat(bw)-parseFloat(goalWt)).toFixed(1):'—';
     const wkLoss    =wtLose!=='—'&&pDur!=='—'?(parseFloat(wtLose)/parseFloat(pDur)).toFixed(2):'—';
 
@@ -3352,7 +3352,6 @@ function loadSuppProtocol(supps){
 // ── PROTOCOLS ──────────────────────────────────────────────
 
 function gatherCurrentProtocol(){
-  // Gather full state of tabs 2-8
   const mealCount=parseInt(document.getElementById('dp-meal-count')?.value)||4;
   const meals=[];
   for(let i=1;i<=mealCount;i++){
@@ -3368,16 +3367,13 @@ function gatherCurrentProtocol(){
   }
   const supps=(currentClient?.supplements||[]).map(s=>({name:s.name,dose:s.dose,timing:s.timing}));
   return {
-    // Body comp
     body_weight:parseFloat(document.getElementById('dp-weight')?.value)||null,
     body_fat:parseFloat(document.getElementById('dp-bf')?.value)||null,
     lean_mass:parseFloat(document.getElementById('dp-lean')?.value)||null,
     fat_mass:parseFloat(document.getElementById('dp-fat-mass')?.value)||null,
-    // Goal setting
     goal_bf:parseFloat(document.getElementById('dp-goal-bf')?.value)||null,
-    goal_weight:parseFloat(document.getElementById('dp-goal-wt')?.value)||null,
+    goal_weight:parseFloat(document.getElementById('dp-goal-weight')?.value)||null,
     phase_duration_weeks:parseInt(document.getElementById('dp-phase-wks')?.value)||null,
-    // Nutrition
     calories:parseInt(document.getElementById('dp-cals')?.value)||null,
     protein_g:parseInt(document.getElementById('res-prot')?.textContent)||null,
     carbs_g:parseInt(document.getElementById('res-carb')?.textContent)||null,
@@ -3386,13 +3382,10 @@ function gatherCurrentProtocol(){
     carb_pct:parseFloat(document.getElementById('dp-carb-pct')?.value)||null,
     fat_pct:parseFloat(document.getElementById('dp-fat-pct')?.value)||null,
     ref_weight:parseFloat(document.getElementById('dp-ref-weight')?.value)||null,
-    maintenance_multiplier:parseFloat(document.getElementById('dp-maint-mult')?.value)||null,
-    // Meals
+    maintenance_multiplier:parseFloat(document.getElementById('dp-maintenance')?.value)||null,
     meal_count:mealCount,
     meals:JSON.stringify(meals),
-    // Supplements
     supplements:JSON.stringify(supps),
-    // Summary
     goal:document.getElementById('ov-goal-1')?.value||null,
     protocol_start:document.getElementById('ov-start-1')?.value||null,
     protocol_end:document.getElementById('ov-end-1')?.value||null,
@@ -3413,12 +3406,19 @@ async function saveProtocol(){
   if(!name){msg.style.color='var(--red)';msg.textContent='Enter a protocol name.';return;}
   msg.style.color='var(--gold)';msg.textContent='Saving...';
   const data=gatherCurrentProtocol();
+  console.log('Saving protocol data:', data);
   const{error}=await sb.from('protocols').insert({
     client_id:currentClient.id,
-    name,notes:notes||null,
+    name,
+    notes:notes||null,
     ...data,
   });
-  if(error){msg.style.color='var(--red)';msg.textContent='Error: '+error.message;return;}
+  if(error){
+    msg.style.color='var(--red)';
+    msg.textContent='Error: '+error.message;
+    console.error('Protocol save error:',error);
+    return;
+  }
   msg.style.color='var(--green)';msg.textContent='✓ Protocol saved.';
   document.getElementById('proto-name').value='';
   document.getElementById('proto-notes').value='';
@@ -3515,23 +3515,24 @@ async function applyProtocol(id){
   // ── Body Composition ──
   if(p.body_weight) document.getElementById('dp-weight').value=p.body_weight;
   if(p.body_fat)    document.getElementById('dp-bf').value=p.body_fat;
+  calcGoals();
 
   // ── Goal Setting ──
-  if(p.goal_bf)              document.getElementById('dp-goal-bf').value=p.goal_bf;
-  if(p.goal_weight)          document.getElementById('dp-goal-wt').value=p.goal_weight;
+  if(p.goal_bf)             document.getElementById('dp-goal-bf').value=p.goal_bf;
   if(p.phase_duration_weeks){
     document.getElementById('dp-phase-wks').value=p.phase_duration_weeks;
     const ovDur=document.getElementById('ov-dur-1');
     if(ovDur) ovDur.value=p.phase_duration_weeks;
+    calcEndDate();
   }
   calcGoals();
 
   // ── Nutrition ──
+  if(p.ref_weight)            document.getElementById('dp-ref-weight').value=p.ref_weight;
+  if(p.maintenance_multiplier)document.getElementById('dp-maintenance').value=p.maintenance_multiplier;
   if(p.protein_pct)           document.getElementById('dp-prot-pct').value=p.protein_pct;
   if(p.carb_pct)              document.getElementById('dp-carb-pct').value=p.carb_pct;
   if(p.fat_pct)               document.getElementById('dp-fat-pct').value=p.fat_pct;
-  if(p.ref_weight)            document.getElementById('dp-ref-weight').value=p.ref_weight;
-  if(p.maintenance_multiplier)document.getElementById('dp-maint-mult').value=p.maintenance_multiplier;
   calcCalories();
 
   // ── Meal Design ──
