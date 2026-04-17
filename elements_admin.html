@@ -510,10 +510,10 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           <div class="dp-sec-title">Training Program Design</div>
           <div class="edit-grid">
             <div class="edit-field"><label>Training Frequency</label>
-              <select id="ov-freq"><option>2x</option><option>3x</option><option>4x</option><option>5x</option></select>
+              <select id="ov-freq" onchange="syncSummaryHeader()"><option>2x</option><option>3x</option><option>4x</option><option>5x</option></select>
             </div>
             <div class="edit-field"><label>Training Method</label>
-              <select id="ov-method">
+              <select id="ov-method" onchange="syncSummaryHeader()">
                 <option>German Body Composition</option>
                 <option>Total Body</option>
                 <option>U/L - Agonist/Antagonist</option>
@@ -522,7 +522,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
               </select>
             </div>
             <div class="edit-field"><label>Training Focus</label>
-              <select id="ov-priority">
+              <select id="ov-priority" onchange="syncSummaryHeader()">
                 <option>Upper Focus</option>
                 <option>Lower Focus</option>
                 <option>Chest Focus</option>
@@ -639,6 +639,25 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             <div style="background:var(--c2);border:1px solid var(--border);padding:16px;text-align:center">
               <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">DEXA Scan</div>
               <div style="font-size:13px;font-weight:500;color:var(--white)" id="sum-dexa-freq">—</div>
+            </div>
+          </div>
+          <!-- Row 5: Training program design (auto-populated from tab 9) -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:2px">
+            <div style="background:var(--c3);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Training Frequency</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold)" id="sum-train-freq">—</div>
+            </div>
+            <div style="background:var(--c3);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Training Method</div>
+              <div style="font-size:12px;font-weight:500;color:var(--white)" id="sum-train-method">—</div>
+            </div>
+            <div style="background:var(--c3);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Training Focus</div>
+              <div style="font-size:12px;font-weight:500;color:var(--white)" id="sum-train-focus">—</div>
+            </div>
+            <div style="background:var(--c3);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Training Days</div>
+              <div style="font-size:10px;font-weight:500;color:var(--white)" id="sum-train-days">—</div>
             </div>
           </div>
         </div>
@@ -3842,6 +3861,20 @@ function syncSummaryHeader(){
   if(el_cf)  el_cf.textContent  = circFreq;
   if(el_sf)  el_sf.textContent  = skinFreq;
   if(el_df)  el_df.textContent  = dexaFreq;
+
+  // Training program from tab 9
+  const trainFreq  = document.getElementById('ov-freq')?.value||'—';
+  const trainMeth  = document.getElementById('ov-method')?.value||'—';
+  const trainFocus = document.getElementById('ov-priority')?.value||'—';
+  const trainDays  = getTrainingDays()||'—';
+  const el_tf  = document.getElementById('sum-train-freq');
+  const el_tm  = document.getElementById('sum-train-method');
+  const el_tfo = document.getElementById('sum-train-focus');
+  const el_td  = document.getElementById('sum-train-days');
+  if(el_tf)  el_tf.textContent  = trainFreq;
+  if(el_tm)  el_tm.textContent  = trainMeth;
+  if(el_tfo) el_tfo.textContent = trainFocus;
+  if(el_td)  el_td.textContent  = trainDays;
 }
 
 async function flashSave(btn){
