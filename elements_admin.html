@@ -443,15 +443,16 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
     </div>
     <div class="dp-tabs" style="overflow-x:auto;flex-wrap:nowrap;">
       <div class="dp-tab on" onclick="dpTab('t1',this)">1. General Information</div>
-      <div class="dp-tab" onclick="dpTab('t7',this)">2. Body Composition</div>
-      <div class="dp-tab" onclick="dpTab('t3',this)">3. Goal Setting</div>
-      <div class="dp-tab" onclick="dpTab('t4',this)">4. Nutrition Overview</div>
-      <div class="dp-tab" onclick="dpTab('t5',this)">5. Meal Design</div>
-      <div class="dp-tab" onclick="dpTab('t11',this)">6. Meal Plan</div>
-      <div class="dp-tab" onclick="dpTab('t8',this)">7. Supplement Protocol</div>
-      <div class="dp-tab" onclick="dpTab('t2',this)">8. Summary</div>
-      <div class="dp-tab" onclick="dpTab('t6',this)">9. Data Review</div>
-      <div class="dp-tab" onclick="dpTab('t9',this)">10. Elements Protocols</div>
+      <div class="dp-tab" onclick="dpTab('t12',this)">2. Health Protocol Selection</div>
+      <div class="dp-tab" onclick="dpTab('t7',this)">3. Body Composition</div>
+      <div class="dp-tab" onclick="dpTab('t3',this)">4. Goal Setting</div>
+      <div class="dp-tab" onclick="dpTab('t4',this)">5. Nutrition Overview</div>
+      <div class="dp-tab" onclick="dpTab('t5',this)">6. Meal Design</div>
+      <div class="dp-tab" onclick="dpTab('t11',this)">7. Meal Plan</div>
+      <div class="dp-tab" onclick="dpTab('t8',this)">8. Supplement Protocol</div>
+      <div class="dp-tab" onclick="dpTab('t2',this)">9. Summary</div>
+      <div class="dp-tab" onclick="dpTab('t6',this)">10. Data Review</div>
+      <div class="dp-tab" onclick="dpTab('t9',this)">11. Elements Protocols</div>
     </div>
     <div class="dp-body">
 
@@ -500,6 +501,13 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
         </div>
         <button class="save-btn" onclick="saveClient()">Save Client Info →</button>
         <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-save-msg"></div>
+      </div>
+
+      <!-- TAB 12: HEALTH PROTOCOL SELECTION -->
+      <div id="dptab-t12" style="display:none">
+        <div class="dp-sec">
+          <div class="dp-sec-title">Health Protocol Selection</div>
+        </div>
       </div>
 
       <!-- TAB 2: HEALTH SYSTEM OVERVIEW -->
