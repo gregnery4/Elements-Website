@@ -683,6 +683,28 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       <!-- TAB 4: DAILY CALORIE CALCULATOR -->
       <div id="dptab-t4" style="display:none">
         <div class="dp-sec">
+          <div class="dp-sec-title">Nutrition Approach</div>
+          <div class="edit-grid">
+            <div class="edit-field"><label>Nutrition Approach</label>
+              <select id="ov-nut-approach" onchange="syncSummaryHeader()">
+                <option>Prepare + Portion Control</option>
+                <option>Prepare + Weigh Food</option>
+                <option>Meals Out + Portion Control</option>
+                <option>Meals Out + Elimination</option>
+                <option>Meal Prep Service</option>
+                <option>Hybrid</option>
+              </select>
+            </div>
+            <div class="edit-field"><label>Tracking Responsibility</label>
+              <select id="ov-tracking" onchange="syncSummaryHeader()">
+                <option>Full Calorie Counting</option>
+                <option>Pictures of Meals</option>
+                <option>Discussion Based</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="dp-sec">
           <div class="dp-sec-title">Daily Calorie Calculator</div>
           <div class="edit-grid">
             <div class="edit-field"><label>Referenced Weight (lbs)</label><input type="number" id="dp-ref-weight" step="0.1" placeholder="auto from goals" oninput="calcCalories()"></div>
@@ -709,28 +731,6 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
         </div>
         <button class="save-btn" onclick="saveNutrition()">Save Nutrition Targets →</button>
         <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-nut-msg"></div>
-        <div class="dp-sec" style="margin-top:24px">
-          <div class="dp-sec-title">Nutrition Approach</div>
-          <div class="edit-grid">
-            <div class="edit-field"><label>Nutrition Approach</label>
-              <select id="ov-nut-approach" onchange="syncSummaryHeader()">
-                <option>Prepare + Portion Control</option>
-                <option>Prepare + Weigh Food</option>
-                <option>Meals Out + Portion Control</option>
-                <option>Meals Out + Elimination</option>
-                <option>Meal Prep Service</option>
-                <option>Hybrid</option>
-              </select>
-            </div>
-            <div class="edit-field"><label>Tracking Responsibility</label>
-              <select id="ov-tracking" onchange="syncSummaryHeader()">
-                <option>Full Calorie Counting</option>
-                <option>Pictures of Meals</option>
-                <option>Discussion Based</option>
-              </select>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- TAB 5: MEAL DESIGN -->
@@ -1075,8 +1075,6 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             <div class="edit-grid" id="cm-inputs-grid"></div>
           </div>
         </div>
-        <button class="save-btn" onclick="saveBodyComp()">Save Assessment →</button>
-        <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="bc-msg"></div>
         <div class="dp-sec" style="margin-top:24px">
           <div class="dp-sec-title">Body Composition Assessment Schedule</div>
           <div class="edit-grid">
@@ -1109,9 +1107,9 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             </div>
           </div>
         </div>
+        <button class="save-btn" onclick="saveBodyComp()">Save Assessment →</button>
+        <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="bc-msg"></div>
       </div>
-
-      <!-- TAB 8: SUPPLEMENTS -->
       <div id="dptab-t8" style="display:none">
         <div class="dp-sec">
           <div class="dp-sec-title">Supplement Protocol</div>
