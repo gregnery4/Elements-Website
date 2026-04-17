@@ -450,9 +450,10 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       <div class="dp-tab" onclick="dpTab('t5',this)">6. Meal Design</div>
       <div class="dp-tab" onclick="dpTab('t8',this)">7. Supplement Design</div>
       <div class="dp-tab" onclick="dpTab('t11',this)">8. Meal Plan</div>
-      <div class="dp-tab" onclick="dpTab('t2',this)">9. Summary</div>
-      <div class="dp-tab" onclick="dpTab('t6',this)">10. Data Review</div>
-      <div class="dp-tab" onclick="dpTab('t9',this)">11. Elements Protocols</div>
+      <div class="dp-tab" onclick="dpTab('t13',this)">9. Training Program Design</div>
+      <div class="dp-tab" onclick="dpTab('t2',this)">10. Summary</div>
+      <div class="dp-tab" onclick="dpTab('t6',this)">11. Data Review</div>
+      <div class="dp-tab" onclick="dpTab('t9',this)">12. Elements Protocols</div>
     </div>
     <div class="dp-body">
 
@@ -527,32 +528,10 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
         </div>
       </div>
 
-      <!-- TAB 2: HEALTH SYSTEM OVERVIEW -->
-      <div id="dptab-t2" style="display:none">
+      <!-- TAB 13: TRAINING PROGRAM DESIGN -->
+      <div id="dptab-t13" style="display:none">
         <div class="dp-sec">
-          <div class="dp-sec-title">Elements Health System Summary</div>
-          <!-- Auto-populated from tabs 2 & 4 -->
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:8px" id="summary-header-cards">
-            <div style="background:var(--c3);border:1px solid var(--border);padding:16px;text-align:center">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Goal</div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold)" id="sum-goal">—</div>
-            </div>
-            <div style="background:var(--c3);border:1px solid var(--border);padding:16px;text-align:center">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Start Date</div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--gold)" id="sum-start">—</div>
-            </div>
-            <div style="background:var(--c3);border:1px solid var(--border);padding:16px;text-align:center">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Phase Duration</div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold)" id="sum-duration">—</div>
-            </div>
-            <div style="background:var(--c3);border:1px solid var(--border);padding:16px;text-align:center">
-              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Proposed End Date</div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--gold)" id="sum-end">—</div>
-            </div>
-          </div>
-        </div>
-        <div class="dp-sec">
-          <div class="dp-sec-title">Training Parameters</div>
+          <div class="dp-sec-title">Training Program Design</div>
           <div class="edit-grid">
             <div class="edit-field"><label>Training Frequency</label>
               <select id="ov-freq"><option>2x</option><option>3x</option><option>4x</option><option>5x</option></select>
@@ -577,6 +556,32 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
                 <option>Hamstrings Focus</option>
                 <option>Glute Focus</option>
               </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: HEALTH SYSTEM OVERVIEW -->
+      <div id="dptab-t2" style="display:none">
+        <div class="dp-sec">
+          <div class="dp-sec-title">Elements Health System Summary</div>
+          <!-- Auto-populated from tabs 2 & 4 -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:8px" id="summary-header-cards">
+            <div style="background:var(--c3);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Goal</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold)" id="sum-goal">—</div>
+            </div>
+            <div style="background:var(--c3);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Start Date</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--gold)" id="sum-start">—</div>
+            </div>
+            <div style="background:var(--c3);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Phase Duration</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold)" id="sum-duration">—</div>
+            </div>
+            <div style="background:var(--c3);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Proposed End Date</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--gold)" id="sum-end">—</div>
             </div>
           </div>
         </div>
