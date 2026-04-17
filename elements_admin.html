@@ -502,30 +502,6 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           <input type="hidden" id="ov-end-1">
           <input type="hidden" id="ov-dur-1">
         </div>
-        <div class="dp-sec">
-          <div class="dp-sec-title">Training Days &amp; Time</div>
-          <div class="edit-grid">
-            <div class="edit-field" style="grid-column:1/-1">
-              <label>Training Days</label>
-              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:8px" id="dp-training-days-wrap">
-                <label class="day-pill" id="day-lbl-mon"><input type="checkbox" id="day-mon" value="Monday" onchange="updateDayStyle('mon')"> Monday</label>
-                <label class="day-pill" id="day-lbl-tue"><input type="checkbox" id="day-tue" value="Tuesday" onchange="updateDayStyle('tue')"> Tuesday</label>
-                <label class="day-pill" id="day-lbl-wed"><input type="checkbox" id="day-wed" value="Wednesday" onchange="updateDayStyle('wed')"> Wednesday</label>
-                <label class="day-pill" id="day-lbl-thu"><input type="checkbox" id="day-thu" value="Thursday" onchange="updateDayStyle('thu')"> Thursday</label>
-                <label class="day-pill" id="day-lbl-fri"><input type="checkbox" id="day-fri" value="Friday" onchange="updateDayStyle('fri')"> Friday</label>
-                <label class="day-pill" id="day-lbl-sat"><input type="checkbox" id="day-sat" value="Saturday" onchange="updateDayStyle('sat')"> Saturday</label>
-                <label class="day-pill" id="day-lbl-sun"><input type="checkbox" id="day-sun" value="Sunday" onchange="updateDayStyle('sun')"> Sunday</label>
-              </div>
-              <div id="dp-days-saved" style="display:none;flex-wrap:wrap;gap:6px;margin-top:10px"></div>
-              <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-                <button onclick="saveDays()" style="padding:8px 20px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600;transition:all .3s">Save Days</button>
-                <button onclick="editDays()" id="dp-days-edit-btn" style="display:none;padding:8px 16px;background:transparent;color:var(--muted);border:1px solid var(--borderw);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;transition:all .3s">Edit</button>
-                <span id="dp-days-msg" style="font-size:10px;color:var(--green);min-height:16px"></span>
-              </div>
-            </div>
-            <div class="edit-field"><label>Training Time</label><input type="time" id="dp-training-time"></div>
-          </div>
-        </div>
       </div>
 
       <!-- TAB 13: TRAINING PROGRAM DESIGN -->
@@ -557,6 +533,30 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
                 <option>Glute Focus</option>
               </select>
             </div>
+          </div>
+        </div>
+        <div class="dp-sec">
+          <div class="dp-sec-title">Training Days &amp; Time</div>
+          <div class="edit-grid">
+            <div class="edit-field" style="grid-column:1/-1">
+              <label>Training Days</label>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:8px" id="dp-training-days-wrap">
+                <label class="day-pill" id="day-lbl-mon"><input type="checkbox" id="day-mon" value="Monday" onchange="updateDayStyle('mon')"> Monday</label>
+                <label class="day-pill" id="day-lbl-tue"><input type="checkbox" id="day-tue" value="Tuesday" onchange="updateDayStyle('tue')"> Tuesday</label>
+                <label class="day-pill" id="day-lbl-wed"><input type="checkbox" id="day-wed" value="Wednesday" onchange="updateDayStyle('wed')"> Wednesday</label>
+                <label class="day-pill" id="day-lbl-thu"><input type="checkbox" id="day-thu" value="Thursday" onchange="updateDayStyle('thu')"> Thursday</label>
+                <label class="day-pill" id="day-lbl-fri"><input type="checkbox" id="day-fri" value="Friday" onchange="updateDayStyle('fri')"> Friday</label>
+                <label class="day-pill" id="day-lbl-sat"><input type="checkbox" id="day-sat" value="Saturday" onchange="updateDayStyle('sat')"> Saturday</label>
+                <label class="day-pill" id="day-lbl-sun"><input type="checkbox" id="day-sun" value="Sunday" onchange="updateDayStyle('sun')"> Sunday</label>
+              </div>
+              <div id="dp-days-saved" style="display:none;flex-wrap:wrap;gap:6px;margin-top:10px"></div>
+              <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+                <button onclick="saveDays()" style="padding:8px 20px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600;transition:all .3s">Save Days</button>
+                <button onclick="editDays()" id="dp-days-edit-btn" style="display:none;padding:8px 16px;background:transparent;color:var(--muted);border:1px solid var(--borderw);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;transition:all .3s">Edit</button>
+                <span id="dp-days-msg" style="font-size:10px;color:var(--green);min-height:16px"></span>
+              </div>
+            </div>
+            <div class="edit-field"><label>Training Time</label><input type="time" id="dp-training-time"></div>
           </div>
         </div>
       </div>
