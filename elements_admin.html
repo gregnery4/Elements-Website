@@ -264,14 +264,14 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
     <div class="lsub">Restricted access — authorized personnel only</div>
     <div class="lfield">
       <label>Email</label>
-      <input type="email" id="a-email" placeholder="coach@elements-pt.com" autocomplete="email">
+      <input type="email" id="a-email" placeholder="coach@elements-pt.com" autocomplete="email" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <div class="lfield">
       <label>Password</label>
-      <input type="password" id="a-pass" placeholder="••••••••" autocomplete="current-password">
+      <input type="password" id="a-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
-    <div class="lerr" id="a-err"></div>
-    <div class="ldebug" id="a-debug"></div>
+    <div class="lerr" id="a-err" style="min-height:18px;font-size:12px;color:#CF6679;margin-bottom:8px;word-break:break-word"></div>
+    <div class="ldebug" id="a-debug" style="min-height:14px;font-size:10px;color:#8A8278;margin-bottom:6px"></div>
     <button class="lbtn" id="a-btn" onclick="doLogin()">Access Dashboard →</button>
     <button class="lbtn-sec" onclick="testJS()">Test Connection</button>
   </div>
@@ -489,13 +489,13 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           <div class="dp-sec-title">Protocol</div>
           <div class="edit-grid">
             <div class="edit-field"><label>Goal</label>
-              <select id="ov-goal-1">
+              <select id="ov-goal-1" onchange="syncSummaryHeader()">
                 <option>Fat Loss</option>
                 <option>Maintenance</option>
                 <option>Growth</option>
               </select>
             </div>
-            <div class="edit-field"><label>Start Date</label><input type="date" id="ov-start-1" oninput="calcEndDate()"></div>
+            <div class="edit-field"><label>Start Date</label><input type="date" id="ov-start-1" oninput="calcEndDate();syncSummaryHeader()"></div>
           </div>
           <!-- Hidden fields used by Goal Setting and PDF — do not remove -->
           <input type="hidden" id="ov-end-1">
@@ -530,7 +530,26 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       <!-- TAB 2: HEALTH SYSTEM OVERVIEW -->
       <div id="dptab-t2" style="display:none">
         <div class="dp-sec">
-          <div class="dp-sec-title">Elements Health System — Protocol Overview</div>
+          <div class="dp-sec-title">Elements Health System Summary</div>
+          <!-- Auto-populated from tabs 2 & 4 -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:8px" id="summary-header-cards">
+            <div style="background:var(--c3);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Goal</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold)" id="sum-goal">—</div>
+            </div>
+            <div style="background:var(--c3);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Start Date</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--gold)" id="sum-start">—</div>
+            </div>
+            <div style="background:var(--c3);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Phase Duration</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold)" id="sum-duration">—</div>
+            </div>
+            <div style="background:var(--c3);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Proposed End Date</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--gold)" id="sum-end">—</div>
+            </div>
+          </div>
         </div>
         <div class="dp-sec">
           <div class="dp-sec-title">Training Parameters</div>
@@ -641,7 +660,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             <div class="edit-field"><label>Goal Body Fat %</label><input type="number" id="dp-goal-bf" step="0.5" placeholder="15" oninput="calcGoals()"></div>
             <div class="edit-field"><label>Goal Body Weight (lbs)</label><input type="number" id="dp-goal-weight" step="0.1" placeholder="auto" readonly style="opacity:.6"></div>
             <div class="edit-field"><label>Required Weight Loss (lbs)</label><input type="number" id="dp-wt-loss" step="0.1" placeholder="auto" readonly style="opacity:.6"></div>
-            <div class="edit-field"><label>Phase Duration (wks)</label><input type="number" id="dp-phase-wks" placeholder="13" oninput="calcGoals();const ovDur=document.getElementById('ov-dur-1');if(ovDur){ovDur.value=this.value;}calcEndDate();"></div>
+            <div class="edit-field"><label>Phase Duration (wks)</label><input type="number" id="dp-phase-wks" placeholder="13" oninput="calcGoals();const ovDur=document.getElementById('ov-dur-1');if(ovDur){ovDur.value=this.value;}calcEndDate();syncSummaryHeader();"></div>
             <div class="edit-field"><label>BW % Reduction / Week</label><input type="number" id="dp-bw-pct" step="0.001" placeholder="auto" readonly style="opacity:.6"></div>
           </div>
         </div>
@@ -1161,18 +1180,42 @@ async function doLogin(){
   const pass=document.getElementById('a-pass').value;
   const btn=document.getElementById('a-btn');
   err('');dbg('');
-  if(!email||!pass){err('Please enter your email and password.');return;}
+  if(!email){err('Please enter your email.');return;}
+  if(!pass){err('Please enter your password.');return;}
   btn.disabled=true;btn.textContent='Signing in...';
+  dbg('Connecting to Supabase...');
   try{
     const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
-    if(error){err(error.message);btn.disabled=false;btn.textContent='Access Dashboard →';return;}
-    dbg('Signed in — checking role...');
+    if(error){
+      err('Login failed: '+error.message);
+      btn.disabled=false;btn.textContent='Access Dashboard →';
+      dbg('');
+      return;
+    }
+    dbg('Authenticated — checking role...');
     const{data:p,error:pe}=await sb.from('profiles').select('role,full_name,email').eq('id',data.user.id).single();
-    if(pe){err('Profile error: '+pe.message+'. Run the SQL setup in Supabase first.');btn.disabled=false;btn.textContent='Access Dashboard →';dbg('');return;}
-    if(!p||p.role!=='admin'){err('Access denied. Role is "'+( p?.role||'none')+'". Go to Supabase → Table Editor → profiles → set your role to "admin".');await sb.auth.signOut();btn.disabled=false;btn.textContent='Access Dashboard →';dbg('');return;}
+    if(pe){
+      err('Profile error: '+pe.message);
+      btn.disabled=false;btn.textContent='Access Dashboard →';
+      dbg('User ID: '+data.user.id);
+      return;
+    }
+    if(!p||p.role!=='admin'){
+      err('Access denied — role is "'+( p?.role||'none')+'". Your account needs admin role in Supabase.');
+      await sb.auth.signOut();
+      btn.disabled=false;btn.textContent='Access Dashboard →';
+      dbg('');
+      return;
+    }
+    dbg('');
     showApp(p);
     loadAll();
-  }catch(e){err('Unexpected error: '+e.message);btn.disabled=false;btn.textContent='Access Dashboard →';dbg('');}
+  }catch(e){
+    err('Unexpected error: '+e.message);
+    btn.disabled=false;btn.textContent='Access Dashboard →';
+    dbg('Check browser console (F12) for details');
+    console.error('Login error:',e);
+  }
 }
 
 function showApp(p){
@@ -1369,6 +1412,7 @@ function openClient(id){
     if(ov.skinfold_frequency) document.getElementById('ov-skin-freq').value=ov.skinfold_frequency;
     if(ov.dexa_frequency) document.getElementById('ov-dexa-freq').value=ov.dexa_frequency;
   }
+  syncSummaryHeader();
 
   // Meal Plan — load into meal design fields
   const mp=c.meal_plans?.[0]||c.meal_plans||null;
@@ -1408,6 +1452,7 @@ function dpTab(name,el){
   if(name==='t11')generateMealPlan();
   if(name==='t6')loadBWScheduledDays();
   if(name==='t9')loadProtocols();
+  if(name==='t2')syncSummaryHeader();
 }
 
 function generateMealPlan(){
@@ -3670,6 +3715,38 @@ async function deleteProtocol(id){
   if(!confirm('Delete this protocol? This cannot be undone.')) return;
   await sb.from('protocols').delete().eq('id',id);
   await loadProtocols();
+}
+
+function syncSummaryHeader(){
+  // Goal from tab 2
+  const goal = document.getElementById('ov-goal-1')?.value||'—';
+  const sumGoal = document.getElementById('sum-goal');
+  if(sumGoal) sumGoal.textContent = goal;
+
+  // Start date from tab 2
+  const startRaw = document.getElementById('ov-start-1')?.value||'';
+  const sumStart = document.getElementById('sum-start');
+  if(sumStart) sumStart.textContent = startRaw
+    ? new Date(startRaw).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+    : '—';
+
+  // Phase duration from tab 4 (dp-phase-wks) — also stored in hidden ov-dur-1
+  const durWks = document.getElementById('dp-phase-wks')?.value
+    || document.getElementById('ov-dur-1')?.value || '';
+  const sumDur = document.getElementById('sum-duration');
+  if(sumDur) sumDur.textContent = durWks ? durWks+' wks' : '—';
+
+  // Proposed end date — calculated from start + duration
+  const sumEnd = document.getElementById('sum-end');
+  if(sumEnd){
+    if(startRaw && durWks){
+      const end = new Date(startRaw);
+      end.setDate(end.getDate() + parseInt(durWks)*7);
+      sumEnd.textContent = end.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    } else {
+      sumEnd.textContent = '—';
+    }
+  }
 }
 
 async function flashSave(btn){
