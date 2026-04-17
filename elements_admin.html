@@ -609,24 +609,15 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           </div>
         </div>
         <div class="dp-sec">
-          <div class="dp-sec-title">Nutrition Parameters</div>
-          <div class="edit-grid">
-            <div class="edit-field"><label>Nutrition Approach</label>
-              <select id="ov-nut-approach">
-                <option>Prepare + Portion Control</option>
-                <option>Prepare + Weigh Food</option>
-                <option>Meals Out + Portion Control</option>
-                <option>Meals Out + Elimination</option>
-                <option>Meal Prep Service</option>
-                <option>Hybrid</option>
-              </select>
+          <!-- Row 3: Nutrition approach cards (auto-populated from tab 5) -->
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:2px;margin-top:2px">
+            <div style="background:var(--c2);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Nutrition Approach</div>
+              <div style="font-size:13px;font-weight:500;color:var(--white)" id="sum-nut-approach">—</div>
             </div>
-            <div class="edit-field"><label>Tracking Responsibility</label>
-              <select id="ov-tracking">
-                <option>Full Calorie Counting</option>
-                <option>Pictures of Meals</option>
-                <option>Discussion Based</option>
-              </select>
+            <div style="background:var(--c2);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Tracking Responsibility</div>
+              <div style="font-size:13px;font-weight:500;color:var(--white)" id="sum-tracking">—</div>
             </div>
           </div>
         </div>
@@ -729,6 +720,28 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
         </div>
         <button class="save-btn" onclick="saveNutrition()">Save Nutrition Targets →</button>
         <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-nut-msg"></div>
+        <div class="dp-sec" style="margin-top:24px">
+          <div class="dp-sec-title">Nutrition Approach</div>
+          <div class="edit-grid">
+            <div class="edit-field"><label>Nutrition Approach</label>
+              <select id="ov-nut-approach" onchange="syncSummaryHeader()">
+                <option>Prepare + Portion Control</option>
+                <option>Prepare + Weigh Food</option>
+                <option>Meals Out + Portion Control</option>
+                <option>Meals Out + Elimination</option>
+                <option>Meal Prep Service</option>
+                <option>Hybrid</option>
+              </select>
+            </div>
+            <div class="edit-field"><label>Tracking Responsibility</label>
+              <select id="ov-tracking" onchange="syncSummaryHeader()">
+                <option>Full Calorie Counting</option>
+                <option>Pictures of Meals</option>
+                <option>Discussion Based</option>
+              </select>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- TAB 5: MEAL DESIGN -->
@@ -3788,6 +3801,14 @@ function syncSummaryHeader(){
   const el_gwt = document.getElementById('sum-goal-wt');
   if(el_gbf) el_gbf.textContent = goalBf||'—';
   if(el_gwt) el_gwt.textContent = goalWt||'—';
+
+  // Nutrition approach & tracking from tab 5
+  const nutAppr = document.getElementById('ov-nut-approach')?.value||'—';
+  const nutTrack = document.getElementById('ov-tracking')?.value||'—';
+  const el_na = document.getElementById('sum-nut-approach');
+  const el_nt = document.getElementById('sum-tracking');
+  if(el_na) el_na.textContent = nutAppr;
+  if(el_nt) el_nt.textContent = nutTrack;
 }
 
 async function flashSave(btn){
