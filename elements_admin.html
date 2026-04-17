@@ -1499,14 +1499,17 @@ function generateMealPlan(){
     </div>`;
   }
 
-  // Daily totals summary bar
-  let totProt=0,totCarb=0,totFat=0;
+  // Daily totals — sum the same values shown in each meal's macro boxes
+  let totProt=0,totCarb=0,totFat=0,totCals=0;
   for(let i=1;i<=count;i++){
-    totProt+=parseInt(document.getElementById(`m${i}-prot`)?.value)||0;
-    totCarb+=parseInt(document.getElementById(`m${i}-carb`)?.value)||0;
-    totFat+=parseInt(document.getElementById(`m${i}-fat`)?.value)||0;
+    const mp=parseInt(document.getElementById(`m${i}-prot`)?.value)||0;
+    const mc=parseInt(document.getElementById(`m${i}-carb`)?.value)||0;
+    const mf=parseInt(document.getElementById(`m${i}-fat`)?.value)||0;
+    totProt+=mp;
+    totCarb+=mc;
+    totFat+=mf;
+    totCals+=(mp*4)+(mc*4)+(mf*9);
   }
-  const totCals=(totProt*4)+(totCarb*4)+(totFat*9);
 
   html+=`
   <div style="background:var(--c1);border:1px solid rgba(201,168,108,.3);padding:18px 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:3px">
