@@ -622,34 +622,23 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           </div>
         </div>
         <div class="dp-sec">
-          <div class="dp-sec-title">Body Composition Assessment Schedule</div>
-          <div class="edit-grid">
-            <div class="edit-field" style="grid-column:1/-1">
-              <label>Bodyweight Recording Days</label>
-              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:8px" id="bw-days-wrap">
-                <label class="day-pill" id="bw-lbl-mon"><input type="checkbox" id="bw-mon" value="Monday" onchange="updateBWDay('mon')"> Monday</label>
-                <label class="day-pill" id="bw-lbl-tue"><input type="checkbox" id="bw-tue" value="Tuesday" onchange="updateBWDay('tue')"> Tuesday</label>
-                <label class="day-pill" id="bw-lbl-wed"><input type="checkbox" id="bw-wed" value="Wednesday" onchange="updateBWDay('wed')"> Wednesday</label>
-                <label class="day-pill" id="bw-lbl-thu"><input type="checkbox" id="bw-thu" value="Thursday" onchange="updateBWDay('thu')"> Thursday</label>
-                <label class="day-pill" id="bw-lbl-fri"><input type="checkbox" id="bw-fri" value="Friday" onchange="updateBWDay('fri')"> Friday</label>
-                <label class="day-pill" id="bw-lbl-sat"><input type="checkbox" id="bw-sat" value="Saturday" onchange="updateBWDay('sat')"> Saturday</label>
-                <label class="day-pill" id="bw-lbl-sun"><input type="checkbox" id="bw-sun" value="Sunday" onchange="updateBWDay('sun')"> Sunday</label>
-              </div>
-              <div id="bw-days-saved" style="display:none;flex-wrap:wrap;gap:6px;margin-top:10px"></div>
-              <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
-                <button onclick="saveBWDays()" style="padding:8px 20px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600">Save Days</button>
-                <button onclick="editBWDays()" id="bw-days-edit-btn" style="display:none;padding:8px 16px;background:transparent;color:var(--muted);border:1px solid var(--borderw);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase">Edit</button>
-                <span id="bw-days-msg" style="font-size:10px;color:var(--green);min-height:16px"></span>
-              </div>
+          <!-- Row 4: Assessment schedule cards (auto-populated from tab 3) -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:2px">
+            <div style="background:var(--c2);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">BW Recording Days</div>
+              <div style="font-size:11px;font-weight:500;color:var(--white)" id="sum-bw-days">—</div>
             </div>
-            <div class="edit-field"><label>Circumference Frequency</label>
-              <select id="ov-circ-freq"><option>1x/Month</option><option>Bi-Weekly</option><option>Weekly</option></select>
+            <div style="background:var(--c2);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Circumference</div>
+              <div style="font-size:13px;font-weight:500;color:var(--white)" id="sum-circ-freq">—</div>
             </div>
-            <div class="edit-field"><label>Caliper Skinfolds Frequency</label>
-              <select id="ov-skin-freq"><option>Bi-Weekly</option><option>Monthly</option><option>Weekly</option></select>
+            <div style="background:var(--c2);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Skinfolds</div>
+              <div style="font-size:13px;font-weight:500;color:var(--white)" id="sum-skin-freq">—</div>
             </div>
-            <div class="edit-field"><label>DEXA Scan Frequency</label>
-              <select id="ov-dexa-freq"><option>Quarterly</option><option>Every 6 Months</option><option>Annually</option></select>
+            <div style="background:var(--c2);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">DEXA Scan</div>
+              <div style="font-size:13px;font-weight:500;color:var(--white)" id="sum-dexa-freq">—</div>
             </div>
           </div>
         </div>
@@ -1088,6 +1077,38 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
         </div>
         <button class="save-btn" onclick="saveBodyComp()">Save Assessment →</button>
         <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="bc-msg"></div>
+        <div class="dp-sec" style="margin-top:24px">
+          <div class="dp-sec-title">Body Composition Assessment Schedule</div>
+          <div class="edit-grid">
+            <div class="edit-field" style="grid-column:1/-1">
+              <label>Bodyweight Recording Days</label>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:8px" id="bw-days-wrap">
+                <label class="day-pill" id="bw-lbl-mon"><input type="checkbox" id="bw-mon" value="Monday" onchange="updateBWDay('mon')"> Monday</label>
+                <label class="day-pill" id="bw-lbl-tue"><input type="checkbox" id="bw-tue" value="Tuesday" onchange="updateBWDay('tue')"> Tuesday</label>
+                <label class="day-pill" id="bw-lbl-wed"><input type="checkbox" id="bw-wed" value="Wednesday" onchange="updateBWDay('wed')"> Wednesday</label>
+                <label class="day-pill" id="bw-lbl-thu"><input type="checkbox" id="bw-thu" value="Thursday" onchange="updateBWDay('thu')"> Thursday</label>
+                <label class="day-pill" id="bw-lbl-fri"><input type="checkbox" id="bw-fri" value="Friday" onchange="updateBWDay('fri')"> Friday</label>
+                <label class="day-pill" id="bw-lbl-sat"><input type="checkbox" id="bw-sat" value="Saturday" onchange="updateBWDay('sat')"> Saturday</label>
+                <label class="day-pill" id="bw-lbl-sun"><input type="checkbox" id="bw-sun" value="Sunday" onchange="updateBWDay('sun')"> Sunday</label>
+              </div>
+              <div id="bw-days-saved" style="display:none;flex-wrap:wrap;gap:6px;margin-top:10px"></div>
+              <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+                <button onclick="saveBWDays()" style="padding:8px 20px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600">Save Days</button>
+                <button onclick="editBWDays()" id="bw-days-edit-btn" style="display:none;padding:8px 16px;background:transparent;color:var(--muted);border:1px solid var(--borderw);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase">Edit</button>
+                <span id="bw-days-msg" style="font-size:10px;color:var(--green);min-height:16px"></span>
+              </div>
+            </div>
+            <div class="edit-field"><label>Circumference Frequency</label>
+              <select id="ov-circ-freq" onchange="syncSummaryHeader()"><option>1x/Month</option><option>Bi-Weekly</option><option>Weekly</option></select>
+            </div>
+            <div class="edit-field"><label>Caliper Skinfolds Frequency</label>
+              <select id="ov-skin-freq" onchange="syncSummaryHeader()"><option>Bi-Weekly</option><option>Monthly</option><option>Weekly</option></select>
+            </div>
+            <div class="edit-field"><label>DEXA Scan Frequency</label>
+              <select id="ov-dexa-freq" onchange="syncSummaryHeader()"><option>Quarterly</option><option>Every 6 Months</option><option>Annually</option></select>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- TAB 8: SUPPLEMENTS -->
@@ -3809,6 +3830,20 @@ function syncSummaryHeader(){
   const el_nt = document.getElementById('sum-tracking');
   if(el_na) el_na.textContent = nutAppr;
   if(el_nt) el_nt.textContent = nutTrack;
+
+  // Assessment schedule from tab 3
+  const bwDaysStr = getBWDays()||'—';
+  const circFreq = document.getElementById('ov-circ-freq')?.value||'—';
+  const skinFreq = document.getElementById('ov-skin-freq')?.value||'—';
+  const dexaFreq = document.getElementById('ov-dexa-freq')?.value||'—';
+  const el_bwd = document.getElementById('sum-bw-days');
+  const el_cf  = document.getElementById('sum-circ-freq');
+  const el_sf  = document.getElementById('sum-skin-freq');
+  const el_df  = document.getElementById('sum-dexa-freq');
+  if(el_bwd) el_bwd.textContent = bwDaysStr;
+  if(el_cf)  el_cf.textContent  = circFreq;
+  if(el_sf)  el_sf.textContent  = skinFreq;
+  if(el_df)  el_df.textContent  = dexaFreq;
 }
 
 async function flashSave(btn){
