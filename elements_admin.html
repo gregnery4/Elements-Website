@@ -1413,8 +1413,22 @@ function dpTab(name,el){
 function generateMealPlan(){
   const count=parseInt(document.getElementById('dp-meal-count')?.value)||4;
   const clientName=document.getElementById('dp-fullname')?.value||'Client';
-  let html='';
 
+  // Build supplement-per-meal lookup from current supplement protocol
+  const suppByMeal={};
+  const supps=currentClient?.supplements||[];
+  supps.forEach(s=>{
+    if(!s.timing) return;
+    s.timing.split(',').map(m=>m.trim()).forEach(m=>{
+      const n=parseInt(m.replace(/M/i,''));
+      if(!isNaN(n)){
+        if(!suppByMeal[n]) suppByMeal[n]=[];
+        suppByMeal[n].push({name:s.name,dose:s.dose||''});
+      }
+    });
+  });
+
+  let html='';
   for(let i=1;i<=count;i++){
     const time=document.getElementById(`m${i}-time`)?.value||'—';
     const type=document.getElementById(`m${i}-type`)?.value||'Whole Food';
@@ -1423,41 +1437,69 @@ function generateMealPlan(){
     const fat=parseInt(document.getElementById(`m${i}-fat`)?.value)||0;
     const foods=document.getElementById(`m${i}-foods`)?.value||'';
     const cals=(prot*4)+(carb*4)+(fat*9);
+    const mealSupps=suppByMeal[i]||[];
 
     html+=`
-    <div style="background:var(--c3);border:1px solid var(--border);padding:24px;margin-bottom:3px">
-      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)">
-        <div>
-          <span style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--white)">Meal ${i}</span>
-          <span style="font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-left:12px">${type}</span>
+    <div style="background:var(--c2);border:1px solid var(--border);margin-bottom:3px;overflow:hidden">
+
+      <!-- Meal Header -->
+      <div style="background:var(--c1);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="width:4px;height:36px;background:linear-gradient(180deg,var(--gold-mid),var(--gold-dark))"></div>
+          <div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--white);line-height:1">MEAL ${i}</div>
+            <div style="font-size:8px;color:var(--gold);letter-spacing:2.5px;text-transform:uppercase;margin-top:2px">${type}</div>
+          </div>
         </div>
         <div style="text-align:right">
-          <div style="font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase">Time: ${time}</div>
-          ${cals?`<div style="font-size:10px;color:var(--muted);margin-top:3px">${cals} calories</div>`:''}
+          <div style="font-size:13px;color:var(--white);font-weight:500;letter-spacing:1px">${time}</div>
+          ${cals?`<div style="font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:1px">${cals} kcal</div>`:''}
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:${foods?'14px':'0'}">
-        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--c2);border:1px solid var(--borderw)">
-          <span style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold)">${prot}g</span>
-          <span style="font-size:11px;color:var(--muted);letter-spacing:.5px">Protein</span>
+
+      <!-- Macro Row -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--borderw)">
+        <div style="padding:14px 16px;text-align:center;border-right:1px solid var(--borderw)">
+          <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px">Protein</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold);line-height:1">${prot}g</div>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--c2);border:1px solid var(--borderw)">
-          <span style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold)">${fat}g</span>
-          <span style="font-size:11px;color:var(--muted);letter-spacing:.5px">Additional Fat</span>
+        <div style="padding:14px 16px;text-align:center;border-right:1px solid var(--borderw)">
+          <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px">Carbohydrates</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#5B8FD4;line-height:1">${carb}g</div>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--c2);border:1px solid var(--borderw);grid-column:1/-1">
-          <span style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#5B8FD4">${carb}g</span>
-          <span style="font-size:11px;color:var(--muted);letter-spacing:.5px">Carbohydrates</span>
+        <div style="padding:14px 16px;text-align:center">
+          <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px">Additional Fats</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#CF6679;line-height:1">${fat}g</div>
         </div>
       </div>
-      ${foods ? `<div style="padding:14px;background:var(--c2);border:1px solid var(--borderw);margin-top:2px">
-        <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:10px">Food Portions</div>
+
+      <!-- Food Portions -->
+      ${foods ? `
+      <div style="padding:16px 20px;border-bottom:1px solid var(--borderw)">
+        <div style="font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:12px">Food Portions</div>
         ${convertFoodsToPortions(foods, prot, carb, fat)}
       </div>` : ''}
+
+      <!-- Supplements for this meal -->
+      ${mealSupps.length ? `
+      <div style="padding:14px 20px;background:var(--c1)">
+        <div style="font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Supplements with this meal</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${mealSupps.map(s=>`
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--c2);border:1px solid var(--borderw)">
+            <div style="width:5px;height:5px;border-radius:50%;background:var(--gold-mid);flex-shrink:0"></div>
+            <div>
+              <div style="font-size:10px;font-weight:500;color:var(--white)">${s.name}</div>
+              ${s.dose?`<div style="font-size:9px;color:var(--muted);margin-top:1px">${s.dose}</div>`:''}
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>` : ''}
+
     </div>`;
   }
 
-  // Summary row
+  // Daily totals summary bar
   let totProt=0,totCarb=0,totFat=0;
   for(let i=1;i<=count;i++){
     totProt+=parseInt(document.getElementById(`m${i}-prot`)?.value)||0;
@@ -1467,11 +1509,23 @@ function generateMealPlan(){
   const totCals=(totProt*4)+(totCarb*4)+(totFat*9);
 
   html+=`
-  <div style="background:var(--gold-dim);border:1px solid rgba(201,168,108,.3);padding:16px 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:3px">
-    <div style="text-align:center"><div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Total Calories</div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold)">${totCals}</div></div>
-    <div style="text-align:center"><div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Total Protein</div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold)">${totProt}g</div></div>
-    <div style="text-align:center"><div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Total Carbs</div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold)">${totCarb}g</div></div>
-    <div style="text-align:center"><div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Total Add. Fats</div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold)">${totFat}g</div></div>
+  <div style="background:var(--c1);border:1px solid rgba(201,168,108,.3);padding:18px 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:3px">
+    <div style="text-align:center;padding:8px">
+      <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px">Total Calories</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold)">${totCals}</div>
+    </div>
+    <div style="text-align:center;padding:8px">
+      <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px">Total Protein</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold)">${totProt}g</div>
+    </div>
+    <div style="text-align:center;padding:8px">
+      <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px">Total Carbs</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#5B8FD4">${totCarb}g</div>
+    </div>
+    <div style="text-align:center;padding:8px">
+      <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px">Total Add. Fats</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#CF6679">${totFat}g</div>
+    </div>
   </div>`;
 
   document.getElementById('meal-plan-output').innerHTML=html||'<div style="font-size:12px;color:var(--muted);padding:20px 0;text-align:center">No meal data found. Fill in the Meal Design tab first.</div>';
