@@ -565,8 +565,8 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       <div id="dptab-t2" style="display:none">
         <div class="dp-sec">
           <div class="dp-sec-title">Elements Health System Summary</div>
-          <!-- Auto-populated from tabs 2 & 4 -->
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:8px" id="summary-header-cards">
+          <!-- Row 1: Protocol cards -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:8px">
             <div style="background:var(--c3);border:1px solid var(--border);padding:16px;text-align:center">
               <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Goal</div>
               <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold)" id="sum-goal">—</div>
@@ -582,6 +582,29 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             <div style="background:var(--c3);border:1px solid var(--border);padding:16px;text-align:center">
               <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Proposed End Date</div>
               <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--gold)" id="sum-end">—</div>
+            </div>
+          </div>
+          <!-- Row 2: Body composition cards -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:2px">
+            <div style="background:var(--c2);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Starting Weight</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--white)" id="sum-start-weight">—</div>
+              <div style="font-size:9px;color:var(--muted);margin-top:3px">lbs</div>
+            </div>
+            <div style="background:var(--c2);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Starting Body Fat</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--white)" id="sum-start-bf">—</div>
+              <div style="font-size:9px;color:var(--muted);margin-top:3px">%</div>
+            </div>
+            <div style="background:var(--c2);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Goal Body Fat</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--gold)" id="sum-goal-bf">—</div>
+              <div style="font-size:9px;color:var(--muted);margin-top:3px">%</div>
+            </div>
+            <div style="background:var(--c2);border:1px solid var(--border);padding:16px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Goal Bodyweight</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--gold)" id="sum-goal-wt">—</div>
+              <div style="font-size:9px;color:var(--muted);margin-top:3px">lbs</div>
             </div>
           </div>
         </div>
@@ -653,8 +676,8 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
         <div class="dp-sec">
           <div class="dp-sec-title">Current Body Composition</div>
           <div class="edit-grid">
-            <div class="edit-field"><label>Body Weight (lbs)</label><input type="number" id="dp-weight" step="0.1" placeholder="200" oninput="calcGoals()"></div>
-            <div class="edit-field"><label>Body Fat % (DEXA)</label><input type="number" id="dp-bf" step="0.1" placeholder="20" oninput="calcGoals()"></div>
+            <div class="edit-field"><label>Body Weight (lbs)</label><input type="number" id="dp-weight" step="0.1" placeholder="200" oninput="calcGoals();syncSummaryHeader()"></div>
+            <div class="edit-field"><label>Body Fat % (DEXA)</label><input type="number" id="dp-bf" step="0.1" placeholder="20" oninput="calcGoals();syncSummaryHeader()"></div>
             <div class="edit-field"><label>Fat Mass (lbs)</label><input type="number" id="dp-fat-mass" step="0.1" placeholder="auto" readonly style="opacity:.6"></div>
             <div class="edit-field"><label>Lean Body Mass (lbs)</label><input type="number" id="dp-lean" step="0.1" placeholder="auto" readonly style="opacity:.6"></div>
           </div>
@@ -662,7 +685,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
         <div class="dp-sec">
           <div class="dp-sec-title">Goal Setting</div>
           <div class="edit-grid">
-            <div class="edit-field"><label>Goal Body Fat %</label><input type="number" id="dp-goal-bf" step="0.5" placeholder="15" oninput="calcGoals()"></div>
+            <div class="edit-field"><label>Goal Body Fat %</label><input type="number" id="dp-goal-bf" step="0.5" placeholder="15" oninput="calcGoals();syncSummaryHeader()"></div>
             <div class="edit-field"><label>Goal Body Weight (lbs)</label><input type="number" id="dp-goal-weight" step="0.1" placeholder="auto" readonly style="opacity:.6"></div>
             <div class="edit-field"><label>Required Weight Loss (lbs)</label><input type="number" id="dp-wt-loss" step="0.1" placeholder="auto" readonly style="opacity:.6"></div>
             <div class="edit-field"><label>Phase Duration (wks)</label><input type="number" id="dp-phase-wks" placeholder="13" oninput="calcGoals();const ovDur=document.getElementById('ov-dur-1');if(ovDur){ovDur.value=this.value;}calcEndDate();syncSummaryHeader();"></div>
@@ -1052,10 +1075,6 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
         </div>
         <button class="save-btn" onclick="saveBodyComp()">Save Assessment →</button>
         <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="bc-msg"></div>
-        <div class="dp-sec" style="margin-top:24px">
-          <div class="dp-sec-title">Assessment History</div>
-          <div id="bc-history"><div style="font-size:12px;color:var(--muted)">No assessments recorded yet.</div></div>
-        </div>
       </div>
 
       <!-- TAB 8: SUPPLEMENTS -->
@@ -2066,6 +2085,7 @@ function calcGoals(){
       const refWt=(bw+goalWt)/2;
       document.getElementById('dp-ref-weight').value=refWt.toFixed(1);
       calcCalories();
+      syncSummaryHeader();
     }
   }
 }
@@ -3723,25 +3743,25 @@ async function deleteProtocol(id){
 }
 
 function syncSummaryHeader(){
-  // Goal from tab 2
+  // Goal from tab 12
   const goal = document.getElementById('ov-goal-1')?.value||'—';
   const sumGoal = document.getElementById('sum-goal');
   if(sumGoal) sumGoal.textContent = goal;
 
-  // Start date from tab 2
+  // Start date from tab 12
   const startRaw = document.getElementById('ov-start-1')?.value||'';
   const sumStart = document.getElementById('sum-start');
   if(sumStart) sumStart.textContent = startRaw
     ? new Date(startRaw).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
     : '—';
 
-  // Phase duration from tab 4 (dp-phase-wks) — also stored in hidden ov-dur-1
+  // Phase duration from Goal Setting tab
   const durWks = document.getElementById('dp-phase-wks')?.value
     || document.getElementById('ov-dur-1')?.value || '';
   const sumDur = document.getElementById('sum-duration');
   if(sumDur) sumDur.textContent = durWks ? durWks+' wks' : '—';
 
-  // Proposed end date — calculated from start + duration
+  // Proposed end date
   const sumEnd = document.getElementById('sum-end');
   if(sumEnd){
     if(startRaw && durWks){
@@ -3752,6 +3772,22 @@ function syncSummaryHeader(){
       sumEnd.textContent = '—';
     }
   }
+
+  // Starting weight & body fat from Goal Setting tab (tab 4)
+  const startWt = document.getElementById('dp-weight')?.value||'';
+  const startBf = document.getElementById('dp-bf')?.value||'';
+  const el_sw = document.getElementById('sum-start-weight');
+  const el_sb = document.getElementById('sum-start-bf');
+  if(el_sw) el_sw.textContent = startWt||'—';
+  if(el_sb) el_sb.textContent = startBf||'—';
+
+  // Goal BF% and goal bodyweight from Goal Setting tab
+  const goalBf = document.getElementById('dp-goal-bf')?.value||'';
+  const goalWt = document.getElementById('dp-goal-weight')?.value||'';
+  const el_gbf = document.getElementById('sum-goal-bf');
+  const el_gwt = document.getElementById('sum-goal-wt');
+  if(el_gbf) el_gbf.textContent = goalBf||'—';
+  if(el_gwt) el_gwt.textContent = goalWt||'—';
 }
 
 async function flashSave(btn){
