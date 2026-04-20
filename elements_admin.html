@@ -964,37 +964,48 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
 
           <!-- SECTION 5: Compliance Score -->
           <div style="background:var(--c3);border:1px solid var(--border);padding:18px;margin-bottom:16px">
-            <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:14px">5. Weekly Compliance Score</div>
-            <div style="font-size:11px;color:var(--muted);margin-bottom:16px">Score is auto-calculated from your selections above. Each section is worth 25%.</div>
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:16px" id="wk-score-preview">
-              <div style="background:var(--c2);border:1px solid var(--border);padding:12px;text-align:center">
-                <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Training</div>
-                <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--muted)" id="score-training">—</div>
+            <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:6px">5. Weekly Compliance Score</div>
+            <div style="font-size:10px;color:var(--muted);margin-bottom:16px">Auto-calculated from sections 1–4 above. Click Calculate to refresh.</div>
+
+            <!-- 4 section scores -->
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:2px">
+              <div style="background:var(--c2);border:1px solid var(--border);padding:14px;text-align:center">
+                <div style="font-size:7px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">1. Training</div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;line-height:1" id="score-training">—</div>
+                <div style="font-size:8px;color:var(--muted);margin-top:4px" id="score-training-detail">sessions done / scheduled</div>
               </div>
-              <div style="background:var(--c2);border:1px solid var(--border);padding:12px;text-align:center">
-                <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Bodyweight</div>
-                <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--muted)" id="score-bw">—</div>
+              <div style="background:var(--c2);border:1px solid var(--border);padding:14px;text-align:center">
+                <div style="font-size:7px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">2. Bodyweight</div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;line-height:1" id="score-bw">—</div>
+                <div style="font-size:8px;color:var(--muted);margin-top:4px" id="score-bw-detail">days recorded / scheduled</div>
               </div>
-              <div style="background:var(--c2);border:1px solid var(--border);padding:12px;text-align:center">
-                <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Nutrition</div>
-                <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--muted)" id="score-nutrition">—</div>
+              <div style="background:var(--c2);border:1px solid var(--border);padding:14px;text-align:center">
+                <div style="font-size:7px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">3. Nutrition</div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;line-height:1" id="score-nutrition">—</div>
+                <div style="font-size:8px;color:var(--muted);margin-top:4px" id="score-nutrition-detail">meals completed</div>
               </div>
-              <div style="background:var(--c2);border:1px solid var(--border);padding:12px;text-align:center">
-                <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Body Comp</div>
-                <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--muted)" id="score-comp">—</div>
+              <div style="background:var(--c2);border:1px solid var(--border);padding:14px;text-align:center">
+                <div style="font-size:7px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">4. Body Comp</div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;line-height:1" id="score-comp">—</div>
+                <div style="font-size:8px;color:var(--muted);margin-top:4px" id="score-comp-detail">assessment completed</div>
               </div>
             </div>
-            <!-- Total score display -->
-            <div style="background:var(--c2);border:1px solid var(--border);padding:20px;display:flex;align-items:center;justify-content:space-between">
+
+            <!-- Overall score -->
+            <div style="background:var(--c2);border:1px solid rgba(201,168,108,.3);padding:20px 24px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:20px;margin-top:2px">
               <div>
-                <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:6px">Overall Compliance Score</div>
-                <div style="font-size:11px;color:var(--muted)" id="score-label">Select options above to calculate</div>
+                <div style="font-size:8px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:6px">Overall Weekly Compliance</div>
+                <div style="font-size:11px;color:var(--muted)" id="score-label">Click Calculate to generate score</div>
+                <div style="margin-top:10px;height:6px;background:var(--c3);border-radius:3px;overflow:hidden">
+                  <div id="score-bar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--gold-dark),var(--gold-mid));transition:width .6s ease;border-radius:3px"></div>
+                </div>
               </div>
               <div style="text-align:right">
-                <div style="font-family:'Bebas Neue',sans-serif;font-size:52px;line-height:1" id="score-total" style="color:var(--muted)">—</div>
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:64px;line-height:1" id="score-total">—</div>
               </div>
             </div>
-            <button type="button" onclick="calcComplianceScore()" style="width:100%;margin-top:2px;padding:12px;background:var(--c4);border:1px solid var(--borderw);color:var(--muted);font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;transition:all .3s" onmouseover="this.style.borderColor='var(--gold-mid)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--borderw)';this.style.color='var(--muted)'">Calculate Score ↻</button>
+
+            <button type="button" onclick="calcComplianceScore()" style="width:100%;margin-top:2px;padding:12px;background:var(--c2);border:1px solid var(--borderw);color:var(--muted);font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;cursor:pointer;transition:all .3s" onmouseover="this.style.borderColor='var(--gold-mid)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--borderw)';this.style.color='var(--muted)'">Calculate Score ↻</button>
           </div>
 
           <button class="save-btn" onclick="addWeeklyEntry()">Save Weekly Review →</button>
@@ -2540,43 +2551,62 @@ const SECTION_SCORES={
 };
 
 function calcComplianceScore(){
-  // Auto-calculate training compliance from sessions done vs scheduled
+  const sc=s=>s>=80?'var(--green)':s>=50?'var(--gold)':'var(--red)';
+  const fmt=s=>s!==null?s+'%':'—';
+  const set=(id,val,detail)=>{
+    const el=document.getElementById(id);
+    const det=document.getElementById(id+'-detail');
+    if(el){el.textContent=fmt(val);el.style.color=val!==null?sc(val):'var(--muted)';}
+    if(det&&detail) det.textContent=detail;
+  };
+
+  // ── 1. Training: sessions done / scheduled ──
   const done=parseInt(document.getElementById('wk-sessions-done')?.value)||0;
   const target=parseInt(document.getElementById('wk-sessions-target')?.value)||0;
   const training=target>0?Math.round((done/target)*100):null;
-  // BW compliance: always auto-calculated from checked days
+  set('score-training',training,target>0?`${done} of ${target} sessions`:'no target set');
+
+  // ── 2. Bodyweight: checked days / scheduled days ──
   const scheduled=getBWDays().split(',').map(s=>s.trim()).filter(Boolean);
-  const completed=getWkBWDays();
-  const bw=scheduled.length>0?Math.round((completed.length/scheduled.length)*100):null;
-  const meals=calcWkNutScore()??null;
-  const nutrition=meals; // nutrition score IS the meal completion %
+  const recorded=getWkBWDays();
+  const bw=scheduled.length>0?Math.round((recorded.length/scheduled.length)*100):null;
+  set('score-bw',bw,scheduled.length>0?`${recorded.length} of ${scheduled.length} days`:'no schedule set');
 
-  const scoreColor=s=>s>=80?'var(--green)':s>=50?'var(--gold)':'var(--red)';
-  const fmt=s=>s!==null?s+'%':'—';
+  // ── 3. Nutrition: meal completion % from grid ──
+  const nutrition=calcWkNutScore()??null;
+  const mealCount=parseInt(document.getElementById('dp-meal-count')?.value)||4;
+  const total7=7*mealCount;
+  let mealsDone=0;
+  DAY_KEYS.forEach(day=>{for(let m=1;m<=mealCount;m++){if(document.getElementById(`wk-meal-${day}-m${m}`)?.checked)mealsDone++;}});
+  set('score-nutrition',nutrition,`${mealsDone} of ${total7} meals`);
 
-  document.getElementById('score-training').textContent=fmt(training);
-  document.getElementById('score-training').style.color=training!==null?scoreColor(training):'var(--muted)';
-  document.getElementById('score-bw').textContent=fmt(bw);
-  document.getElementById('score-bw').style.color=bw!==null?scoreColor(bw):'var(--muted)';
-  document.getElementById('score-nutrition').textContent=fmt(meals);
-  document.getElementById('score-nutrition').style.color=meals!==null?scoreColor(meals):'var(--muted)';
-  document.getElementById('score-comp').textContent=fmt(nutrition);
-  document.getElementById('score-comp').style.color=nutrition!==null?scoreColor(nutrition):'var(--muted)';
+  // ── 4. Body Comp: was an assessment taken? ──
+  const doSkinfold=document.getElementById('wka-cb-skinfold')?.checked;
+  const doCirc=document.getElementById('wka-cb-circumference')?.checked;
+  const doDexa=document.getElementById('wka-cb-dexa')?.checked;
+  const anyAssessment=doSkinfold||doCirc||doDexa;
+  const comp=anyAssessment?100:0;
+  const compTypes=[doSkinfold&&'Skinfolds',doCirc&&'Circumference',doDexa&&'DEXA'].filter(Boolean);
+  set('score-comp',comp,anyAssessment?compTypes.join(' + '):'none taken');
 
-  const defined=[training,bw,meals,nutrition].filter(s=>s!==null);
-  if(!defined.length){
+  // ── Overall: average of sections that have data ──
+  const sections=[training,bw,nutrition,comp].filter(s=>s!==null);
+  if(!sections.length){
     document.getElementById('score-total').textContent='—';
     document.getElementById('score-total').style.color='var(--muted)';
-    document.getElementById('score-label').textContent='Select options above to calculate';
+    document.getElementById('score-label').textContent='Fill in sections above to calculate';
+    document.getElementById('score-bar').style.width='0%';
     return null;
   }
-  const total=Math.round(defined.reduce((a,b)=>a+b,0)/4);
+  const overall=Math.round(sections.reduce((a,b)=>a+b,0)/4);
   const totalEl=document.getElementById('score-total');
-  totalEl.textContent=total+'%';
-  totalEl.style.color=scoreColor(total);
-  const label=total>=90?'Excellent week — all action points met':total>=75?'Good week — most action points met':total>=50?'Average week — some action points missed':'Below average — action points need attention';
+  totalEl.textContent=overall+'%';
+  totalEl.style.color=sc(overall);
+  document.getElementById('score-bar').style.width=overall+'%';
+  document.getElementById('score-bar').style.background=overall>=80?'linear-gradient(90deg,#2A7040,#4CAF80)':overall>=50?'linear-gradient(90deg,var(--gold-dark),var(--gold-mid))':'linear-gradient(90deg,#8B1A2A,#CF4060)';
+  const label=overall>=90?'⭐ Excellent — all commitments met this week':overall>=75?'✓ Good — strong week overall':overall>=50?'⚠ Average — some areas need attention':'✗ Below target — review action points with client';
   document.getElementById('score-label').textContent=label;
-  return total;
+  return overall;
 }
 function updateWkBWDay(key){
   const cb=document.getElementById(`wk-bw-cb-${key}`);
