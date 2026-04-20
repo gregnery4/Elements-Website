@@ -806,7 +806,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           <div id="meal-fields"></div>
         </div>
         <button class="save-btn" onclick="saveMealPlan(this)">Save Meal Plan →</button>
-        <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="mp-save-msg"></div>
+        <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="md-save-msg"></div>
       </div>
 
       <!-- TAB 11: MEAL PLAN PREVIEW -->
@@ -4171,6 +4171,7 @@ function calcEndDate(){
 async function saveOverview(btn){
   if(!currentClient)return;
   if(btn){btn.textContent='Saving...';btn.disabled=true;}
+  const msgEl=btn?.nextElementSibling?.style!==undefined?btn.nextElementSibling:null;
   const{error}=await sb.from('client_overview').upsert({
     client_id:currentClient.id,
     goal:document.getElementById('ov-goal-1')?.value||null,
@@ -4190,17 +4191,26 @@ async function saveOverview(btn){
     dexa_frequency:document.getElementById('ov-dexa-freq')?.value||null,
     updated_at:new Date().toISOString(),
   },{onConflict:'client_id'});
-  if(btn){
-    btn.disabled=false;
-    if(error){btn.textContent='Error — try again';btn.style.background='var(--red)';console.error(error);}
-    else{btn.textContent='✓ Saved!';btn.style.background='linear-gradient(135deg,#2A5040,#1A3A28)';}
-    setTimeout(()=>{btn.textContent=btn.textContent.includes('Saved')?btn.getAttribute('data-label')||'Save Overview →':'Save Overview →';btn.style.background='';},2500);
+  if(btn) btn.disabled=false;
+  if(error){
+    if(btn){btn.textContent='Error — try again';btn.style.background='var(--red)';}
+    if(msgEl){msgEl.style.color='var(--red)';msgEl.textContent='Error: '+error.message;}
+    console.error(error);
+  } else {
+    if(btn){btn.textContent='✓ Saved!';btn.style.background='linear-gradient(135deg,#2A5040,#1A3A28)';}
+    if(msgEl){msgEl.style.color='var(--green)';msgEl.textContent='✓ Saved.';}
+    setTimeout(()=>{
+      if(btn){const orig=btn.getAttribute('data-orig-label')||btn.textContent.replace('✓ Saved!','Save →');btn.textContent=orig;btn.style.background='';}
+      if(msgEl) msgEl.textContent='';
+    },2500);
   }
 }
 
 async function saveMealPlan(btn){
   if(!currentClient)return;
-  const msg=document.getElementById('mp-save-msg');
+  // Support both Meal Design (md-save-msg) and Meal Plan (mp-save-msg) tabs
+  const msgId = btn?.closest('#dptab-t5') ? 'md-save-msg' : 'mp-save-msg';
+  const msg=document.getElementById(msgId);
   if(btn){btn.textContent='Saving...';btn.disabled=true;}
   if(msg){msg.textContent='Saving...';msg.style.color='var(--gold)';}
   const count=parseInt(document.getElementById('dp-meal-count')?.value)||4;
