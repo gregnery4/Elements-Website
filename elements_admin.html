@@ -453,7 +453,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       <div class="dp-tab" onclick="dpTab('t13',this)">8. Training Program Design</div>
       <div class="dp-tab" onclick="dpTab('t2',this)">9. Summary</div>
       <div class="dp-tab" onclick="dpTab('t9',this)">10. Elements Protocols</div>
-      <div class="dp-tab" onclick="dpTab('t6',this)">Data Review</div>
+      <div class="dp-tab" onclick="dpTab('t6',this)">Weekly &amp; Monthly Review</div>
     </div>
     <div class="dp-body">
 
@@ -827,28 +827,6 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       <!-- TAB 6: WEEKLY DATA ENTRY -->
       <div id="dptab-t6" style="display:none">
 
-        <!-- MONTHLY SUMMARY (shows when 4+ weeks exist) -->
-        <div class="dp-sec" id="monthly-summary-section" style="display:none">
-          <div class="dp-sec-title" style="display:flex;align-items:center;justify-content:space-between">
-            Monthly Summary
-            <button onclick="generateMonthlySummaryPDF()" style="padding:8px 20px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600">Download PDF →</button>
-          </div>
-          <div id="monthly-summary-preview" style="background:var(--c3);border:1px solid var(--border);padding:20px">
-            <div style="font-size:12px;color:var(--muted);text-align:center">Click Download PDF to generate the monthly summary.</div>
-          </div>
-        </div>
-
-        <!-- WEEKLY LOG TABLE -->
-        <div class="dp-sec">
-          <div class="dp-sec-title" style="display:flex;align-items:center;justify-content:space-between">
-            Weekly Review Log
-            <span style="font-size:10px;color:var(--muted);letter-spacing:1px;font-family:'Montserrat',sans-serif;font-weight:300">Click any week to expand</span>
-          </div>
-          <div id="weekly-log-body">
-            <div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No weekly reviews yet. Add the first one below.</div>
-          </div>
-        </div>
-
         <!-- ADD WEEKLY REVIEW -->
         <div class="dp-sec" style="margin-top:3px">
           <div class="dp-sec-title">Add Weekly Review</div>
@@ -1011,6 +989,29 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           <button class="save-btn" onclick="addWeeklyEntry()">Save Weekly Review →</button>
           <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="wk-msg"></div>
         </div>
+
+        <!-- MONTHLY SUMMARY (shows when 4+ weeks exist) -->
+        <div class="dp-sec" id="monthly-summary-section" style="display:none">
+          <div class="dp-sec-title" style="display:flex;align-items:center;justify-content:space-between">
+            Monthly Summary
+            <button onclick="generateMonthlySummaryPDF()" style="padding:8px 20px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600">Download PDF →</button>
+          </div>
+          <div id="monthly-summary-preview" style="background:var(--c3);border:1px solid var(--border);padding:20px">
+            <div style="font-size:12px;color:var(--muted);text-align:center">Click Download PDF to generate the monthly summary.</div>
+          </div>
+        </div>
+
+        <!-- WEEKLY LOG TABLE -->
+        <div class="dp-sec">
+          <div class="dp-sec-title" style="display:flex;align-items:center;justify-content:space-between">
+            Weekly Review Log
+            <span style="font-size:10px;color:var(--muted);letter-spacing:1px;font-family:'Montserrat',sans-serif;font-weight:300">Click any week to expand</span>
+          </div>
+          <div id="weekly-log-body">
+            <div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No weekly reviews yet. Add the first one below.</div>
+          </div>
+        </div>
+
       </div>
 
       <!-- TAB 7: BODY COMPOSITION ASSESSMENT -->
