@@ -2813,7 +2813,7 @@ function toggleWkAssessment(){
   if(doSkinfold){
     html+=`<div style="background:var(--c2);border:1px solid var(--borderw);padding:14px;margin-bottom:3px">
       <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Caliper Skinfolds (mm)</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px" id="wka-sk-grid">`;
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:2px" id="wka-sk-grid">`;
     const selectedSites=getSkSites();
     const sitesToUse=selectedSites.length>0?selectedSites:Object.values(SK_SITES);
     sitesToUse.forEach(site=>{
@@ -2824,7 +2824,7 @@ function toggleWkAssessment(){
       html+=`<div style="background:var(--c1);border:1px solid var(--borderw);padding:10px">
         <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">${site}</div>
         <div style="display:flex;align-items:center;gap:6px">
-          <input type="number" id="wka-sk-${key}" step="0.1" placeholder="0.0" value="${tab2Val}" style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--borderw);color:var(--white);font-size:13px;font-family:'Montserrat',sans-serif;padding:2px 0;outline:none">
+          <input type="number" id="wka-sk-${key}" step="0.1" placeholder="0.0" value="${tab2Val}" style="flex:1;min-width:0;background:transparent;border:none;border-bottom:1px solid var(--borderw);color:var(--white);font-size:13px;font-family:'Montserrat',sans-serif;padding:2px 0;outline:none">
           <span style="font-size:9px;color:var(--muted)">mm</span>
         </div>
       </div>`;
@@ -2832,22 +2832,40 @@ function toggleWkAssessment(){
     html+=`</div></div>`;
   }
 
-  // ── CIRCUMFERENCES — auto-populated from tab 2 ──
+  // ── CIRCUMFERENCES — only selected sites from tab 2 ──
   if(doCirc){
     html+=`<div style="background:var(--c2);border:1px solid var(--borderw);padding:14px;margin-bottom:3px">
       <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Circumference Measurements (inches)</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px">`;
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:2px">`;
     const cmEntries=[['shoulder','Shoulders'],['arm','Upper Arm'],['waist','Umbilical / Waist'],['hips','Hips'],['thigh','Thigh']];
-    cmEntries.forEach(([key,label])=>{
-      const tab2Val=document.getElementById(`cmm-${key}`)?.value||'';
-      html+=`<div style="background:var(--c1);border:1px solid var(--borderw);padding:10px">
-        <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">${label}</div>
-        <div style="display:flex;align-items:center;gap:6px">
-          <input type="number" id="wka-cm-${key}" step="0.1" placeholder="0.0" value="${tab2Val}" style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--borderw);color:var(--white);font-size:13px;font-family:'Montserrat',sans-serif;padding:2px 0;outline:none">
-          <span style="font-size:9px;color:var(--muted)">in</span>
-        </div>
-      </div>`;
-    });
+    // Get selected sites — prefer live DOM, fall back to saved client data, show none if truly nothing selected
+    let selectedCm=getCmSites();
+    if(!selectedCm.length){
+      // Try saved cm_sites from client record
+      const saved=currentClient?.client_metrics?.[0]?.notes;
+      const notes=saved?(typeof saved==='string'?JSON.parse(saved):saved):{};
+      if(notes.circumferences&&Object.keys(notes.circumferences).length){
+        selectedCm=Object.keys(notes.circumferences).map(k=>
+          cmEntries.find(([,l])=>l.toLowerCase()===k.toLowerCase())?.[1]).filter(Boolean);
+      }
+    }
+    const cmToShow=selectedCm.length>0
+      ? cmEntries.filter(([,label])=>selectedCm.some(s=>s.toLowerCase()===label.toLowerCase()))
+      : [];
+    if(!cmToShow.length){
+      html+=`<div style="font-size:11px;color:var(--muted);font-style:italic;padding:8px 0">No circumference sites selected on Tab 2. Go to Body Composition Assessments and save your sites first.</div>`;
+    } else {
+      cmToShow.forEach(([key,label])=>{
+        const tab2Val=document.getElementById(`cmm-${key}`)?.value||'';
+        html+=`<div style="background:var(--c1);border:1px solid var(--borderw);padding:10px">
+          <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">${label}</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input type="number" id="wka-cm-${key}" step="0.1" placeholder="0.0" value="${tab2Val}" style="flex:1;min-width:0;background:transparent;border:none;border-bottom:1px solid var(--borderw);color:var(--white);font-size:13px;font-family:'Montserrat',sans-serif;padding:2px 0;outline:none">
+            <span style="font-size:9px;color:var(--muted);flex-shrink:0">in</span>
+          </div>
+        </div>`;
+      });
+    }
     html+=`</div></div>`;
   }
 
@@ -2864,12 +2882,12 @@ function toggleWkAssessment(){
     ];
     html+=`<div style="background:var(--c2);border:1px solid var(--borderw);padding:14px;margin-bottom:3px">
       <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">DEXA Scan Results</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px">`;
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:2px">`;
     dexaFields.forEach(([label,id,srcId])=>{
       const tab2Val=document.getElementById(srcId)?.value||'';
       html+=`<div style="background:var(--c1);border:1px solid var(--borderw);padding:10px">
         <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">${label}</div>
-        <input type="number" id="${id}" step="0.1" placeholder="0" value="${tab2Val}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--borderw);color:var(--white);font-size:13px;font-family:'Montserrat',sans-serif;padding:2px 0;outline:none">
+        <input type="number" id="${id}" step="0.1" placeholder="0" value="${tab2Val}" style="width:100%;min-width:0;box-sizing:border-box;background:transparent;border:none;border-bottom:1px solid var(--borderw);color:var(--white);font-size:13px;font-family:'Montserrat',sans-serif;padding:2px 0;outline:none">
       </div>`;
     });
     html+=`</div></div>`;
