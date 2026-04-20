@@ -1693,11 +1693,13 @@ const FOOD_DB = [
   {k:['bread'],                             type:'carb',    p:2.5,  c:13.5, f:1.0,  unit:'slice (1oz)'},
   // FATS
   {k:['olive oil'],                         type:'fat',     p:0,    c:0,    f:4.5,  unit:'tsp'},
+  {k:['avocado oil'],                       type:'fat',     p:0,    c:0,    f:4.5,  unit:'tsp'},
   {k:['avocado'],                           type:'fat',     p:0.5,  c:2.5,  f:4.0,  unit:'oz'},
   {k:['almond butter','peanut butter','nut butter'],type:'fat',p:1.2,c:1.0,f:5.3,unit:'tsp'},
   {k:['almonds','nuts','mixed nuts'],       type:'fat',     p:6.0,  c:6.0,  f:14.0, unit:'oz'},
   {k:['coconut oil'],                       type:'fat',     p:0,    c:0,    f:4.5,  unit:'tsp'},
   {k:['butter'],                            type:'fat',     p:0,    c:0,    f:3.8,  unit:'tsp'},
+  {k:['ghee','clarified butter'],           type:'fat',     p:0,    c:0,    f:4.7,  unit:'tsp'},
   // CHEESES — all measured in tablespoons, support feta-cheese-2 = 2 tbsp syntax
   {k:['feta cheese','feta'],                type:'fat',     p:1.0,  c:0.3,  f:2.0,  unit:'tbsp'},
   {k:['parmesan','parmigiano'],             type:'fat',     p:2.0,  c:0.2,  f:1.5,  unit:'tbsp'},
@@ -1758,9 +1760,12 @@ function convertFoodsToPortions(foodsStr, targetProt, targetCarb, targetFat){
 
     // ── EGGS — capped at 4, spillover handled above ──
     if(match.unit === 'egg'){
-      const count = _cappedCount !== undefined ? _cappedCount : Math.min(MAX_EGGS, Math.round(targetProt / match.p));
+      // forcedQty: "whole egg-3" = exactly 3 eggs, bypasses cap
+      const count = forcedQty !== null ? forcedQty
+        : (_cappedCount !== undefined ? _cappedCount : Math.min(MAX_EGGS, Math.round(targetProt / match.p)));
       portionStr = `${count} egg${count !== 1 ? 's' : ''}`;
-      displayUnit = `whole eggs${count === MAX_EGGS && otherProts.length > 0 ? ` (max — remaining protein → ${otherProts.map(o=>o.item).join(', ')})` : ''}`;
+      displayUnit = forcedQty !== null ? 'whole eggs (fixed)'
+        : `whole eggs${count === MAX_EGGS && otherProts.length > 0 ? ` (max — remaining protein → ${otherProts.map(o=>o.item).join(', ')})` : ''}`;
       actualP = Math.round(count * match.p);
       actualC = Math.round(count * match.c);
       actualF = Math.round(count * match.f);
@@ -3248,8 +3253,9 @@ function _getFoodPortionsText(foodsStr, targetProt, targetCarb, targetFat){
     if(!match){results.push({name:item,portion:'—',macros:'not in database'});return;}
     let portion='',macros='';
     if(match.unit==='egg'){
-      const count=_cappedCount!==undefined?_cappedCount:Math.min(MAX_EGGS,Math.round(targetProt/match.p));
-      portion=`${count} whole egg${count!==1?'s':''}`;
+      const count=forcedQty!==null ? forcedQty
+        : (_cappedCount!==undefined?_cappedCount:Math.min(MAX_EGGS,Math.round(targetProt/match.p)));
+      portion=`${count} whole egg${count!==1?'s':''}${forcedQty!==null?' (fixed)':''}`;
       macros=`${Math.round(count*match.p)}P · ${Math.round(count*match.c)}C · ${Math.round(count*match.f)}F`;
     } else if(match.unit.includes('scoop')){
       const protTarget=otherProts.some(o=>o.item===item)?remainingProtPerSource:targetProt;
