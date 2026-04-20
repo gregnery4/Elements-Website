@@ -3926,15 +3926,21 @@ function _buildMealPlanPDF(jsPDF,c,setMsg){
   try{
     const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
     const W=doc.internal.pageSize.getWidth();
-    const M=14; const col=W-M*2;
-    let y=M;
+    const M=16; const col=W-M*2;
+    let y=0;
 
-    const GOLD=[168,129,58]; const BLK=[26,26,26]; const WHT=[255,255,255];
-    const LG=[245,243,240]; const MG=[138,130,120]; const DG=[80,80,80];
+    // ── Palette ──
+    const GOLD=[168,129,58];  const GOLD_DIM=[210,185,130];
+    const BLK=[22,22,22];     const WHT=[255,255,255];
+    const LG=[248,246,242];   const LG2=[240,237,232];
+    const MG=[150,140,128];   const DG=[70,65,60];
+    const BLUE=[58,100,168];  const RED=[150,55,75];
 
     const clientName=c.full_name||c.email||'Client';
-    const coachName=c.coach||'Gavin Regnery';
     const mealCount=parseInt(document.getElementById('dp-meal-count')?.value)||4;
+    const goal=document.getElementById('ov-goal-1')?.value||'';
+    const startDate=document.getElementById('ov-start-1')?.value||'';
+    const dateStr=startDate?new Date(startDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
 
     // Supplement-per-meal lookup
     const suppByMeal={};
@@ -3946,31 +3952,51 @@ function _buildMealPlanPDF(jsPDF,c,setMsg){
       });
     });
 
-    const newPage=()=>{
-      // footer
-      doc.setFillColor(...BLK);doc.rect(0,286,W,11,'F');
-      doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...MG);
+    const addFooter=()=>{
+      const p=doc.internal.getCurrentPageInfo().pageNumber;
+      const total=doc.internal.getNumberOfPages();
+      doc.setFillColor(...BLK);doc.rect(0,285,W,12,'F');
+      doc.setDrawColor(...GOLD);doc.setLineWidth(0.4);doc.line(0,285,W,285);
+      doc.setFontSize(6.5);doc.setFont('helvetica','normal');doc.setTextColor(...MG);
       doc.text('ELEMENTS Personal Training · Santa Monica, CA',M,291);
-      doc.text('Confidential — Client Copy',W-M,291,{align:'right'});
-      doc.addPage();y=M;
+      doc.text(`${clientName} · Meal Plan`,W/2,291,{align:'center'});
+      doc.text(`${p} / ${total}`,W-M,291,{align:'right'});
     };
-    const checkY=(h)=>{if(y+h>282)newPage();};
 
-    // ── HEADER ──
-    doc.setFillColor(...BLK);doc.rect(0,0,W,22,'F');
-    doc.setFillColor(...GOLD);doc.rect(0,22,W,1.5,'F');
-    doc.setFontSize(18);doc.setFont('helvetica','bold');
-    doc.setTextColor(...WHT);doc.text('ELEMENTS',M,14);
-    doc.setFontSize(7);doc.setFont('helvetica','normal');
-    doc.setTextColor(...GOLD);doc.text('PERSONAL TRAINING · SANTA MONICA',M,19);
-    doc.setFontSize(10);doc.setFont('helvetica','bold');
-    doc.setTextColor(...WHT);doc.text(clientName,W-M,11,{align:'right'});
-    doc.setFontSize(7);doc.setFont('helvetica','normal');
-    doc.setTextColor(180,160,120);
-    doc.text(`Meal Plan · ${mealCount} meals/day · Coach: ${coachName}`,W-M,17,{align:'right'});
-    y=30;
+    const newPage=()=>{
+      addFooter();
+      doc.addPage();
+      y=M;
+    };
+    const checkY=(h)=>{if(y+h>281)newPage();};
 
-    // Daily macro summary bar
+    // ══════════════════════════════
+    // HEADER
+    // ══════════════════════════════
+    // Full-width black header
+    doc.setFillColor(...BLK);doc.rect(0,0,W,30,'F');
+    // Gold accent bar
+    doc.setFillColor(...GOLD);doc.rect(0,30,W,2,'F');
+
+    // ELEMENTS wordmark
+    doc.setFontSize(22);doc.setFont('helvetica','bold');
+    doc.setTextColor(...WHT);doc.text('ELEMENTS',M,19);
+    doc.setFontSize(7.5);doc.setFont('helvetica','normal');
+    doc.setTextColor(...GOLD_DIM);doc.text('PERSONAL TRAINING  ·  SANTA MONICA',M,25.5);
+
+    // Client name + context right-aligned
+    doc.setFontSize(13);doc.setFont('helvetica','bold');
+    doc.setTextColor(...WHT);doc.text(clientName,W-M,16,{align:'right'});
+    const subRight=[goal,dateStr].filter(Boolean).join('  ·  ');
+    if(subRight){
+      doc.setFontSize(7);doc.setFont('helvetica','normal');
+      doc.setTextColor(...GOLD_DIM);doc.text(subRight,W-M,23,{align:'right'});
+    }
+    y=38;
+
+    // ══════════════════════════════
+    // DAILY TOTALS BAR
+    // ══════════════════════════════
     let totP=0,totC=0,totF=0;
     for(let i=1;i<=mealCount;i++){
       totP+=parseInt(document.getElementById(`m${i}-prot`)?.value)||0;
@@ -3978,16 +4004,28 @@ function _buildMealPlanPDF(jsPDF,c,setMsg){
       totF+=parseInt(document.getElementById(`m${i}-fat`)?.value)||0;
     }
     const totCals=(totP*4)+(totC*4)+(totF*9);
-    const mw=col/4;
-    [['CALORIES',totCals,''],['PROTEIN',totP+'g',''],['CARBS',totC+'g',''],['FATS',totF+'g','']].forEach(([l,v],i)=>{
-      const x=M+i*mw;
-      doc.setFillColor(...BLK);doc.rect(x,y,mw-1,14,'F');
-      doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...GOLD);doc.text(l,x+mw/2,y+4.5,{align:'center'});
-      doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(...WHT);doc.text(String(v),x+mw/2,y+11,{align:'center'});
-    });
-    y+=17;
 
-    // ── MEALS ──
+    // Section label
+    doc.setFontSize(7);doc.setFont('helvetica','bold');
+    doc.setTextColor(...GOLD);doc.text('DAILY TARGETS',M,y);
+    y+=4;
+
+    const mw=col/4;
+    const macroData=[['Calories',String(totCals),WHT],['Protein',totP+'g',[...GOLD]],['Carbohydrates',totC+'g',BLUE],['Fats',totF+'g',RED]];
+    macroData.forEach(([l,v,clr],i)=>{
+      const x=M+i*(mw+0.5);
+      doc.setFillColor(30,30,30);doc.rect(x,y,mw,16,'F');
+      doc.setFillColor(...GOLD);doc.rect(x,y,mw,0.8,'F');
+      doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...MG);
+      doc.text(l.toUpperCase(),x+mw/2,y+5.5,{align:'center'});
+      doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(...clr);
+      doc.text(v,x+mw/2,y+13,{align:'center'});
+    });
+    y+=20;
+
+    // ══════════════════════════════
+    // MEALS
+    // ══════════════════════════════
     for(let i=1;i<=mealCount;i++){
       const mp=parseInt(document.getElementById(`m${i}-prot`)?.value)||0;
       const mc=parseInt(document.getElementById(`m${i}-carb`)?.value)||0;
@@ -3999,76 +4037,93 @@ function _buildMealPlanPDF(jsPDF,c,setMsg){
       const mealSupps=suppByMeal[i]||[];
       const portions=mfood?_getFoodPortionsText(mfood,mp,mc,mf):[];
 
-      const estH=13+11+(portions.length>0?6+portions.length*6:0)+(mealSupps.length>0?6+Math.ceil(mealSupps.length/3)*6:0)+5;
+      // Estimate height
+      const estH=14+12+(portions.length>0?5.5+portions.length*6.5+2:0)+(mealSupps.length>0?7:0)+6;
       checkY(estH);
 
-      // Meal header
-      doc.setFillColor(...BLK);doc.rect(M,y,col,10,'F');
-      doc.setFillColor(...GOLD);doc.rect(M,y,3,10,'F');
-      doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...WHT);
-      doc.text(`MEAL ${i}`,M+6,y+7);
-      doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(...GOLD);
-      doc.text(mtype,M+26,y+7);
-      doc.setTextColor(200,185,150);
-      doc.text(`${mt}${mkcal?' · '+mkcal+' kcal':''}`,W-M-2,y+7,{align:'right'});
-      y+=11;
+      // ── Meal Header ──
+      // Thin gold top border
+      doc.setFillColor(...GOLD);doc.rect(M,y,col,0.8,'F');
+      doc.setFillColor(30,30,30);doc.rect(M,y+0.8,col,12,'F');
 
-      // Macro boxes
+      // Meal number — large
+      doc.setFontSize(11);doc.setFont('helvetica','bold');
+      doc.setTextColor(...WHT);doc.text(`MEAL ${i}`,M+4,y+9);
+
+      // Type badge
+      doc.setFontSize(7);doc.setFont('helvetica','normal');
+      doc.setTextColor(...GOLD_DIM);doc.text(mtype.toUpperCase(),M+33,y+9);
+
+      // Time + kcal right
+      if(mt){
+        doc.setFontSize(8);doc.setFont('helvetica','bold');
+        doc.setTextColor(...WHT);doc.text(mt,W-M-3,y+7,{align:'right'});
+      }
+      if(mkcal){
+        doc.setFontSize(6.5);doc.setFont('helvetica','normal');
+        doc.setTextColor(...GOLD_DIM);doc.text(mkcal+' kcal',W-M-3,y+12,{align:'right'});
+      }
+      y+=13.5;
+
+      // ── Macro Row ──
       const b3=col/3;
-      [[mp+'g','Protein',GOLD],[mc+'g','Carbs',[58,107,180]],[mf+'g','Fats',[160,60,90]]].forEach(([v,l,clr],idx)=>{
+      const macros3=[[mp+'g','PROTEIN',GOLD],[mc+'g','CARBS',BLUE],[mf+'g','FATS',RED]];
+      macros3.forEach(([v,l,clr],idx)=>{
         const x=M+idx*b3;
-        doc.setFillColor(...LG);doc.rect(x,y,b3-0.5,10,'F');
-        doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text(l,x+b3/2,y+3.5,{align:'center'});
-        doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...clr);doc.text(v,x+b3/2,y+8.5,{align:'center'});
+        const isLast=idx===2;
+        doc.setFillColor(...LG);doc.rect(x,y,b3-(isLast?0:0.5),11,'F');
+        doc.setFontSize(5.5);doc.setFont('helvetica','normal');doc.setTextColor(...MG);
+        doc.text(l,x+b3/2,y+4,{align:'center'});
+        doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(...clr);
+        doc.text(v,x+b3/2,y+9.5,{align:'center'});
       });
-      y+=11;
+      y+=12;
 
-      // Food portions
+      // ── Food Portions ──
       if(portions.length){
-        doc.setFillColor(250,248,244);doc.rect(M,y,col,5.5,'F');
-        doc.setFontSize(6);doc.setFont('helvetica','bold');doc.setTextColor(...GOLD);
+        // Column header row
+        doc.setFillColor(...LG2);doc.rect(M,y,col,5.5,'F');
+        doc.setFontSize(6);doc.setFont('helvetica','bold');doc.setTextColor(...DG);
         doc.text('FOOD',M+3,y+4);
-        doc.text('AMOUNT',M+80,y+4);
-        doc.text('MACROS',M+120,y+4);
+        doc.text('AMOUNT',M+90,y+4);
+        doc.text('P · C · F',W-M-3,y+4,{align:'right'});
         y+=5.5;
+
         portions.forEach(({name,portion,macros},fi)=>{
-          if(fi%2===0){doc.setFillColor(...WHT);}else{doc.setFillColor(...LG);}doc.rect(M,y,col,6,'F');
-          doc.setFillColor(...GOLD);doc.rect(M,y,1.5,portions.length*6,'F');
+          if(fi%2===0){doc.setFillColor(...WHT);}else{doc.setFillColor(...LG);}
+          doc.rect(M,y,col,6.5,'F');
+          // Left accent
+          doc.setFillColor(...GOLD);doc.rect(M,y,1.2,6.5,'F');
           doc.setFontSize(7.5);doc.setFont('helvetica','bold');doc.setTextColor(...BLK);
-          doc.text(name,M+4,y+4.3);
-          doc.setFont('helvetica','normal');doc.setTextColor(...DG);
-          doc.text(portion,M+80,y+4.3);
+          doc.text(name,M+4,y+4.6);
+          doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(...DG);
+          doc.text(portion,M+90,y+4.6);
           doc.setFontSize(6.5);doc.setTextColor(...MG);
-          doc.text(macros,M+120,y+4.3);
-          y+=6;
+          doc.text(macros,W-M-2,y+4.6,{align:'right'});
+          y+=6.5;
         });
-        y+=1;
+        y+=2;
       }
 
-      // Supplements
+      // ── Supplements ──
       if(mealSupps.length){
-        doc.setFillColor(30,30,30);doc.rect(M,y,col,6,'F');
+        checkY(8);
+        doc.setFillColor(28,28,28);doc.rect(M,y,col,7,'F');
         doc.setFontSize(6);doc.setFont('helvetica','bold');doc.setTextColor(...GOLD);
-        doc.text('SUPPLEMENTS:',M+3,y+4.3);
-        doc.setFont('helvetica','normal');doc.setTextColor(160,145,120);
-        const suppStr=mealSupps.map(s=>`${s.name}${s.dose?' ('+s.dose+')':''}`).join('  ·  ');
-        const suppLines=doc.splitTextToSize(suppStr,col-32);
-        doc.text(suppLines[0],M+32,y+4.3);
-        y+=6;
+        doc.text('WITH THIS MEAL',M+3,y+4.8);
+        doc.setFont('helvetica','normal');doc.setTextColor(155,140,115);
+        const suppStr=mealSupps.map(s=>`${s.name}${s.dose?' · '+s.dose:''}`).join('    ');
+        const suppLines=doc.splitTextToSize(suppStr,col-38);
+        doc.text(suppLines[0],M+38,y+4.8);
+        y+=7;
       }
-      y+=4;
+
+      // Space between meals
+      y+=5;
     }
 
-    // Footer on all pages
-    const totalPages=doc.internal.getNumberOfPages();
-    for(let p=1;p<=totalPages;p++){
-      doc.setPage(p);
-      doc.setFillColor(...BLK);doc.rect(0,286,W,11,'F');
-      doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...MG);
-      doc.text('ELEMENTS Personal Training · Santa Monica, CA',M,291);
-      doc.text(`Page ${p} of ${totalPages}`,W/2,291,{align:'center'});
-      doc.text('Confidential — Client Copy',W-M,291,{align:'right'});
-    }
+    // Add footer to final page
+    addFooter();
 
     doc.save(`${clientName.replace(/\s+/g,'-')}-Meal-Plan.pdf`);
     setMsg('✓ PDF downloaded!');
