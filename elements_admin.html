@@ -3597,14 +3597,51 @@ function gatherCurrentProtocol(){
     });
   }
   const supps=(currentClient?.supplements||[]).map(s=>({name:s.name,dose:s.dose,timing:s.timing}));
+
+  // Skinfold site measurements
+  const skMeasurements={};
+  Object.keys(SK_SITES).forEach(k=>{
+    const val=document.getElementById(`skm-${k}`)?.value;
+    if(val) skMeasurements[k]=parseFloat(val);
+  });
+
+  // Circumference site measurements
+  const cmMeasurements={};
+  Object.keys(CM_SITES).forEach(k=>{
+    const val=document.getElementById(`cmm-${k}`)?.value;
+    if(val) cmMeasurements[k]=parseFloat(val);
+  });
+
   return {
+    // ── General ──
+    training_age:parseFloat(document.getElementById('dp-training-age')?.value)||null,
+
+    // ── Body Composition (DEXA) ──
+    assessment_date:document.getElementById('bc-date')?.value||null,
+    bc_total_mass:parseFloat(document.getElementById('bc-total-mass')?.value)||null,
     body_weight:parseFloat(document.getElementById('dp-weight')?.value)||null,
     body_fat:parseFloat(document.getElementById('dp-bf')?.value)||null,
     lean_mass:parseFloat(document.getElementById('dp-lean')?.value)||null,
     fat_mass:parseFloat(document.getElementById('dp-fat-mass')?.value)||null,
+    bc_bmc:parseFloat(document.getElementById('bc-bmc')?.value)||null,
+    bc_visc_fat:parseFloat(document.getElementById('bc-visc-fat')?.value)||null,
+    bc_rmr:parseInt(document.getElementById('bc-rmr')?.value)||null,
+    bc_bf_pct:parseFloat(document.getElementById('bc-bf')?.value)||null,
+    bc_lean_mass:parseFloat(document.getElementById('bc-lean')?.value)||null,
+    bc_fat_mass:parseFloat(document.getElementById('bc-fat-mass')?.value)||null,
+    sk_sites:getSkSites()||null,
+    sk_measurements:Object.keys(skMeasurements).length?JSON.stringify(skMeasurements):null,
+    cm_sites:getCmSites()||null,
+    cm_measurements:Object.keys(cmMeasurements).length?JSON.stringify(cmMeasurements):null,
+
+    // ── Goal Setting ──
     goal_bf:parseFloat(document.getElementById('dp-goal-bf')?.value)||null,
     goal_weight:parseFloat(document.getElementById('dp-goal-weight')?.value)||null,
+    wt_loss:parseFloat(document.getElementById('dp-wt-loss')?.value)||null,
+    bw_pct_reduction:parseFloat(document.getElementById('dp-bw-pct')?.value)||null,
     phase_duration_weeks:parseInt(document.getElementById('dp-phase-wks')?.value)||null,
+
+    // ── Nutrition ──
     calories:parseInt(document.getElementById('dp-cals')?.value)||null,
     protein_g:parseInt(document.getElementById('res-prot')?.textContent)||null,
     carbs_g:parseInt(document.getElementById('res-carb')?.textContent)||null,
@@ -3614,19 +3651,31 @@ function gatherCurrentProtocol(){
     fat_pct:parseFloat(document.getElementById('dp-fat-pct')?.value)||null,
     ref_weight:parseFloat(document.getElementById('dp-ref-weight')?.value)||null,
     maintenance_multiplier:parseFloat(document.getElementById('dp-maintenance')?.value)||null,
+
+    // ── Meals ──
     meal_count:mealCount,
     meals:JSON.stringify(meals),
+
+    // ── Supplements ──
     supplements:JSON.stringify(supps),
+
+    // ── Protocol ──
     goal:document.getElementById('ov-goal-1')?.value||null,
     protocol_start:document.getElementById('ov-start-1')?.value||null,
     protocol_end:document.getElementById('ov-end-1')?.value||null,
+
+    // ── Training ──
     training_frequency:document.getElementById('ov-freq')?.value||null,
     training_method:document.getElementById('ov-method')?.value||null,
     training_focus:document.getElementById('ov-priority')?.value||null,
     training_days:getTrainingDays()||null,
     training_time:document.getElementById('dp-training-time')?.value||null,
+
+    // ── Nutrition approach ──
     nutrition_approach:document.getElementById('ov-nut-approach')?.value||null,
     tracking_responsibility:document.getElementById('ov-tracking')?.value||null,
+
+    // ── Assessment schedule ──
     bw_recording_days:getBWDays()||null,
     circumference_frequency:document.getElementById('ov-circ-freq')?.value||null,
     skinfold_frequency:document.getElementById('ov-skin-freq')?.value||null,
@@ -3746,15 +3795,39 @@ async function applyProtocol(id){
   if(!currentClient) return;
   const{data:p,error}=await sb.from('protocols').select('*').eq('id',id).single();
   if(error||!p){alert('Could not load protocol.');return;}
-  if(!confirm(`Apply "${p.name}" to ${currentClient.full_name||'this client'}? This will overwrite tabs 2–8.`)) return;
+  if(!confirm(`Apply "${p.name}" to ${currentClient.full_name||'this client'}? This will overwrite tabs 2–9.`)) return;
 
-  // ── Body Composition ──
-  if(p.body_weight) document.getElementById('dp-weight').value=p.body_weight;
-  if(p.body_fat)    document.getElementById('dp-bf').value=p.body_fat;
-  calcGoals();
+  // ── General ──
+  if(p.training_age) document.getElementById('dp-training-age').value=p.training_age;
+
+  // ── Body Composition (DEXA) ──
+  if(p.assessment_date)  document.getElementById('bc-date').value=p.assessment_date;
+  if(p.bc_total_mass)    document.getElementById('bc-total-mass').value=p.bc_total_mass;
+  if(p.bc_bf_pct)        document.getElementById('bc-bf').value=p.bc_bf_pct;
+  if(p.bc_lean_mass)     document.getElementById('bc-lean').value=p.bc_lean_mass;
+  if(p.bc_fat_mass)      document.getElementById('bc-fat-mass').value=p.bc_fat_mass;
+  if(p.bc_bmc)           document.getElementById('bc-bmc').value=p.bc_bmc;
+  if(p.bc_visc_fat)      document.getElementById('bc-visc-fat').value=p.bc_visc_fat;
+  if(p.bc_rmr)           document.getElementById('bc-rmr').value=p.bc_rmr;
+  if(p.sk_sites)         setSkSites(p.sk_sites);
+  if(p.cm_sites)         setCmSites(p.cm_sites);
+  if(p.sk_measurements){
+    try{
+      const skm=typeof p.sk_measurements==='string'?JSON.parse(p.sk_measurements):p.sk_measurements;
+      setTimeout(()=>Object.entries(skm).forEach(([k,v])=>{const el=document.getElementById(`skm-${k}`);if(el)el.value=v;}),200);
+    }catch(e){}
+  }
+  if(p.cm_measurements){
+    try{
+      const cmm=typeof p.cm_measurements==='string'?JSON.parse(p.cm_measurements):p.cm_measurements;
+      setTimeout(()=>Object.entries(cmm).forEach(([k,v])=>{const el=document.getElementById(`cmm-${k}`);if(el)el.value=v;}),200);
+    }catch(e){}
+  }
 
   // ── Goal Setting ──
-  if(p.goal_bf)             document.getElementById('dp-goal-bf').value=p.goal_bf;
+  if(p.body_weight) document.getElementById('dp-weight').value=p.body_weight;
+  if(p.body_fat)    document.getElementById('dp-bf').value=p.body_fat;
+  if(p.goal_bf)     document.getElementById('dp-goal-bf').value=p.goal_bf;
   if(p.phase_duration_weeks){
     document.getElementById('dp-phase-wks').value=p.phase_duration_weeks;
     const ovDur=document.getElementById('ov-dur-1');
@@ -3769,6 +3842,8 @@ async function applyProtocol(id){
   if(p.protein_pct)           document.getElementById('dp-prot-pct').value=p.protein_pct;
   if(p.carb_pct)              document.getElementById('dp-carb-pct').value=p.carb_pct;
   if(p.fat_pct)               document.getElementById('dp-fat-pct').value=p.fat_pct;
+  if(p.nutrition_approach)    document.getElementById('ov-nut-approach').value=p.nutrition_approach;
+  if(p.tracking_responsibility)document.getElementById('ov-tracking').value=p.tracking_responsibility;
   calcCalories();
 
   // ── Meal Design ──
@@ -3796,7 +3871,6 @@ async function applyProtocol(id){
   if(p.supplements){
     try{
       const supps=typeof p.supplements==='string'?JSON.parse(p.supplements):p.supplements;
-      // Delete existing and re-insert
       await sb.from('supplements').delete().eq('client_id',currentClient.id);
       if(supps.length){
         await sb.from('supplements').insert(supps.map(s=>({
@@ -3807,7 +3881,7 @@ async function applyProtocol(id){
     }catch(e){}
   }
 
-  // ── Summary ──
+  // ── Protocol & Training ──
   if(p.goal)                   document.getElementById('ov-goal-1').value=p.goal;
   if(p.protocol_start)         document.getElementById('ov-start-1').value=p.protocol_start;
   if(p.protocol_end)           document.getElementById('ov-end-1').value=p.protocol_end;
@@ -3816,8 +3890,6 @@ async function applyProtocol(id){
   if(p.training_focus)         document.getElementById('ov-priority').value=p.training_focus;
   if(p.training_days)          setTrainingDays(p.training_days);
   if(p.training_time)          document.getElementById('dp-training-time').value=p.training_time;
-  if(p.nutrition_approach)     document.getElementById('ov-nut-approach').value=p.nutrition_approach;
-  if(p.tracking_responsibility)document.getElementById('ov-tracking').value=p.tracking_responsibility;
   if(p.bw_recording_days)      setBWDays(p.bw_recording_days);
   if(p.circumference_frequency)document.getElementById('ov-circ-freq').value=p.circumference_frequency;
   if(p.skinfold_frequency)     document.getElementById('ov-skin-freq').value=p.skinfold_frequency;
