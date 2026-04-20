@@ -1022,7 +1022,9 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
         <div class="dp-sec">
           <div class="dp-sec-title" style="display:flex;align-items:center;justify-content:space-between">
             Weekly Review Log
-            <span style="font-size:10px;color:var(--muted);letter-spacing:1px;font-family:'Montserrat',sans-serif;font-weight:300">Click any week to expand</span>
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="font-size:10px;color:var(--muted);letter-spacing:1px;font-family:'Montserrat',sans-serif;font-weight:300">Click any week to expand</span>
+            </div>
           </div>
           <div id="weekly-log-body">
             <div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No weekly reviews yet. Add the first one below.</div>
@@ -2985,6 +2987,250 @@ async function addWeeklyEntry(){
   setTimeout(()=>msg.textContent='',3000);
 }
 
+function generateWeeklyReviewPDF(idx){
+  const entries=weeklyData[currentClient?.id]||[];
+  const e=entries[idx];
+  if(!e){alert('No entry found.');return;}
+  const JsPDF=window.jspdf?.jsPDF||window.jsPDF;
+  if(!JsPDF){
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload=()=>setTimeout(()=>generateWeeklyReviewPDF(idx),200);
+    document.head.appendChild(s);return;
+  }
+  _buildWeeklyReviewPDF(JsPDF,e,currentClient);
+}
+
+function _buildWeeklyReviewPDF(jsPDF,e,c){
+  try{
+    const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const W=doc.internal.pageSize.getWidth();
+    const M=16; const col=W-M*2;
+    let y=0;
+
+    const GOLD=[168,129,58]; const GOLD_DIM=[210,185,130];
+    const BLK=[22,22,22]; const WHT=[255,255,255];
+    const LG=[248,246,242]; const LG2=[240,237,232];
+    const MG=[150,140,128]; const DG=[70,65,60];
+    const GRN=[60,140,90]; const RED=[160,50,70]; const AMB=[180,130,40];
+
+    const clientName=c?.full_name||c?.email||'Client';
+    const sc=s=>s>=80?GRN:s>=50?AMB:RED;
+    const fmt=s=>s!==null&&s!==undefined?s+'%':'—';
+
+    const addFooter=()=>{
+      const p=doc.internal.getCurrentPageInfo().pageNumber;
+      const total=doc.internal.getNumberOfPages();
+      doc.setFillColor(...BLK);doc.rect(0,285,W,12,'F');
+      doc.setDrawColor(...GOLD);doc.setLineWidth(0.4);doc.line(0,285,W,285);
+      doc.setFontSize(6.5);doc.setFont('helvetica','normal');doc.setTextColor(...MG);
+      doc.text('ELEMENTS Personal Training · Santa Monica, CA',M,291);
+      doc.text(`${clientName} · Week ${e.wk} Review`,W/2,291,{align:'center'});
+      doc.text(`${p} / ${total}`,W-M,291,{align:'right'});
+    };
+    const checkY=h=>{if(y+h>281){addFooter();doc.addPage();y=M;}};
+
+    const secHead=(title,clr=GOLD)=>{
+      checkY(10);
+      doc.setFillColor(30,30,30);doc.rect(M,y,col,8,'F');
+      doc.setFillColor(...clr);doc.rect(M,y,3,8,'F');
+      doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(...WHT);
+      doc.text(title.toUpperCase(),M+6,y+5.5);
+      y+=9;
+    };
+
+    // ── HEADER ──
+    doc.setFillColor(...BLK);doc.rect(0,0,W,30,'F');
+    doc.setFillColor(...GOLD);doc.rect(0,30,W,2,'F');
+    doc.setFontSize(22);doc.setFont('helvetica','bold');
+    doc.setTextColor(...WHT);doc.text('ELEMENTS',M,19);
+    doc.setFontSize(7.5);doc.setFont('helvetica','normal');
+    doc.setTextColor(...GOLD_DIM);doc.text('PERSONAL TRAINING  ·  SANTA MONICA',M,25.5);
+    doc.setFontSize(13);doc.setFont('helvetica','bold');
+    doc.setTextColor(...WHT);doc.text(clientName,W-M,14,{align:'right'});
+    doc.setFontSize(8);doc.setFont('helvetica','normal');
+    doc.setTextColor(...GOLD_DIM);
+    doc.text(`Week ${e.wk} Review`,W-M,21,{align:'right'});
+    const dateStr=e.date?new Date(e.date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
+    if(dateStr) doc.text(dateStr,W-M,27,{align:'right'});
+    y=38;
+
+    // ── COMPLIANCE SCORE BANNER ──
+    if(e.score!==null&&e.score!==undefined){
+      const clr=sc(e.score);
+      doc.setFillColor(28,28,28);doc.rect(M,y,col,18,'F');
+      doc.setFillColor(...clr);doc.rect(M,y,3,18,'F');
+      doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...GOLD_DIM);
+      doc.text('OVERALL COMPLIANCE',M+8,y+7);
+      doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(...MG);
+      const lbl=e.score>=90?'Excellent — all commitments met':e.score>=75?'Good — strong week overall':e.score>=50?'Average — some areas need attention':'Below target — review action points';
+      doc.text(lbl,M+8,y+13);
+      doc.setFontSize(20);doc.setFont('helvetica','bold');doc.setTextColor(...clr);
+      doc.text(e.score+'%',W-M-2,y+13,{align:'right'});
+      y+=21;
+    }
+
+    // ── 1. TRAINING ──
+    secHead('1. Training Frequency');
+    const trainPct=e.sessions_target>0?Math.round((e.sessions_done/e.sessions_target)*100):null;
+    const mw2=col/2;
+    // Sessions boxes
+    [['Sessions Completed',e.sessions_done||'—',WHT],['Sessions Scheduled',e.sessions_target||'—',MG]].forEach(([l,v,clr],i)=>{
+      const x=M+i*(mw2+1);
+      doc.setFillColor(...LG);doc.rect(x,y,mw2-1,14,'F');
+      doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text(l.toUpperCase(),x+mw2/2,y+4.5,{align:'center'});
+      doc.setFontSize(14);doc.setFont('helvetica','bold');doc.setTextColor(...clr);doc.text(String(v),x+mw2/2,y+11.5,{align:'center'});
+    });
+    y+=15;
+    if(trainPct!==null){
+      doc.setFillColor(...sc(trainPct));doc.rect(M,y,Math.round(col*(trainPct/100)),4,'F');
+      doc.setFillColor(...LG2);doc.rect(M+Math.round(col*(trainPct/100)),y,col-Math.round(col*(trainPct/100)),4,'F');
+      doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...sc(trainPct));
+      doc.text(`${trainPct}% completion`,W-M,y+3,{align:'right'});
+      y+=6;
+    }
+    if(e.training_notes){
+      checkY(10);
+      doc.setFillColor(...LG);doc.rect(M,y,col,8,'F');
+      doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text('NOTES',M+3,y+3.5);
+      doc.setFontSize(8);doc.setTextColor(...DG);doc.text(e.training_notes,M+3,y+7);
+      y+=9;
+    }
+    y+=4;
+
+    // ── 2. BODYWEIGHT ──
+    secHead('2. Bodyweight Recording');
+    const bwPct=e.bw_compliance?parseInt(e.bw_compliance):null;
+    const bwDays=(e.bw_days||'').split(',').map(s=>s.trim()).filter(Boolean);
+    if(bwDays.length){
+      doc.setFillColor(...LG);doc.rect(M,y,col,10,'F');
+      doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text('DAYS RECORDED',M+3,y+4);
+      doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...DG);
+      doc.text(bwDays.join('  ·  '),M+3,y+8.5);
+      y+=11;
+    }
+    if(bwPct!==null){
+      doc.setFillColor(...sc(bwPct));doc.rect(M,y,Math.round(col*(bwPct/100)),4,'F');
+      doc.setFillColor(...LG2);doc.rect(M+Math.round(col*(bwPct/100)),y,col-Math.round(col*(bwPct/100)),4,'F');
+      doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...sc(bwPct));
+      doc.text(`${bwPct}% compliance`,W-M,y+3,{align:'right'});
+      y+=6;
+    }
+    y+=4;
+
+    // ── 3. NUTRITION ──
+    secHead('3. Nutrition Tracking');
+    const nutPct=e.meals_logged||null;
+    // Meal grid
+    try{
+      const md=typeof e.meals_compliance==='string'?JSON.parse(e.meals_compliance):e.meals_compliance;
+      if(md&&typeof md==='object'&&!Array.isArray(md)){
+        const mealCount=Object.values(md)[0]?.length||0;
+        if(mealCount>0){
+          checkY(8+mealCount*6);
+          const cellW=col/8;
+          // Header row
+          doc.setFillColor(...LG2);doc.rect(M,y,col,6,'F');
+          doc.setFontSize(6);doc.setFont('helvetica','bold');doc.setTextColor(...MG);
+          doc.text('',M+2,y+4);
+          ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach((d,i)=>{
+            doc.text(d,M+cellW+(i*cellW)+cellW/2,y+4,{align:'center'});
+          });
+          y+=6;
+          for(let m=0;m<mealCount;m++){
+            if(m%2===0){doc.setFillColor(...LG);}else{doc.setFillColor(...WHT);}
+            doc.rect(M,y,col,6,'F');
+            doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...DG);
+            doc.text(`M${m+1}`,M+cellW/2,y+4.3,{align:'center'});
+            DAY_KEYS.forEach((day,di)=>{
+              const done=md[day]?.[m];
+              doc.setFontSize(8);
+              doc.setTextColor(...(done?GRN:MG));
+              doc.text(done?'✓':'○',M+cellW+(di*cellW)+cellW/2,y+4.3,{align:'center'});
+            });
+            y+=6;
+          }
+          y+=2;
+        }
+      }
+    }catch(err){}
+    if(nutPct!==null){
+      doc.setFillColor(...sc(nutPct));doc.rect(M,y,Math.round(col*(nutPct/100)),4,'F');
+      doc.setFillColor(...LG2);doc.rect(M+Math.round(col*(nutPct/100)),y,col-Math.round(col*(nutPct/100)),4,'F');
+      doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...sc(nutPct));
+      doc.text(`${nutPct}% meal completion`,W-M,y+3,{align:'right'});
+      y+=6;
+    }
+    if(e.nut_notes){
+      checkY(10);
+      doc.setFillColor(...LG);doc.rect(M,y,col,8,'F');
+      doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text('NOTES',M+3,y+3.5);
+      doc.setFontSize(8);doc.setTextColor(...DG);doc.text(e.nut_notes,M+3,y+7);
+      y+=9;
+    }
+    y+=4;
+
+    // ── 4. BODY COMP ASSESSMENT ──
+    if(e.assessment_type&&e.assessment_type!=='no'&&e.assessment&&Object.keys(e.assessment).length){
+      secHead('4. Body Composition Assessment');
+      const aDate=e.assessment.date?new Date(e.assessment.date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
+      doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(...MG);
+      doc.text((e.assessment_type||'').toUpperCase()+(aDate?' · '+aDate:''),M,y+4);
+      y+=7;
+
+      if(e.assessment.dexa){
+        const dFields=[['Total Mass',e.assessment.dexa.total_mass,'lbs'],['Body Fat %',e.assessment.dexa.body_fat,'%'],['Lean Mass',e.assessment.dexa.lean_mass,'lbs'],['Fat Mass',e.assessment.dexa.fat_mass,'lbs'],['BMC',e.assessment.dexa.bmc,'lbs'],['Visceral Fat',e.assessment.dexa.visceral_fat,'lbs'],['RMR',e.assessment.dexa.rmr,'cal']].filter(([,v])=>v);
+        const dw=col/Math.min(dFields.length,4);
+        let dx=M,dy=y;
+        dFields.forEach(([l,v,u],i)=>{
+          if(i>0&&i%4===0){dx=M;dy+=14;}
+          doc.setFillColor(...LG);doc.rect(dx,dy,dw-1,13,'F');
+          doc.setFontSize(5.5);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text(l.toUpperCase(),dx+dw/2,dy+4,{align:'center'});
+          doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...DG);doc.text(`${v}${u}`,dx+dw/2,dy+10.5,{align:'center'});
+          dx+=dw;
+        });
+        y=dy+15;
+      }
+
+      if(e.assessment.skinfolds&&Object.keys(e.assessment.skinfolds).length){
+        checkY(20);
+        doc.setFontSize(6.5);doc.setFont('helvetica','bold');doc.setTextColor(...GOLD);doc.text('SKINFOLDS (mm)',M,y+4);y+=6;
+        const skArr=Object.entries(e.assessment.skinfolds);
+        const sw=col/Math.min(skArr.length,5);
+        skArr.forEach(([site,val],i)=>{
+          const x=M+(i%5)*sw;
+          if(i>0&&i%5===0) y+=12;
+          doc.setFillColor(...LG);doc.rect(x,y,sw-1,11,'F');
+          doc.setFontSize(5.5);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text(site,x+sw/2,y+4,{align:'center'});
+          doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(...DG);doc.text(`${val}mm`,x+sw/2,y+9,{align:'center'});
+        });
+        y+=13;
+      }
+
+      if(e.assessment.circumferences&&Object.keys(e.assessment.circumferences).length){
+        checkY(20);
+        doc.setFontSize(6.5);doc.setFont('helvetica','bold');doc.setTextColor(...GOLD);doc.text('CIRCUMFERENCE (inches)',M,y+4);y+=6;
+        const cmArr=Object.entries(e.assessment.circumferences);
+        const cw=col/Math.min(cmArr.length,5);
+        cmArr.forEach(([site,val],i)=>{
+          const x=M+(i%5)*cw;
+          if(i>0&&i%5===0) y+=12;
+          doc.setFillColor(...LG);doc.rect(x,y,cw-1,11,'F');
+          doc.setFontSize(5.5);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text(site,x+cw/2,y+4,{align:'center'});
+          doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(...DG);doc.text(`${val}"`,x+cw/2,y+9,{align:'center'});
+        });
+        y+=13;
+      }
+    }
+
+    addFooter();
+    doc.save(`${(c?.full_name||'Client').replace(/\s+/g,'-')}-Week-${e.wk}-Review.pdf`);
+  }catch(err){
+    console.error('Weekly review PDF error:',err);
+    alert('PDF error: '+err.message);
+  }
+}
+
 function renderWeeklyLog(){
   const entries=weeklyData[currentClient?.id]||[];
   const container=document.getElementById('weekly-log-body');
@@ -2999,14 +3245,15 @@ function renderWeeklyLog(){
   container.innerHTML=entries.map((e,i)=>`
     <div style="border:1px solid var(--border);margin-bottom:3px;overflow:hidden">
       <!-- Collapsed header — click to expand -->
-      <div onclick="toggleWeekExpand(${i})" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;background:var(--c2);transition:background .2s" onmouseover="this.style.background='var(--c3)'" onmouseout="this.style.background='var(--c2)'">
-        <div style="display:flex;align-items:center;gap:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--c2);">
+        <div onclick="toggleWeekExpand(${i})" style="display:flex;align-items:center;gap:16px;flex:1;cursor:pointer" onmouseover="this.parentElement.style.background='var(--c3)'" onmouseout="this.parentElement.style.background='var(--c2)'">
           <span style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px">Week ${e.wk}</span>
-          <span style="font-size:10px;color:var(--muted)">${e.date}</span>
+          <span style="font-size:10px;color:var(--muted)">${e.date||''}</span>
         </div>
         <div style="display:flex;align-items:center;gap:10px">
           ${e.score!==null&&e.score!==undefined?`<span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:${e.score>=80?'var(--green)':e.score>=50?'var(--gold)':'var(--red)'}">${e.score}%</span>`:'<span style="font-size:10px;color:var(--muted)">No score</span>'}
-          <span style="font-size:12px;color:var(--muted)" id="wk-chevron-${i}">▼</span>
+          <button onclick="event.stopPropagation();generateWeeklyReviewPDF(${i})" style="padding:5px 12px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:7px;letter-spacing:2px;text-transform:uppercase;font-weight:600;white-space:nowrap">PDF →</button>
+          <span onclick="toggleWeekExpand(${i})" style="font-size:12px;color:var(--muted);cursor:pointer" id="wk-chevron-${i}">▼</span>
         </div>
       </div>
       <!-- Expanded body -->
