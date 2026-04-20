@@ -665,15 +665,27 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             </div>
           </div>
         </div>
-        <!-- Meal Plan PDF box -->
-        <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;background:var(--c2);border:1px solid rgba(201,168,108,.3);padding:18px 20px;margin-top:2px">
-          <div>
-            <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:5px">Meal Plan PDF</div>
-            <div style="font-size:11px;color:var(--muted)">Generates a clean branded PDF showing the full meal plan with food portions and supplements.</div>
+        <!-- PDF Download boxes -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:2px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--c2);border:1px solid rgba(201,168,108,.3);padding:18px 20px">
+            <div>
+              <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:5px">Meal Plan PDF</div>
+              <div style="font-size:11px;color:var(--muted)">Branded PDF of the full meal plan with food portions and supplements.</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+              <button onclick="generateMealPlanPDF()" style="padding:10px 18px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:600;white-space:nowrap">Download →</button>
+              <span id="mp-pdf-msg" style="font-size:10px;color:var(--green);min-height:16px;white-space:nowrap"></span>
+            </div>
           </div>
-          <div style="display:flex;align-items:center;gap:10px">
-            <button onclick="generateMealPlanPDF()" style="padding:10px 22px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600;white-space:nowrap">Download PDF →</button>
-            <span id="mp-pdf-msg" style="font-size:10px;color:var(--green);min-height:16px;white-space:nowrap"></span>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--c2);border:1px solid rgba(201,168,108,.3);padding:18px 20px">
+            <div>
+              <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:5px">Body Composition PDF</div>
+              <div style="font-size:11px;color:var(--muted)">Complete body comp report — DEXA data, skinfolds, circumferences and goals.</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+              <button onclick="generateBodyCompPDF()" style="padding:10px 18px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:600;white-space:nowrap">Download →</button>
+              <span id="bc-pdf-msg" style="font-size:10px;color:var(--green);min-height:16px;white-space:nowrap"></span>
+            </div>
           </div>
         </div>
         <button class="save-btn" onclick="saveOverview(this)" style="margin-top:14px">Save Overview →</button>
@@ -3922,6 +3934,257 @@ function syncSummaryHeader(){
   if(el_tm)  el_tm.textContent  = trainMeth;
   if(el_tfo) el_tfo.textContent = trainFocus;
   if(el_td)  el_td.textContent  = trainDays;
+}
+
+function generateBodyCompPDF(){
+  const msg=document.getElementById('bc-pdf-msg');
+  const setMsg=(t,c='var(--green)')=>{if(msg){msg.textContent=t;msg.style.color=c;}};
+  if(!currentClient){setMsg('Open a client first.','var(--red)');return;}
+  const JsPDF=window.jspdf?.jsPDF||window.jsPDF;
+  if(!JsPDF){
+    setMsg('Loading...','var(--gold)');
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload=()=>setTimeout(()=>generateBodyCompPDF(),200);
+    s.onerror=()=>setMsg('Failed to load PDF library.','var(--red)');
+    document.head.appendChild(s);
+    return;
+  }
+  setMsg('Building...','var(--gold)');
+  setTimeout(()=>_buildBodyCompPDF(JsPDF,currentClient,setMsg),50);
+}
+
+function _buildBodyCompPDF(jsPDF,c,setMsg){
+  try{
+    const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const W=doc.internal.pageSize.getWidth();
+    const M=16; const col=W-M*2;
+    let y=0;
+
+    const GOLD=[168,129,58]; const GOLD_DIM=[210,185,130];
+    const BLK=[22,22,22]; const WHT=[255,255,255];
+    const LG=[248,246,242]; const LG2=[240,237,232];
+    const MG=[150,140,128]; const DG=[70,65,60];
+    const BLUE=[58,100,168]; const RED=[150,55,75]; const GRN=[60,140,90];
+
+    const clientName=c.full_name||c.email||'Client';
+    const assessDate=document.getElementById('bc-date')?.value||'';
+    const dateStr=assessDate?new Date(assessDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
+
+    const v=id=>document.getElementById(id)?.value||'';
+    const n=id=>parseFloat(v(id))||null;
+
+    // Gather DEXA data
+    const totalMass=n('bc-total-mass');
+    const bfPct=n('bc-bf');
+    const leanMass=n('bc-lean');
+    const fatMass=n('bc-fat-mass');
+    const bmc=n('bc-bmc');
+    const viscFat=n('bc-visc-fat');
+    const rmr=n('bc-rmr');
+
+    // Gather goal data
+    const startWt=n('dp-weight');
+    const startBf=n('dp-bf');
+    const goalBf=n('dp-goal-bf');
+    const goalWt=n('dp-goal-weight');
+    const phaseDur=v('dp-phase-wks');
+
+    // Gather skinfold sites + measurements
+    const skSites=['pec','tri','bic','sub','sup1','sup2','mid','umb','ham','qua'];
+    const skLabels={pec:'Pectoral',tri:'Triceps',bic:'Biceps',sub:'Subscapularis',sup1:'Suprailiac-1',sup2:'Suprailiac-2',mid:'Mid-Axillary',umb:'Umbilical',ham:'Hamstrings',qua:'Quadriceps'};
+    const skData=skSites.filter(s=>document.getElementById(`sk-${s}`)?.checked).map(s=>({
+      name:skLabels[s], val:v(`sk-${s}-mm`)
+    }));
+
+    // Gather circumference sites + measurements
+    const cmSites=['shoulder','arm','waist','hip','thigh'];
+    const cmLabels={shoulder:'Shoulders',arm:'Upper Arm',waist:'Umbilical / Waist',hip:'Hips',thigh:'Thigh'};
+    const cmData=cmSites.filter(s=>document.getElementById(`cm-${s}`)?.checked).map(s=>({
+      name:cmLabels[s], val:v(`cm-${s}-in`)
+    }));
+
+    const addFooter=()=>{
+      const p=doc.internal.getCurrentPageInfo().pageNumber;
+      const total=doc.internal.getNumberOfPages();
+      doc.setFillColor(...BLK);doc.rect(0,285,W,12,'F');
+      doc.setDrawColor(...GOLD);doc.setLineWidth(0.4);doc.line(0,285,W,285);
+      doc.setFontSize(6.5);doc.setFont('helvetica','normal');doc.setTextColor(...MG);
+      doc.text('ELEMENTS Personal Training · Santa Monica, CA',M,291);
+      doc.text(`${clientName} · Body Composition Assessment`,W/2,291,{align:'center'});
+      doc.text(`${p} / ${total}`,W-M,291,{align:'right'});
+    };
+    const checkY=h=>{if(y+h>281){addFooter();doc.addPage();y=M;}};
+
+    // ── HEADER ──
+    doc.setFillColor(...BLK);doc.rect(0,0,W,30,'F');
+    doc.setFillColor(...GOLD);doc.rect(0,30,W,2,'F');
+    doc.setFontSize(22);doc.setFont('helvetica','bold');
+    doc.setTextColor(...WHT);doc.text('ELEMENTS',M,19);
+    doc.setFontSize(7.5);doc.setFont('helvetica','normal');
+    doc.setTextColor(...GOLD_DIM);doc.text('PERSONAL TRAINING  ·  SANTA MONICA',M,25.5);
+    doc.setFontSize(13);doc.setFont('helvetica','bold');
+    doc.setTextColor(...WHT);doc.text(clientName,W-M,16,{align:'right'});
+    doc.setFontSize(7);doc.setFont('helvetica','normal');
+    doc.setTextColor(...GOLD_DIM);
+    const subR=['Body Composition Assessment',dateStr].filter(Boolean).join('  ·  ');
+    doc.text(subR,W-M,23,{align:'right'});
+    y=38;
+
+    // ── SECTION HEADER HELPER ──
+    const secHead=(title,clr=GOLD)=>{
+      checkY(10);
+      doc.setFillColor(30,30,30);doc.rect(M,y,col,8,'F');
+      doc.setFillColor(...clr);doc.rect(M,y,3,8,'F');
+      doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(...WHT);
+      doc.text(title.toUpperCase(),M+6,y+5.5);
+      y+=9;
+    };
+
+    // ── GOALS SECTION ──
+    secHead('Phase Overview & Goals');
+    const goalData=[
+      ['Goal',document.getElementById('ov-goal-1')?.value||'—'],
+      ['Start Date',dateStr||'—'],
+      ['Phase Duration',phaseDur?phaseDur+' weeks':'—'],
+    ];
+    const startData=[
+      ['Starting Weight',startWt?startWt+' lbs':'—'],
+      ['Starting Body Fat',startBf?startBf+'%':'—'],
+    ];
+    const goalBoxData=[
+      ['Goal Body Fat',goalBf?goalBf+'%':'—',GOLD],
+      ['Goal Weight',goalWt?goalWt+' lbs':'—',GOLD],
+    ];
+
+    // Left col text pairs
+    const colW=col/2-1;
+    goalData.forEach(([l,v2])=>{
+      doc.setFillColor(...LG);doc.rect(M,y,colW,8,'F');
+      doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text(l,M+4,y+3.5);
+      doc.setFontSize(8.5);doc.setFont('helvetica','bold');doc.setTextColor(...DG);doc.text(String(v2),M+4,y+7);
+      y+=9;
+    });
+    y-=goalData.length*9;
+    startData.forEach(([l,v2],i)=>{
+      const rx=M+colW+1;
+      doc.setFillColor(...LG);doc.rect(rx,y+i*9,colW,8,'F');
+      doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text(l,rx+4,y+i*9+3.5);
+      doc.setFontSize(8.5);doc.setFont('helvetica','bold');doc.setTextColor(...DG);doc.text(String(v2),rx+4,y+i*9+7);
+    });
+    y+=Math.max(goalData.length,startData.length)*9+2;
+
+    // Goal boxes
+    const bw2=col/2;
+    goalBoxData.forEach(([l,v2,clr],i)=>{
+      const x=M+i*bw2;
+      doc.setFillColor(28,28,28);doc.rect(x,y,bw2-(i===0?1:0),16,'F');
+      doc.setFillColor(...clr);doc.rect(x,y,bw2-(i===0?1:0),0.8,'F');
+      doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text(l.toUpperCase(),x+bw2/2,y+5,{align:'center'});
+      doc.setFontSize(13);doc.setFont('helvetica','bold');doc.setTextColor(...clr);doc.text(String(v2),x+bw2/2,y+13,{align:'center'});
+    });
+    y+=19;
+
+    // ── DEXA DATA ──
+    if(totalMass||bfPct||leanMass||fatMass){
+      checkY(60);
+      secHead('DEXA Scan Results');
+      const dexaMain=[
+        ['Total Mass',totalMass?totalMass+' lbs':'—',WHT],
+        ['Body Fat %',bfPct?bfPct+'%':'—',RED],
+        ['Lean Mass',leanMass?leanMass+' lbs':'—',BLUE],
+        ['Fat Mass',fatMass?fatMass+' lbs':'—',RED],
+      ];
+      const mw4=col/4;
+      dexaMain.forEach(([l,v2,clr],i)=>{
+        const x=M+i*mw4;
+        doc.setFillColor(...LG);doc.rect(x,y,mw4-(i<3?0.5:0),18,'F');
+        doc.setFontSize(5.5);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text(l.toUpperCase(),x+mw4/2,y+4.5,{align:'center'});
+        doc.setFontSize(12);doc.setFont('helvetica','bold');doc.setTextColor(...clr);doc.text(String(v2),x+mw4/2,y+13,{align:'center'});
+      });
+      y+=19;
+      // Secondary DEXA metrics
+      const dexaSec=[[' BMC',bmc?bmc+' lbs':'—'],[' Visceral Fat',viscFat?viscFat+' lbs':'—'],[' Resting Met. Rate',rmr?rmr+' cal':'—']].filter(([,v2])=>v2!=='—');
+      if(dexaSec.length){
+        const sw=col/dexaSec.length;
+        dexaSec.forEach(([l,v2],i)=>{
+          const x=M+i*sw;
+          doc.setFillColor(32,32,32);doc.rect(x,y,sw-(i<dexaSec.length-1?0.5:0),13,'F');
+          doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text(l.trim().toUpperCase(),x+sw/2,y+4,{align:'center'});
+          doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...WHT);doc.text(String(v2),x+sw/2,y+10.5,{align:'center'});
+        });
+        y+=14;
+      }
+      y+=3;
+    }
+
+    // ── SKINFOLD DATA ──
+    if(skData.length){
+      checkY(20+skData.length*7);
+      secHead('Caliper Skinfold Measurements');
+      const sw2=col/2;
+      skData.forEach(({name,val},i)=>{
+        const col2=i%2;
+        const row=Math.floor(i/2);
+        if(col2===0) checkY(7);
+        const x=M+col2*sw2;
+        const ry=y+row*7.5;
+        if(i%2===0){doc.setFillColor(...WHT);}else{doc.setFillColor(...LG);}
+        doc.rect(x,ry,sw2-(col2===0?0.5:0),7,'F');
+        doc.setFillColor(...GOLD);doc.rect(x,ry,1.2,7,'F');
+        doc.setFontSize(7.5);doc.setFont('helvetica','bold');doc.setTextColor(...BLK);doc.text(name,x+4,ry+5);
+        doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(...DG);
+        doc.text(val?val+' mm':'—',x+sw2-4,ry+5,{align:'right'});
+      });
+      y+=Math.ceil(skData.length/2)*7.5+4;
+    }
+
+    // ── CIRCUMFERENCE DATA ──
+    if(cmData.length){
+      checkY(20+cmData.length*7);
+      secHead('Circumference Measurements');
+      cmData.forEach(({name,val},i)=>{
+        checkY(7.5);
+        if(i%2===0){doc.setFillColor(...WHT);}else{doc.setFillColor(...LG);}
+        doc.rect(M,y,col,7,'F');
+        doc.setFillColor(...GOLD);doc.rect(M,y,1.2,7,'F');
+        doc.setFontSize(7.5);doc.setFont('helvetica','bold');doc.setTextColor(...BLK);doc.text(name,M+4,y+5);
+        doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(...DG);
+        doc.text(val?val+' in':'—',W-M-2,y+5,{align:'right'});
+        y+=7.5;
+      });
+      y+=3;
+    }
+
+    // ── ASSESSMENT SCHEDULE ──
+    checkY(24);
+    secHead('Assessment Schedule');
+    const schedData=[
+      ['Bodyweight Recording',getBWDays()||'—'],
+      ['Circumference',document.getElementById('ov-circ-freq')?.value||'—'],
+      ['Caliper Skinfolds',document.getElementById('ov-skin-freq')?.value||'—'],
+      ['DEXA Scan',document.getElementById('ov-dexa-freq')?.value||'—'],
+    ];
+    const sw4=col/4;
+    schedData.forEach(([l,v2],i)=>{
+      const x=M+i*sw4;
+      doc.setFillColor(...LG);doc.rect(x,y,sw4-(i<3?0.5:0),16,'F');
+      doc.setFontSize(5.5);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text(l.toUpperCase(),x+sw4/2,y+4.5,{align:'center'});
+      doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...DG);
+      const lines=doc.splitTextToSize(String(v2),sw4-6);
+      doc.text(lines,x+sw4/2,y+10,{align:'center'});
+    });
+    y+=19;
+
+    addFooter();
+
+    doc.save(`${clientName.replace(/\s+/g,'-')}-Body-Comp.pdf`);
+    setMsg('✓ PDF downloaded!');
+    setTimeout(()=>setMsg(''),4000);
+  }catch(e){
+    setMsg('Error: '+e.message,'var(--red)');
+    console.error('Body comp PDF error:',e);
+  }
 }
 
 function generateMealPlanPDF(){
