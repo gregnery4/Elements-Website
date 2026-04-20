@@ -1669,6 +1669,8 @@ const FOOD_DB = [
   {k:['egg white','egg whites'],            type:'protein', p:3.6,  c:0.2,  f:0,    unit:'oz'},
   {k:['whole egg','eggs','egg'],            type:'protein', p:6.0,  c:0.3,  f:5.0,  unit:'egg', perUnit:1},
   {k:['greek yogurt'],                      type:'protein', p:3.0,  c:2.0,  f:0.3,  unit:'oz'},
+  {k:['oikos','oikos yogurt'],              type:'protein', p:3.5,  c:1.5,  f:0.2,  unit:'oz'},
+  {k:['plain non-fat greek yogurt','non-fat greek yogurt','nonfat greek yogurt'], type:'protein', p:3.5, c:2.0, f:0.0, unit:'oz'},
   {k:['cottage cheese'],                    type:'protein', p:3.5,  c:1.0,  f:0.5,  unit:'oz'},
   {k:['whey protein','protein powder','protein shake','nutridyn whey'],type:'protein',p:22.5,c:2.0,f:1.5,unit:'scoop (30g)'},
   {k:['casein protein'],                    type:'protein', p:22.0, c:3.0,  f:1.0,  unit:'scoop (30g)'},
@@ -1733,13 +1735,14 @@ function convertFoodsToPortions(foodsStr, targetProt, targetCarb, targetFat){
   const eggEntry   = matchedItems.find(e => e.match?.unit === 'egg');
   const otherProts = matchedItems.filter(e => e !== eggEntry && e.match?.type === 'protein' && e.match?.unit !== 'egg');
 
-  // Calculate how much protein eggs will use (capped at 4)
+  // Calculate how much protein eggs will use — respects forcedQty if set
   let remainingProt = targetProt;
   if(eggEntry && otherProts.length > 0){
-    const eggCount  = Math.min(MAX_EGGS, Math.round(targetProt / EGG_PROTEIN_PER));
+    const eggCount = eggEntry.forcedQty !== null
+      ? eggEntry.forcedQty                                          // fixed qty e.g. whole egg-2
+      : Math.min(MAX_EGGS, Math.round(targetProt / EGG_PROTEIN_PER)); // auto-cap at 4
     const eggProtUsed = eggCount * EGG_PROTEIN_PER;
     remainingProt = Math.max(0, targetProt - eggProtUsed);
-    // Store on eggEntry so the loop can use it
     eggEntry._cappedCount = eggCount;
     eggEntry._eggProtUsed = eggProtUsed;
   }
@@ -3243,7 +3246,9 @@ function _getFoodPortionsText(foodsStr, targetProt, targetCarb, targetFat){
   const otherProts=matchedItems.filter(e=>e!==eggEntry&&e.match?.type==='protein'&&e.match?.unit!=='egg');
   let remainingProt=targetProt;
   if(eggEntry&&otherProts.length>0){
-    const eggCount=Math.min(MAX_EGGS,Math.round(targetProt/6.0));
+    const eggCount=eggEntry.forcedQty!==null
+      ? eggEntry.forcedQty
+      : Math.min(MAX_EGGS,Math.round(targetProt/6.0));
     eggEntry._cappedCount=eggCount;
     remainingProt=Math.max(0,targetProt-eggCount*6.0);
   }
