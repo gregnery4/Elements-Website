@@ -933,24 +933,32 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           <!-- SECTION 4: Body Comp Assessment -->
           <div style="background:var(--c3);border:1px solid var(--border);padding:18px;margin-bottom:3px">
             <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:14px">4. Body Composition Assessment</div>
-            <div class="edit-grid">
-              <div class="edit-field">
-                <label>Assessment Taken This Week?</label>
-                <select id="wk-assessment-taken" onchange="toggleWkAssessment()">
-                  <option value="no">No</option>
-                  <option value="skinfold">Yes — Skinfold Calipers</option>
-                  <option value="circumference">Yes — Circumference</option>
-                  <option value="dexa">Yes — DEXA Scan</option>
-                  <option value="both">Yes — Skinfold + Circumference</option>
-                </select>
-              </div>
-              <div class="edit-field">
-                <label>Assessment Date</label>
-                <input type="date" id="wk-assessment-date">
-              </div>
+
+            <!-- Assessment type checkboxes -->
+            <div style="font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px">Assessments taken this week</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+              <label style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--c2);border:1px solid var(--borderw);cursor:pointer;transition:all .2s" id="wka-lbl-skinfold">
+                <input type="checkbox" id="wka-cb-skinfold" onchange="toggleWkAssessment()"> 
+                <span style="font-size:11px;color:var(--white)">Caliper Skinfolds</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--c2);border:1px solid var(--borderw);cursor:pointer;transition:all .2s" id="wka-lbl-circumference">
+                <input type="checkbox" id="wka-cb-circumference" onchange="toggleWkAssessment()">
+                <span style="font-size:11px;color:var(--white)">Circumference</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--c2);border:1px solid var(--borderw);cursor:pointer;transition:all .2s" id="wka-lbl-dexa">
+                <input type="checkbox" id="wka-cb-dexa" onchange="toggleWkAssessment()">
+                <span style="font-size:11px;color:var(--white)">DEXA Scan</span>
+              </label>
             </div>
-            <div id="wk-assessment-details" style="display:none;margin-top:14px">
-              <div class="edit-grid" id="wk-assessment-fields"></div>
+
+            <div class="edit-field" style="margin-bottom:14px">
+              <label>Assessment Date</label>
+              <input type="date" id="wk-assessment-date">
+            </div>
+
+            <!-- Auto-populated data from tab 2 -->
+            <div id="wk-assessment-details" style="display:none;margin-top:4px">
+              <div id="wk-assessment-fields"></div>
             </div>
           </div>
 
@@ -2754,34 +2762,89 @@ function resetWkBWDays(){
 
 // ── ASSESSMENT TOGGLE ──
 function toggleWkAssessment(){
-  const type=document.getElementById('wk-assessment-taken').value;
+  const doSkinfold=document.getElementById('wka-cb-skinfold')?.checked;
+  const doCirc=document.getElementById('wka-cb-circumference')?.checked;
+  const doDexa=document.getElementById('wka-cb-dexa')?.checked;
+
+  // Update checkbox label styles
+  [['skinfold',doSkinfold],['circumference',doCirc],['dexa',doDexa]].forEach(([key,on])=>{
+    const lbl=document.getElementById(`wka-lbl-${key}`);
+    if(lbl){lbl.style.borderColor=on?'var(--gold-mid)':'var(--borderw)';lbl.style.background=on?'rgba(168,129,58,.1)':'var(--c2)';}
+  });
+
   const details=document.getElementById('wk-assessment-details');
   const fields=document.getElementById('wk-assessment-fields');
-  if(type==='no'){details.style.display='none';return;}
+  if(!doSkinfold&&!doCirc&&!doDexa){details.style.display='none';return;}
   details.style.display='block';
+
   let html='';
-  if(type==='skinfold'||type==='both'){
-    // Pull selected sites from the Body Comp tab skinfold selector
+
+  // ── SKINFOLDS — auto-populated from tab 2 ──
+  if(doSkinfold){
+    html+=`<div style="background:var(--c2);border:1px solid var(--borderw);padding:14px;margin-bottom:3px">
+      <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Caliper Skinfolds (mm)</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px" id="wka-sk-grid">`;
     const selectedSites=getSkSites();
-    const sitesToUse=selectedSites.length>0 ? selectedSites :
-      Object.values(SK_SITES); // fallback to all if none selected
-    html+=`<div class="edit-field" style="grid-column:1/-1"><label style="color:var(--gold)">Skinfold Sites (mm)</label></div>`;
+    const sitesToUse=selectedSites.length>0?selectedSites:Object.values(SK_SITES);
     sitesToUse.forEach(site=>{
-      html+=`<div class="edit-field"><label>${site}</label><input type="number" id="wka-sk-${site.toLowerCase().replace(/[^a-z0-9]/g,'')}" step="0.1" placeholder="mm"></div>`;
+      const key=site.toLowerCase().replace(/[^a-z0-9]/g,'');
+      // Try to auto-populate from tab 2 measurement
+      const tab2Key=Object.keys(SK_SITES).find(k=>SK_SITES[k]===site);
+      const tab2Val=document.getElementById(`skm-${tab2Key}`)?.value||'';
+      html+=`<div style="background:var(--c1);border:1px solid var(--borderw);padding:10px">
+        <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">${site}</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input type="number" id="wka-sk-${key}" step="0.1" placeholder="0.0" value="${tab2Val}" style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--borderw);color:var(--white);font-size:13px;font-family:'Montserrat',sans-serif;padding:2px 0;outline:none">
+          <span style="font-size:9px;color:var(--muted)">mm</span>
+        </div>
+      </div>`;
     });
+    html+=`</div></div>`;
   }
-  if(type==='circumference'||type==='both'){
-    html+=`<div class="edit-field" style="grid-column:1/-1"><label style="color:var(--gold);margin-top:8px">Circumference Sites (inches)</label></div>`;
-    ['Shoulders','Upper Arm','Umbilical / Waist','Hips','Thigh'].forEach(site=>{
-      html+=`<div class="edit-field"><label>${site}</label><input type="number" id="wka-cm-${site.toLowerCase().replace(/[^a-z0-9]/g,'')}" step="0.1" placeholder="in"></div>`;
+
+  // ── CIRCUMFERENCES — auto-populated from tab 2 ──
+  if(doCirc){
+    html+=`<div style="background:var(--c2);border:1px solid var(--borderw);padding:14px;margin-bottom:3px">
+      <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Circumference Measurements (inches)</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px">`;
+    const cmEntries=[['shoulder','Shoulders'],['arm','Upper Arm'],['waist','Umbilical / Waist'],['hips','Hips'],['thigh','Thigh']];
+    cmEntries.forEach(([key,label])=>{
+      const tab2Val=document.getElementById(`cmm-${key}`)?.value||'';
+      html+=`<div style="background:var(--c1);border:1px solid var(--borderw);padding:10px">
+        <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">${label}</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <input type="number" id="wka-cm-${key}" step="0.1" placeholder="0.0" value="${tab2Val}" style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--borderw);color:var(--white);font-size:13px;font-family:'Montserrat',sans-serif;padding:2px 0;outline:none">
+          <span style="font-size:9px;color:var(--muted)">in</span>
+        </div>
+      </div>`;
     });
+    html+=`</div></div>`;
   }
-  if(type==='dexa'){
-    html+=`<div class="edit-field" style="grid-column:1/-1"><label style="color:var(--gold)">DEXA Results</label></div>`;
-    [['Total Mass (lbs)','wka-dexa-mass'],['Body Fat %','wka-dexa-bf'],['Lean Mass (lbs)','wka-dexa-lean'],['Fat Mass (lbs)','wka-dexa-fatmass'],['BMC (lbs)','wka-dexa-bmc'],['Visceral Fat (lbs)','wka-dexa-viscfat'],['RMR (cal)','wka-dexa-rmr']].forEach(([label,id])=>{
-      html+=`<div class="edit-field"><label>${label}</label><input type="number" id="${id}" step="0.1" placeholder="0"></div>`;
+
+  // ── DEXA — auto-populated from tab 2 ──
+  if(doDexa){
+    const dexaFields=[
+      ['Total Mass (lbs)','wka-dexa-mass','bc-total-mass'],
+      ['Body Fat %','wka-dexa-bf','bc-bf'],
+      ['Lean Mass (lbs)','wka-dexa-lean','bc-lean'],
+      ['Fat Mass (lbs)','wka-dexa-fatmass','bc-fat-mass'],
+      ['BMC (lbs)','wka-dexa-bmc','bc-bmc'],
+      ['Visceral Fat (lbs)','wka-dexa-viscfat','bc-visc-fat'],
+      ['RMR (cal)','wka-dexa-rmr','bc-rmr'],
+    ];
+    html+=`<div style="background:var(--c2);border:1px solid var(--borderw);padding:14px;margin-bottom:3px">
+      <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">DEXA Scan Results</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px">`;
+    dexaFields.forEach(([label,id,srcId])=>{
+      const tab2Val=document.getElementById(srcId)?.value||'';
+      html+=`<div style="background:var(--c1);border:1px solid var(--borderw);padding:10px">
+        <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">${label}</div>
+        <input type="number" id="${id}" step="0.1" placeholder="0" value="${tab2Val}" style="width:100%;background:transparent;border:none;border-bottom:1px solid var(--borderw);color:var(--white);font-size:13px;font-family:'Montserrat',sans-serif;padding:2px 0;outline:none">
+      </div>`;
     });
+    html+=`</div></div>`;
   }
+
   fields.innerHTML=html;
 }
 
@@ -2794,37 +2857,40 @@ async function addWeeklyEntry(){
   const date=document.getElementById('wk-date').value;
   if(!wk||!date){msg.style.color='var(--red)';msg.textContent='Week number and start date are required.';return;}
 
-  const assessmentType=document.getElementById('wk-assessment-taken').value;
+  const doSkinfold=document.getElementById('wka-cb-skinfold')?.checked;
+  const doCirc=document.getElementById('wka-cb-circumference')?.checked;
+  const doDexa=document.getElementById('wka-cb-dexa')?.checked;
+  const assessmentType=doDexa?'dexa':doSkinfold&&doCirc?'both':doSkinfold?'skinfold':doCirc?'circumference':'no';
   let assessmentData={};
+  if(doSkinfold){
+    assessmentData.skinfolds={};
+    const selectedSites=getSkSites();
+    const sitesToUse=selectedSites.length>0?selectedSites:Object.values(SK_SITES);
+    sitesToUse.forEach(site=>{
+      const key=site.toLowerCase().replace(/[^a-z0-9]/g,'');
+      const v=document.getElementById(`wka-sk-${key}`)?.value;
+      if(v) assessmentData.skinfolds[site]=parseFloat(v);
+    });
+  }
+  if(doCirc){
+    assessmentData.circumferences={};
+    [['shoulder','Shoulders'],['arm','Upper Arm'],['waist','Umbilical / Waist'],['hips','Hips'],['thigh','Thigh']].forEach(([key,label])=>{
+      const v=document.getElementById(`wka-cm-${key}`)?.value;
+      if(v) assessmentData.circumferences[label]=parseFloat(v);
+    });
+  }
+  if(doDexa){
+    assessmentData.dexa={
+      total_mass:parseFloat(document.getElementById('wka-dexa-mass')?.value)||null,
+      body_fat:parseFloat(document.getElementById('wka-dexa-bf')?.value)||null,
+      lean_mass:parseFloat(document.getElementById('wka-dexa-lean')?.value)||null,
+      fat_mass:parseFloat(document.getElementById('wka-dexa-fatmass')?.value)||null,
+      bmc:parseFloat(document.getElementById('wka-dexa-bmc')?.value)||null,
+      visceral_fat:parseFloat(document.getElementById('wka-dexa-viscfat')?.value)||null,
+      rmr:parseFloat(document.getElementById('wka-dexa-rmr')?.value)||null,
+    };
+  }
   if(assessmentType!=='no'){
-    if(assessmentType==='skinfold'||assessmentType==='both'){
-      assessmentData.skinfolds={};
-      const selectedSites=getSkSites();
-      const sitesToUse=selectedSites.length>0?selectedSites:Object.values(SK_SITES);
-      sitesToUse.forEach(site=>{
-        const key=site.toLowerCase().replace(/[^a-z0-9]/g,'');
-        const v=document.getElementById(`wka-sk-${key}`)?.value;
-        if(v) assessmentData.skinfolds[site]=parseFloat(v);
-      });
-    }
-    if(assessmentType==='circumference'||assessmentType==='both'){
-      assessmentData.circumferences={};
-      [['shoulders','shoulders'],['upperarm','upper arm'],['umbilicalwaist','umbilical / waist'],['hips','hips'],['thigh','thigh']].forEach(([k,label])=>{
-        const v=document.getElementById(`wka-cm-${k}`)?.value;
-        if(v) assessmentData.circumferences[label]=parseFloat(v);
-      });
-    }
-    if(assessmentType==='dexa'){
-      assessmentData.dexa={
-        total_mass:parseFloat(document.getElementById('wka-dexa-mass')?.value)||null,
-        body_fat:parseFloat(document.getElementById('wka-dexa-bf')?.value)||null,
-        lean_mass:parseFloat(document.getElementById('wka-dexa-lean')?.value)||null,
-        fat_mass:parseFloat(document.getElementById('wka-dexa-fatmass')?.value)||null,
-        bmc:parseFloat(document.getElementById('wka-dexa-bmc')?.value)||null,
-        visceral_fat:parseFloat(document.getElementById('wka-dexa-viscfat')?.value)||null,
-        rmr:parseFloat(document.getElementById('wka-dexa-rmr')?.value)||null,
-      };
-    }
     assessmentData.date=document.getElementById('wk-assessment-date').value;
     assessmentData.type=assessmentType;
   }
@@ -2877,7 +2943,8 @@ async function addWeeklyEntry(){
 
   ['wk-num','wk-date','wk-meals','wk-training-notes','wk-nut-notes','wk-assessment-date','wk-sessions-done','wk-sessions-target'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('wk-assessment-details').style.display='none';
-  document.getElementById('wk-assessment-taken').value='no';
+  ['wka-cb-skinfold','wka-cb-circumference','wka-cb-dexa'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;});
+  toggleWkAssessment();
   resetWkBWDays();
 
   msg.style.color='var(--green)'; msg.textContent='✓ Weekly review saved.';
