@@ -738,6 +738,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             <div class="edit-field"><label>Tracking Responsibility</label>
               <select id="ov-tracking" onchange="syncSummaryHeader()">
                 <option>Full Calorie Counting</option>
+                <option>Full Calorie Counting + Picture of Meals</option>
                 <option>Pictures of Meals</option>
                 <option>Discussion Based</option>
               </select>
@@ -891,18 +892,6 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
               <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-right:10px">Compliance</span>
               <span id="wk-bw-grade-val" style="font-family:'Bebas Neue',sans-serif;font-size:22px"></span>
               <span id="wk-bw-grade-label" style="font-size:10px;color:var(--muted);margin-left:8px"></span>
-            </div>
-
-            <div class="edit-grid">
-              <div class="edit-field">
-                <label>Override Compliance (optional)</label>
-                <select id="wk-bw-compliance">
-                  <option value="auto">Auto — calculated from days above</option>
-                  <option value="yes">✓ Yes — All days recorded</option>
-                  <option value="partial">⚠ Partial — Missed some days</option>
-                  <option value="no">✗ No — Not recorded</option>
-                </select>
-              </div>
             </div>
           </div>
 
@@ -2545,16 +2534,10 @@ function calcComplianceScore(){
   const done=parseInt(document.getElementById('wk-sessions-done')?.value)||0;
   const target=parseInt(document.getElementById('wk-sessions-target')?.value)||0;
   const training=target>0?Math.round((done/target)*100):null;
-  // BW compliance: use auto-calculated % if override is 'auto', else use manual selection
-  const bwOverride=document.getElementById('wk-bw-compliance')?.value;
-  let bw;
-  if(bwOverride==='auto'||!bwOverride){
-    const scheduled=getBWDays().split(',').map(s=>s.trim()).filter(Boolean);
-    const completed=getWkBWDays();
-    bw=scheduled.length>0?Math.round((completed.length/scheduled.length)*100):null;
-  } else {
-    bw=SECTION_SCORES.bw_compliance[bwOverride]??null;
-  }
+  // BW compliance: always auto-calculated from checked days
+  const scheduled=getBWDays().split(',').map(s=>s.trim()).filter(Boolean);
+  const completed=getWkBWDays();
+  const bw=scheduled.length>0?Math.round((completed.length/scheduled.length)*100):null;
   const meals=SECTION_SCORES.meals_compliance[document.getElementById('wk-meals-compliance')?.value]??null;
   const nutrition=SECTION_SCORES.nutrition_adherence[document.getElementById('wk-nutrition-adherence')?.value]??null;
 
@@ -2733,7 +2716,7 @@ async function addWeeklyEntry(){
     training_compliance:'auto',
     training_notes:document.getElementById('wk-training-notes').value,
     bw_days:getWkBWDays().join(', '),
-    bw_compliance:document.getElementById('wk-bw-compliance').value,
+    bw_compliance:(()=>{const sc=getBWDays().split(',').map(s=>s.trim()).filter(Boolean);const co=getWkBWDays();return sc.length>0?Math.round((co.length/sc.length)*100)+''||'auto':'auto';})(),
     meals_compliance:document.getElementById('wk-meals-compliance').value,
     meals_logged:document.getElementById('wk-meals').value,
     nutrition_adherence:document.getElementById('wk-nutrition-adherence').value,
