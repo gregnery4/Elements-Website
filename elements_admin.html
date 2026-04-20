@@ -3990,18 +3990,19 @@ function _buildBodyCompPDF(jsPDF,c,setMsg){
     const goalWt=n('dp-goal-weight');
     const phaseDur=v('dp-phase-wks');
 
-    // Gather skinfold sites + measurements
-    const skSites=['pec','tri','bic','sub','sup1','sup2','mid','umb','ham','qua'];
-    const skLabels={pec:'Pectoral',tri:'Triceps',bic:'Biceps',sub:'Subscapularis',sup1:'Suprailiac-1',sup2:'Suprailiac-2',mid:'Mid-Axillary',umb:'Umbilical',ham:'Hamstrings',qua:'Quadriceps'};
-    const skData=skSites.filter(s=>document.getElementById(`sk-${s}`)?.checked).map(s=>({
-      name:skLabels[s], val:v(`sk-${s}-mm`)
+    // Gather skinfold sites + measurements — inputs are id="skm-{key}"
+    const skData=Object.keys(SK_SITES).filter(k=>document.getElementById(`sk-${k}`)?.checked).map(k=>({
+      name:SK_SITES[k],
+      val:document.getElementById(`skm-${k}`)?.value||''
     }));
 
-    // Gather circumference sites + measurements
-    const cmSites=['shoulder','arm','waist','hip','thigh'];
-    const cmLabels={shoulder:'Shoulders',arm:'Upper Arm',waist:'Umbilical / Waist',hip:'Hips',thigh:'Thigh'};
-    const cmData=cmSites.filter(s=>document.getElementById(`cm-${s}`)?.checked).map(s=>({
-      name:cmLabels[s], val:v(`cm-${s}-in`)
+    // Gather circumference sites + measurements — inputs are id="cmm-{key}"
+    const cmData=Object.keys(CM_SITES).filter(k=>{
+      const el=document.getElementById(`cm-${k}`)||document.getElementById(`cm-${k==='hips'?'hip':k}`);
+      return el?.checked;
+    }).map(k=>({
+      name:CM_SITES[k],
+      val:document.getElementById(`cmm-${k}`)?.value||''
     }));
 
     const addFooter=()=>{
@@ -4090,7 +4091,7 @@ function _buildBodyCompPDF(jsPDF,c,setMsg){
       checkY(60);
       secHead('DEXA Scan Results');
       const dexaMain=[
-        ['Total Mass',totalMass?totalMass+' lbs':'—',WHT],
+        ['Total Mass',totalMass?totalMass+' lbs':'—',BLUE],
         ['Body Fat %',bfPct?bfPct+'%':'—',RED],
         ['Lean Mass',leanMass?leanMass+' lbs':'—',BLUE],
         ['Fat Mass',fatMass?fatMass+' lbs':'—',RED],
