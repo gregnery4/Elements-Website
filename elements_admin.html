@@ -3598,19 +3598,36 @@ function gatherCurrentProtocol(){
   }
   const supps=(currentClient?.supplements||[]).map(s=>({name:s.name,dose:s.dose,timing:s.timing}));
 
-  // Skinfold site measurements
+  // Skinfold sites as comma string + measurements from DOM (rendered after saveSkSites) or client data
+  const skSitesArr=getSkSites();
   const skMeasurements={};
-  Object.keys(SK_SITES).forEach(k=>{
+  SK_ORDER.forEach(k=>{
     const val=document.getElementById(`skm-${k}`)?.value;
     if(val) skMeasurements[k]=parseFloat(val);
   });
+  // Fallback: read from last saved client_metrics notes
+  const lastMetrics=currentClient?.client_metrics?.[0];
+  const savedNotes=lastMetrics?.notes?(typeof lastMetrics.notes==='string'?JSON.parse(lastMetrics.notes):lastMetrics.notes):{};
+  if(!Object.keys(skMeasurements).length && savedNotes.skinfolds){
+    Object.entries(savedNotes.skinfolds).forEach(([name,val])=>{
+      const k=Object.keys(SK_SITES).find(k=>SK_SITES[k]===name);
+      if(k) skMeasurements[k]=val;
+    });
+  }
 
-  // Circumference site measurements
+  // Circumference sites as comma string + measurements
+  const cmSitesArr=getCmSites();
   const cmMeasurements={};
-  Object.keys(CM_SITES).forEach(k=>{
+  CM_ORDER.forEach(k=>{
     const val=document.getElementById(`cmm-${k}`)?.value;
     if(val) cmMeasurements[k]=parseFloat(val);
   });
+  if(!Object.keys(cmMeasurements).length && savedNotes.circumferences){
+    Object.entries(savedNotes.circumferences).forEach(([name,val])=>{
+      const k=Object.keys(CM_SITES).find(k=>CM_SITES[k]===name);
+      if(k) cmMeasurements[k]=val;
+    });
+  }
 
   return {
     // ── General ──
@@ -3629,9 +3646,9 @@ function gatherCurrentProtocol(){
     bc_bf_pct:parseFloat(document.getElementById('bc-bf')?.value)||null,
     bc_lean_mass:parseFloat(document.getElementById('bc-lean')?.value)||null,
     bc_fat_mass:parseFloat(document.getElementById('bc-fat-mass')?.value)||null,
-    sk_sites:getSkSites()||null,
+    sk_sites:skSitesArr.length?skSitesArr.join(','):null,
     sk_measurements:Object.keys(skMeasurements).length?JSON.stringify(skMeasurements):null,
-    cm_sites:getCmSites()||null,
+    cm_sites:cmSitesArr.length?cmSitesArr.join(','):null,
     cm_measurements:Object.keys(cmMeasurements).length?JSON.stringify(cmMeasurements):null,
 
     // ── Goal Setting ──
@@ -3809,19 +3826,26 @@ async function applyProtocol(id){
   if(p.bc_bmc)           document.getElementById('bc-bmc').value=p.bc_bmc;
   if(p.bc_visc_fat)      document.getElementById('bc-visc-fat').value=p.bc_visc_fat;
   if(p.bc_rmr)           document.getElementById('bc-rmr').value=p.bc_rmr;
-  if(p.sk_sites)         setSkSites(p.sk_sites);
-  if(p.cm_sites)         setCmSites(p.cm_sites);
+  if(p.sk_sites)  setSkSites(p.sk_sites);
+  if(p.cm_sites)  setCmSites(p.cm_sites);
   if(p.sk_measurements){
     try{
       const skm=typeof p.sk_measurements==='string'?JSON.parse(p.sk_measurements):p.sk_measurements;
-      setTimeout(()=>Object.entries(skm).forEach(([k,v])=>{const el=document.getElementById(`skm-${k}`);if(el)el.value=v;}),200);
-    }catch(e){}
+      // Delay to allow setSkSites to render inputs first
+      setTimeout(()=>Object.entries(skm).forEach(([k,v])=>{
+        const el=document.getElementById(`skm-${k}`);
+        if(el) el.value=v;
+      }),300);
+    }catch(e){console.error('sk_measurements restore:',e);}
   }
   if(p.cm_measurements){
     try{
       const cmm=typeof p.cm_measurements==='string'?JSON.parse(p.cm_measurements):p.cm_measurements;
-      setTimeout(()=>Object.entries(cmm).forEach(([k,v])=>{const el=document.getElementById(`cmm-${k}`);if(el)el.value=v;}),200);
-    }catch(e){}
+      setTimeout(()=>Object.entries(cmm).forEach(([k,v])=>{
+        const el=document.getElementById(`cmm-${k}`);
+        if(el) el.value=v;
+      }),300);
+    }catch(e){console.error('cm_measurements restore:',e);}
   }
 
   // ── Goal Setting ──
