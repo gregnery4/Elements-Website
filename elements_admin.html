@@ -3127,30 +3127,57 @@ function _buildWeeklyReviewPDF(jsPDF,e,c){
       if(md&&typeof md==='object'&&!Array.isArray(md)){
         const mealCount=Object.values(md)[0]?.length||0;
         if(mealCount>0){
-          checkY(8+mealCount*6);
+          const rowH=7;
+          const hdrH=8;
+          checkY(hdrH+mealCount*rowH+6);
           const cellW=col/8;
-          // Header row
-          doc.setFillColor(...LG2);doc.rect(M,y,col,6,'F');
-          doc.setFontSize(6);doc.setFont('helvetica','bold');doc.setTextColor(...MG);
-          doc.text('',M+2,y+4);
+          const labelW=cellW;
+
+          // Header row — dark background, gold day labels
+          doc.setFillColor(30,30,30);doc.rect(M,y,col,hdrH,'F');
+          doc.setFontSize(6.5);doc.setFont('helvetica','bold');doc.setTextColor(...GOLD_DIM);
           ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach((d,i)=>{
-            doc.text(d,M+cellW+(i*cellW)+cellW/2,y+4,{align:'center'});
+            doc.text(d,M+labelW+(i*cellW)+cellW/2,y+5.5,{align:'center'});
           });
-          y+=6;
+          y+=hdrH;
+
+          // Meal rows
           for(let m=0;m<mealCount;m++){
-            if(m%2===0){doc.setFillColor(...LG);}else{doc.setFillColor(...WHT);}
-            doc.rect(M,y,col,6,'F');
-            doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...DG);
-            doc.text(`M${m+1}`,M+cellW/2,y+4.3,{align:'center'});
+            if(m%2===0){doc.setFillColor(...LG);}else{doc.setFillColor(...WHT);}doc.rect(M,y,col,rowH,'F');
+            // Left label
+            doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(50,50,50);
+            doc.text(`M${m+1}`,M+labelW/2,y+5,{align:'center'});
+            // Day cells
             DAY_KEYS.forEach((day,di)=>{
               const done=md[day]?.[m];
-              doc.setFontSize(8);
-              doc.setTextColor(...(done?GRN:MG));
-              doc.text(done?'✓':'○',M+cellW+(di*cellW)+cellW/2,y+4.3,{align:'center'});
+              const cx=M+labelW+(di*cellW)+cellW/2;
+              const cy=y+rowH/2;
+              if(done){
+                // Green filled circle
+                doc.setFillColor(...GRN);
+                doc.circle(cx,cy,2.2,'F');
+                doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...WHT);
+                doc.text('Y',cx,cy+0.8*0.7+0.7,{align:'center'});
+              } else {
+                // Light grey empty circle
+                doc.setDrawColor(200,195,190);doc.setLineWidth(0.5);
+                doc.circle(cx,cy,2.2,'S');
+              }
             });
-            y+=6;
+            y+=rowH;
           }
-          y+=2;
+
+          // Totals row
+          doc.setFillColor(240,237,232);doc.rect(M,y,col,6,'F');
+          doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...MG);
+          doc.text('TOTAL',M+labelW/2,y+4,{align:'center'});
+          DAY_KEYS.forEach((day,di)=>{
+            const done=(md[day]||[]).filter(Boolean).length;
+            const clr=done===mealCount?GRN:done>0?AMB:MG;
+            doc.setFontSize(6.5);doc.setFont('helvetica','bold');doc.setTextColor(...clr);
+            doc.text(`${done}/${mealCount}`,M+labelW+(di*cellW)+cellW/2,y+4,{align:'center'});
+          });
+          y+=7;
         }
       }
     }catch(err){}
