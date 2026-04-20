@@ -895,36 +895,38 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             </div>
           </div>
 
-          <!-- SECTION 3: Meal Pictures / Nutrition -->
+          <!-- SECTION 3: Nutrition Tracking -->
           <div style="background:var(--c3);border:1px solid var(--border);padding:18px;margin-bottom:3px">
             <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:14px">3. Nutrition Tracking</div>
-            <div class="edit-grid">
-              <div class="edit-field">
-                <label>Meal Pictures Uploaded</label>
-                <select id="wk-meals-compliance">
-                  <option value="all">✓ All meals — Every meal photographed</option>
-                  <option value="most">⚠ Most meals — 1–2 missed per day</option>
-                  <option value="some">⚠ Some meals — Inconsistent</option>
-                  <option value="none">✗ None — Not completed</option>
-                </select>
+
+            <!-- Nutrition tracking agreements from Tab 4 -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-bottom:16px" id="wk-nut-agreements">
+              <div style="background:var(--c2);border:1px solid var(--borderw);padding:10px 14px">
+                <div style="font-size:8px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">Nutrition Approach</div>
+                <div style="font-size:12px;font-weight:500;color:var(--white)" id="wk-nut-approach-ref">—</div>
               </div>
-              <div class="edit-field">
-                <label>Daily Meals Logged (avg)</label>
-                <input type="number" id="wk-meals" placeholder="4" min="0">
+              <div style="background:var(--c2);border:1px solid var(--borderw);padding:10px 14px">
+                <div style="font-size:8px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">Tracking Responsibility</div>
+                <div style="font-size:12px;font-weight:500;color:var(--white)" id="wk-nut-tracking-ref">—</div>
               </div>
-              <div class="edit-field">
-                <label>Food Selection Adherence</label>
-                <select id="wk-nutrition-adherence">
-                  <option value="full">✓ Full — On target all week</option>
-                  <option value="good">✓ Good — On target 5–6 days</option>
-                  <option value="partial">⚠ Partial — On target 3–4 days</option>
-                  <option value="poor">✗ Poor — Off target most days</option>
-                </select>
-              </div>
-              <div class="edit-field">
-                <label>Nutrition Notes</label>
-                <input type="text" id="wk-nut-notes" placeholder="e.g. Hit protein targets, struggled with carbs">
-              </div>
+            </div>
+
+            <!-- Daily meal checkboxes — Mon–Sun × N meals -->
+            <div style="font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px">Check off each meal completed per day</div>
+            <div id="wk-meal-grid" style="overflow-x:auto">
+              <div style="font-size:11px;color:var(--muted);font-style:italic">Fill in Tab 5 (Meal Design) with the number of meals first.</div>
+            </div>
+
+            <!-- Auto-grade -->
+            <div id="wk-nut-grade" style="display:none;padding:10px 14px;margin-top:12px;background:var(--c2);border:1px solid var(--border)">
+              <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-right:10px">Meal Compliance</span>
+              <span id="wk-nut-grade-val" style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold)"></span>
+              <span style="font-size:10px;color:var(--muted);margin-left:8px" id="wk-nut-grade-detail"></span>
+            </div>
+
+            <div class="edit-field" style="margin-top:12px">
+              <label>Nutrition Notes</label>
+              <input type="text" id="wk-nut-notes" placeholder="e.g. Hit protein targets, struggled with carbs on Wednesday">
             </div>
           </div>
 
@@ -1538,7 +1540,7 @@ function dpTab(name,el){
   if(el)el.classList.add('on');
   if(name==='t5')syncMealTotals();
   if(name==='t11')generateMealPlan();
-  if(name==='t6')loadBWScheduledDays();
+  if(name==='t6'){loadBWScheduledDays();renderWkMealGrid();}
   if(name==='t9')loadProtocols();
   if(name==='t2')syncSummaryHeader();
 }
@@ -2538,8 +2540,8 @@ function calcComplianceScore(){
   const scheduled=getBWDays().split(',').map(s=>s.trim()).filter(Boolean);
   const completed=getWkBWDays();
   const bw=scheduled.length>0?Math.round((completed.length/scheduled.length)*100):null;
-  const meals=SECTION_SCORES.meals_compliance[document.getElementById('wk-meals-compliance')?.value]??null;
-  const nutrition=SECTION_SCORES.nutrition_adherence[document.getElementById('wk-nutrition-adherence')?.value]??null;
+  const meals=calcWkNutScore()??null;
+  const nutrition=meals; // nutrition score IS the meal completion %
 
   const scoreColor=s=>s>=80?'var(--green)':s>=50?'var(--gold)':'var(--red)';
   const fmt=s=>s!==null?s+'%':'—';
@@ -2583,6 +2585,125 @@ function getWkBWDays(){
   if(!wrap) return [];
   return Array.from(wrap.querySelectorAll('input[type=checkbox]'))
     .filter(cb=>cb.checked).map(cb=>cb.value);
+}
+
+const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const DAY_KEYS=['mon','tue','wed','thu','fri','sat','sun'];
+
+function renderWkMealGrid(){
+  const count=parseInt(document.getElementById('dp-meal-count')?.value)||4;
+  const grid=document.getElementById('wk-meal-grid');
+  if(!grid) return;
+
+  // Pull nutrition agreements from tab 4
+  const nutAppr=document.getElementById('ov-nut-approach')?.value||'—';
+  const nutTrack=document.getElementById('ov-tracking')?.value||'—';
+  const refA=document.getElementById('wk-nut-approach-ref');
+  const refT=document.getElementById('wk-nut-tracking-ref');
+  if(refA) refA.textContent=nutAppr;
+  if(refT) refT.textContent=nutTrack;
+
+  // Build 7-column grid: meal label + Mon–Sun checkboxes
+  let html=`<table style="width:100%;border-collapse:collapse;min-width:440px">`;
+  html+=`<tr><td style="font-size:8px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;padding:6px 8px 8px;width:56px"></td>`;
+  DAYS.forEach(d=>{
+    html+=`<td style="font-size:8px;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;padding:6px 4px 8px;text-align:center;font-weight:600">${d}</td>`;
+  });
+  html+=`</tr>`;
+
+  for(let m=1;m<=count;m++){
+    const mTime=document.getElementById(`m${m}-time`)?.value||'';
+    const bg=m%2===0?'background:rgba(255,255,255,.02)':'';
+    html+=`<tr style="${bg}"><td style="font-size:9px;color:var(--white);padding:5px 8px;font-weight:600;white-space:nowrap;vertical-align:middle">M${m}${mTime?`<br><span style="font-size:7px;color:var(--muted);font-weight:400">${mTime}</span>`:''}</td>`;
+    DAY_KEYS.forEach(day=>{
+      const id=`wk-meal-${day}-m${m}`;
+      html+=`<td style="text-align:center;padding:3px 2px;vertical-align:middle">
+        <label id="lbl-${id}" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:var(--c2);border:1px solid var(--borderw);cursor:pointer;transition:all .15s;border-radius:2px">
+          <input type="checkbox" id="${id}" style="display:none" onchange="updateWkMealCheck('${day}',${m},${count})">
+          <span id="chk-${id}" style="font-size:13px;color:var(--muted);line-height:1;pointer-events:none">○</span>
+        </label>
+      </td>`;
+    });
+    html+=`</tr>`;
+  }
+
+  // Totals row
+  html+=`<tr style="border-top:1px solid var(--borderw)"><td style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:7px 8px">Total</td>`;
+  DAY_KEYS.forEach(day=>{
+    html+=`<td style="text-align:center;padding:5px 2px"><span id="wk-day-total-${day}" style="font-size:9px;color:var(--muted);font-weight:500">0/${count}</span></td>`;
+  });
+  html+=`</tr></table>`;
+  grid.innerHTML=html;
+  calcWkNutScore();
+}
+
+function updateWkMealCheck(day,meal,count){
+  const id=`wk-meal-${day}-m${meal}`;
+  const cb=document.getElementById(id);
+  const chk=document.getElementById(`chk-${id}`);
+  const lbl=document.getElementById(`lbl-${id}`);
+  if(cb.checked){
+    chk.textContent='✓';chk.style.color='var(--green)';
+    lbl.style.background='rgba(60,140,90,.15)';lbl.style.borderColor='rgba(60,140,90,.5)';
+  } else {
+    chk.textContent='○';chk.style.color='var(--muted)';
+    lbl.style.background='var(--c2)';lbl.style.borderColor='var(--borderw)';
+  }
+  const n=count||parseInt(document.getElementById('dp-meal-count')?.value)||4;
+  const done=Array.from({length:n},(_,i)=>document.getElementById(`wk-meal-${day}-m${i+1}`)?.checked?1:0).reduce((a,b)=>a+b,0);
+  const tot=document.getElementById(`wk-day-total-${day}`);
+  if(tot){
+    tot.textContent=`${done}/${n}`;
+    tot.style.color=done===n?'var(--green)':done>0?'var(--gold)':'var(--muted)';
+  }
+  calcWkNutScore();
+}
+
+function calcWkNutScore(){
+  const count=parseInt(document.getElementById('dp-meal-count')?.value)||4;
+  if(!count) return null;
+  const total=7*count;
+  let done=0;
+  DAY_KEYS.forEach(day=>{
+    for(let m=1;m<=count;m++){
+      if(document.getElementById(`wk-meal-${day}-m${m}`)?.checked) done++;
+    }
+  });
+  const pct=Math.round((done/total)*100);
+  const grade=document.getElementById('wk-nut-grade');
+  const val=document.getElementById('wk-nut-grade-val');
+  const detail=document.getElementById('wk-nut-grade-detail');
+  if(grade) grade.style.display='block';
+  if(val){val.textContent=pct+'%';val.style.color=pct>=80?'var(--green)':pct>=50?'var(--gold)':'var(--red)';}
+  if(detail) detail.textContent=`${done} of ${total} meals completed`;
+  return pct;
+}
+
+function getWkMealData(){
+  const count=parseInt(document.getElementById('dp-meal-count')?.value)||4;
+  const data={};
+  DAY_KEYS.forEach(day=>{
+    data[day]=[];
+    for(let m=1;m<=count;m++){
+      data[day].push(document.getElementById(`wk-meal-${day}-m${m}`)?.checked?1:0);
+    }
+  });
+  return data;
+}
+
+function setWkMealData(data){
+  if(!data) return;
+  const count=parseInt(document.getElementById('dp-meal-count')?.value)||4;
+  DAY_KEYS.forEach(day=>{
+    if(!data[day]) return;
+    data[day].forEach((checked,i)=>{
+      if(checked){
+        const id=`wk-meal-${day}-m${i+1}`;
+        const cb=document.getElementById(id);
+        if(cb){cb.checked=true;updateWkMealCheck(day,i+1,count);}
+      }
+    });
+  });
 }
 
 function loadBWScheduledDays(){
@@ -2717,9 +2838,8 @@ async function addWeeklyEntry(){
     training_notes:document.getElementById('wk-training-notes').value,
     bw_days:getWkBWDays().join(', '),
     bw_compliance:(()=>{const sc=getBWDays().split(',').map(s=>s.trim()).filter(Boolean);const co=getWkBWDays();return sc.length>0?Math.round((co.length/sc.length)*100)+''||'auto':'auto';})(),
-    meals_compliance:document.getElementById('wk-meals-compliance').value,
-    meals_logged:document.getElementById('wk-meals').value,
-    nutrition_adherence:document.getElementById('wk-nutrition-adherence').value,
+    meals_compliance:JSON.stringify(getWkMealData()),
+    meals_logged:calcWkNutScore()||0,
     nut_notes:document.getElementById('wk-nut-notes').value,
     assessment_type:assessmentType,
     assessment:assessmentData,
@@ -2809,9 +2929,32 @@ function renderWeeklyLog(){
           <!-- Nutrition -->
           <div style="background:var(--c2);border:1px solid var(--border);padding:14px">
             <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Nutrition Tracking</div>
-            <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Meal pictures: <span style="color:${complianceColor[e.meals_compliance]||'var(--muted)'}">${complianceLabel[e.meals_compliance]||'—'}</span></div>
-            <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Adherence: <span style="color:${complianceColor[e.nutrition_adherence]||'var(--muted)'}">${complianceLabel[e.nutrition_adherence]||'—'}</span></div>
-            ${e.meals_logged?`<div style="font-size:11px;color:var(--muted)">Avg meals/day: <span style="color:var(--white)">${e.meals_logged}</span></div>`:''}
+            ${(()=>{
+              const pct=e.meals_logged||0;
+              const clr=pct>=80?'var(--green)':pct>=50?'var(--gold)':'var(--red)';
+              let mealGrid='';
+              try{
+                const md=typeof e.meals_compliance==='string'?JSON.parse(e.meals_compliance):e.meals_compliance;
+                if(md&&typeof md==='object'&&!Array.isArray(md)){
+                  const totalCols=Object.values(md)[0]?.length||0;
+                  if(totalCols>0){
+                    mealGrid=`<div style="display:grid;grid-template-columns:auto repeat(7,1fr);gap:2px;margin-top:8px;font-size:8px">
+                      <div style="color:var(--muted)"></div>${['M','T','W','T','F','S','S'].map(d=>`<div style="text-align:center;color:var(--gold);font-weight:600">${d}</div>`).join('')}
+                      ${Array.from({length:totalCols},(_,mi)=>`
+                        <div style="color:var(--muted);padding:1px 0">M${mi+1}</div>
+                        ${DAY_KEYS.map(day=>{
+                          const checked=md[day]?.[mi];
+                          return `<div style="text-align:center;font-size:10px;color:${checked?'var(--green)':'var(--muted)'}">${checked?'✓':'○'}</div>`;
+                        }).join('')}
+                      `).join('')}
+                    </div>`;
+                  }
+                }
+              }catch(e2){}
+              return `<div style="font-size:22px;font-family:'Bebas Neue',sans-serif;color:${clr}">${pct}%</div>
+              <div style="font-size:9px;color:var(--muted);margin-top:2px">meal completion</div>
+              ${mealGrid}`;
+            })()}
             ${e.nut_notes?`<div style="font-size:11px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--borderw)">${e.nut_notes}</div>`:''}
           </div>
           <!-- Body Comp -->
