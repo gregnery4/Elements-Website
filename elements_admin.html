@@ -967,8 +967,8 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:6px">5. Weekly Compliance Score</div>
             <div style="font-size:10px;color:var(--muted);margin-bottom:16px">Auto-calculated from sections 1–4 above. Click Calculate to refresh.</div>
 
-            <!-- 4 section scores -->
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:2px">
+            <!-- 3 section scores -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-bottom:2px">
               <div style="background:var(--c2);border:1px solid var(--border);padding:14px;text-align:center">
                 <div style="font-size:7px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">1. Training</div>
                 <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;line-height:1" id="score-training">—</div>
@@ -983,11 +983,6 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
                 <div style="font-size:7px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">3. Nutrition</div>
                 <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;line-height:1" id="score-nutrition">—</div>
                 <div style="font-size:8px;color:var(--muted);margin-top:4px" id="score-nutrition-detail">meals completed</div>
-              </div>
-              <div style="background:var(--c2);border:1px solid var(--border);padding:14px;text-align:center">
-                <div style="font-size:7px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">4. Body Comp</div>
-                <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;line-height:1" id="score-comp">—</div>
-                <div style="font-size:8px;color:var(--muted);margin-top:4px" id="score-comp-detail">assessment completed</div>
               </div>
             </div>
 
@@ -2580,17 +2575,8 @@ function calcComplianceScore(){
   DAY_KEYS.forEach(day=>{for(let m=1;m<=mealCount;m++){if(document.getElementById(`wk-meal-${day}-m${m}`)?.checked)mealsDone++;}});
   set('score-nutrition',nutrition,`${mealsDone} of ${total7} meals`);
 
-  // ── 4. Body Comp: was an assessment taken? ──
-  const doSkinfold=document.getElementById('wka-cb-skinfold')?.checked;
-  const doCirc=document.getElementById('wka-cb-circumference')?.checked;
-  const doDexa=document.getElementById('wka-cb-dexa')?.checked;
-  const anyAssessment=doSkinfold||doCirc||doDexa;
-  const comp=anyAssessment?100:0;
-  const compTypes=[doSkinfold&&'Skinfolds',doCirc&&'Circumference',doDexa&&'DEXA'].filter(Boolean);
-  set('score-comp',comp,anyAssessment?compTypes.join(' + '):'none taken');
-
-  // ── Overall: average of sections that have data ──
-  const sections=[training,bw,nutrition,comp].filter(s=>s!==null);
+  // ── Overall: average of 3 sections (always divide by 3) ──
+  const sections=[training,bw,nutrition].filter(s=>s!==null);
   if(!sections.length){
     document.getElementById('score-total').textContent='—';
     document.getElementById('score-total').style.color='var(--muted)';
@@ -2598,7 +2584,7 @@ function calcComplianceScore(){
     document.getElementById('score-bar').style.width='0%';
     return null;
   }
-  const overall=Math.round(sections.reduce((a,b)=>a+b,0)/4);
+  const overall=Math.round(sections.reduce((a,b)=>a+b,0)/3);
   const totalEl=document.getElementById('score-total');
   totalEl.textContent=overall+'%';
   totalEl.style.color=sc(overall);
