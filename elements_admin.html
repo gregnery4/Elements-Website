@@ -1692,12 +1692,12 @@ const FOOD_DB = [
   {k:['apple'],                             type:'carb',    p:0.1,  c:3.9,  f:0.1,  unit:'oz'},
   {k:['bread'],                             type:'carb',    p:2.5,  c:13.5, f:1.0,  unit:'slice (1oz)'},
   // FATS
-  {k:['olive oil'],                         type:'fat',     p:0,    c:0,    f:28.0, unit:'tbsp'},
+  {k:['olive oil'],                         type:'fat',     p:0,    c:0,    f:4.5,  unit:'tsp'},
   {k:['avocado'],                           type:'fat',     p:0.5,  c:2.5,  f:4.0,  unit:'oz'},
-  {k:['almond butter','peanut butter','nut butter'],type:'fat',p:3.5,c:3.0,f:16.0,unit:'tbsp (16g)'},
+  {k:['almond butter','peanut butter','nut butter'],type:'fat',p:1.2,c:1.0,f:5.3,unit:'tsp'},
   {k:['almonds','nuts','mixed nuts'],       type:'fat',     p:6.0,  c:6.0,  f:14.0, unit:'oz'},
-  {k:['coconut oil'],                       type:'fat',     p:0,    c:0,    f:28.0, unit:'tbsp'},
-  {k:['butter'],                            type:'fat',     p:0,    c:0,    f:28.0, unit:'tbsp'},
+  {k:['coconut oil'],                       type:'fat',     p:0,    c:0,    f:4.5,  unit:'tsp'},
+  {k:['butter'],                            type:'fat',     p:0,    c:0,    f:3.8,  unit:'tsp'},
   // CHEESES — all measured in tablespoons, support feta-cheese-2 = 2 tbsp syntax
   {k:['feta cheese','feta'],                type:'fat',     p:1.0,  c:0.3,  f:2.0,  unit:'tbsp'},
   {k:['parmesan','parmigiano'],             type:'fat',     p:2.0,  c:0.2,  f:1.5,  unit:'tbsp'},
@@ -1813,10 +1813,17 @@ function convertFoodsToPortions(foodsStr, targetProt, targetCarb, targetFat){
       }
       color = '#5B8FD4';
 
-    // ── FATS — tbsp for liquids/cheeses (supports forcedQty), oz for solids ──
+    // ── FATS — tsp for oils/butters, tbsp for cheeses, oz for solids ──
     } else {
       if(!match.f){ return; }
-      if(match.unit.includes('tbsp')){
+      if(match.unit === 'tsp'){
+        const tsp = forcedQty !== null ? forcedQty : (targetFat ? targetFat / match.f : 1);
+        portionStr = `${Number.isInteger(tsp) ? tsp : tsp.toFixed(1)} tsp`;
+        displayUnit = forcedQty !== null ? 'teaspoons (fixed)' : 'teaspoons';
+        actualP = Math.round(tsp * match.p);
+        actualC = Math.round(tsp * match.c);
+        actualF = Math.round(tsp * match.f);
+      } else if(match.unit.includes('tbsp')){
         // forcedQty allows e.g. "feta-cheese-2" = 2 tbsp; otherwise auto-calculate from target
         const tbsp = forcedQty !== null ? forcedQty : (targetFat ? targetFat / match.f : 1);
         portionStr = `${Number.isInteger(tbsp) ? tbsp : tbsp.toFixed(1)} tbsp`;
@@ -3271,7 +3278,11 @@ function _getFoodPortionsText(foodsStr, targetProt, targetCarb, targetFat){
       }
     } else {
       if(!match.f){return;}
-      if(match.unit.includes('tbsp')){
+      if(match.unit==='tsp'){
+        const tsp=forcedQty!==null ? forcedQty : (targetFat ? targetFat/match.f : 1);
+        portion=`${Number.isInteger(tsp)?tsp:tsp.toFixed(1)} tsp${forcedQty!==null?' (fixed)':''}`;
+        macros=`${Math.round(tsp*match.p)}P · ${Math.round(tsp*match.c)}C · ${Math.round(tsp*match.f)}F`;
+      } else if(match.unit.includes('tbsp')){
         const tbsp=forcedQty!==null ? forcedQty : (targetFat ? targetFat/match.f : 1);
         portion=`${Number.isInteger(tbsp)?tbsp:tbsp.toFixed(1)} tbsp${forcedQty!==null?' (fixed)':''}`;
         macros=`${Math.round(tbsp*match.p)}P · ${Math.round(tbsp*match.c)}C · ${Math.round(tbsp*match.f)}F`;
