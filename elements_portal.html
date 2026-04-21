@@ -404,58 +404,59 @@ async function loadApp(user){
   document.getElementById('s-occ').value=p?.occupation||'';
   document.getElementById('s-coach').textContent=p?.coach||'Gavin Regnery';
   document.getElementById('s-since').textContent=p?.start_date?new Date(p.start_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'—';
-  await Promise.all([loadMetrics(),loadNutrition(),loadMealPlan(),loadSupps(),loadBodyComp(),loadReviews(),loadOverview()]);
+  await Promise.allSettled([loadMetrics(),loadNutrition(),loadMealPlan(),loadSupps(),loadBodyComp(),loadReviews(),loadOverview()]);
   document.getElementById('app').classList.add('vis');
 }
 
 async function loadOverview(){
-  const{data:ov}=await sb.from('client_overview').select('*').eq('client_id',uid).single();
-  const{data:m}=await sb.from('client_metrics').select('body_weight,body_fat').eq('client_id',uid).order('recorded_at',{ascending:false}).limit(1);
-  const{data:g}=await sb.from('client_metrics').select('goal_bf,goal_weight').eq('client_id',uid).order('recorded_at',{ascending:false}).limit(1);
+  try{
+    const{data:ov}=await sb.from('client_overview').select('*').eq('client_id',uid).maybeSingle();
+    const{data:mArr}=await sb.from('client_metrics').select('body_weight,body_fat,notes').eq('client_id',uid).order('recorded_at',{ascending:false}).limit(1);
+    const met=mArr?.[0];
 
-  // Dashboard goal card
-  if(ov?.goal) document.getElementById('k-goal').textContent=ov.goal;
+    // Dashboard goal card
+    if(ov?.goal) document.getElementById('k-goal').textContent=ov.goal;
 
-  if(!ov) return;
-  const fmtDate=d=>d?new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
+    if(!ov) return;
+    const fmtDate=d=>{try{return d?new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';}catch(e){return'—';}};
 
-  // Row 1: Protocol
-  document.getElementById('hps-goal').textContent=ov.goal||'—';
-  document.getElementById('hps-start').textContent=fmtDate(ov.protocol_start);
-  document.getElementById('hps-duration').textContent=ov.phase_duration_weeks?ov.phase_duration_weeks+' wks':'—';
-  // Proposed end date
-  if(ov.protocol_start&&ov.phase_duration_weeks){
-    const end=new Date(ov.protocol_start);
-    end.setDate(end.getDate()+ov.phase_duration_weeks*7);
-    document.getElementById('hps-end').textContent=fmtDate(end.toISOString().split('T')[0]);
+    // Row 1: Protocol
+    document.getElementById('hps-goal').textContent=ov.goal||'—';
+    document.getElementById('hps-start').textContent=fmtDate(ov.protocol_start);
+    document.getElementById('hps-duration').textContent=ov.phase_duration_weeks?ov.phase_duration_weeks+' wks':'—';
+    if(ov.protocol_start&&ov.phase_duration_weeks){
+      const end=new Date(ov.protocol_start);
+      end.setDate(end.getDate()+parseInt(ov.phase_duration_weeks)*7);
+      document.getElementById('hps-end').textContent=fmtDate(end.toISOString().split('T')[0]);
+    }
+
+    // Row 2: Body comp
+    if(met){
+      document.getElementById('hps-sw').textContent=met.body_weight||'—';
+      document.getElementById('hps-sbf').textContent=met.body_fat||'—';
+    }
+    const notes=met?.notes?(typeof met.notes==='string'?JSON.parse(met.notes):met.notes):{};
+    document.getElementById('hps-gbf').textContent=ov.goal_bf||notes.goal_bf||'—';
+    document.getElementById('hps-gw').textContent=ov.goal_weight||notes.goal_weight||'—';
+
+    // Row 3: Nutrition
+    document.getElementById('hps-nut-approach').textContent=ov.nutrition_approach||'—';
+    document.getElementById('hps-tracking').textContent=ov.tracking_responsibility||'—';
+
+    // Row 4: Assessment schedule
+    document.getElementById('hps-bw-days').textContent=ov.bw_recording_days||'—';
+    document.getElementById('hps-circ').textContent=ov.circumference_frequency||'—';
+    document.getElementById('hps-skin').textContent=ov.skinfold_frequency||'—';
+    document.getElementById('hps-dexa').textContent=ov.dexa_frequency||'—';
+
+    // Row 5: Training
+    document.getElementById('hps-freq').textContent=ov.training_frequency||'—';
+    document.getElementById('hps-method').textContent=ov.training_method||'—';
+    document.getElementById('hps-focus').textContent=ov.training_focus||'—';
+    document.getElementById('hps-days').textContent=ov.training_days||'—';
+  }catch(e){
+    console.warn('loadOverview error (non-fatal):',e);
   }
-
-  // Row 2: Body comp from latest metrics
-  const met=m?.[0];
-  if(met){
-    document.getElementById('hps-sw').textContent=met.body_weight||'—';
-    document.getElementById('hps-sbf').textContent=met.body_fat||'—';
-  }
-  // Goal bf/weight from goal_setting fields saved in client_metrics notes or overview
-  const notes=met?.notes?(typeof met.notes==='string'?JSON.parse(met.notes):met.notes):{};
-  document.getElementById('hps-gbf').textContent=ov.goal_bf||notes.goal_bf||'—';
-  document.getElementById('hps-gw').textContent=ov.goal_weight||notes.goal_weight||'—';
-
-  // Row 3: Nutrition
-  document.getElementById('hps-nut-approach').textContent=ov.nutrition_approach||'—';
-  document.getElementById('hps-tracking').textContent=ov.tracking_responsibility||'—';
-
-  // Row 4: Assessment schedule
-  document.getElementById('hps-bw-days').textContent=ov.bw_recording_days||'—';
-  document.getElementById('hps-circ').textContent=ov.circumference_frequency||'—';
-  document.getElementById('hps-skin').textContent=ov.skinfold_frequency||'—';
-  document.getElementById('hps-dexa').textContent=ov.dexa_frequency||'—';
-
-  // Row 5: Training
-  document.getElementById('hps-freq').textContent=ov.training_frequency||'—';
-  document.getElementById('hps-method').textContent=ov.training_method||'—';
-  document.getElementById('hps-focus').textContent=ov.training_focus||'—';
-  document.getElementById('hps-days').textContent=ov.training_days||'—';
 }
 
 async function loadMetrics(){
