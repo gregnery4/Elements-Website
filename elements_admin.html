@@ -1068,10 +1068,10 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           <div class="dp-sec-title">DEXA Scan Data</div>
           <div class="edit-grid">
             <div class="edit-field"><label>Assessment Date</label><input type="date" id="bc-date"></div>
-            <div class="edit-field"><label>Total Mass (lbs)</label><input type="number" id="bc-total-mass" step="0.1"></div>
-            <div class="edit-field"><label>Body Fat %</label><input type="number" id="bc-bf" step="0.1"></div>
-            <div class="edit-field"><label>Lean Mass (lbs)</label><input type="number" id="bc-lean" step="0.1"></div>
-            <div class="edit-field"><label>Fat Mass (lbs)</label><input type="number" id="bc-fat-mass" step="0.1"></div>
+            <div class="edit-field"><label>Total Mass (lbs)</label><input type="number" id="bc-total-mass" step="0.1" oninput="document.getElementById('dp-weight').value=this.value;calcGoals();syncSummaryHeader()"></div>
+            <div class="edit-field"><label>Body Fat %</label><input type="number" id="bc-bf" step="0.1" oninput="document.getElementById('dp-bf').value=this.value;calcGoals();syncSummaryHeader()"></div>
+            <div class="edit-field"><label>Lean Mass (lbs)</label><input type="number" id="bc-lean" step="0.1" oninput="document.getElementById('dp-lean').value=this.value"></div>
+            <div class="edit-field"><label>Fat Mass (lbs)</label><input type="number" id="bc-fat-mass" step="0.1" oninput="document.getElementById('dp-fat-mass').value=this.value"></div>
             <div class="edit-field"><label>Bone Mineral Content (BMC)</label><input type="number" id="bc-bmc" step="0.01"></div>
             <div class="edit-field"><label>Visceral Fat (lbs)</label><input type="number" id="bc-visc-fat" step="0.01"></div>
             <div class="edit-field"><label>Resting Metabolic Rate</label><input type="number" id="bc-rmr"></div>
