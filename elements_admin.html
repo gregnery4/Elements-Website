@@ -466,7 +466,6 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             <div class="edit-field"><label>Email</label><input type="text" id="dp-email" placeholder="Email"></div>
             <div class="edit-field"><label>Phone</label><input type="text" id="dp-phone" placeholder="602-000-0000"></div>
             <div class="edit-field"><label>Biological Age</label><input type="number" id="dp-age" placeholder="30"></div>
-            <div class="edit-field"><label>Training Age (years)</label><input type="number" id="dp-training-age" placeholder="0" step="0.5"></div>
             <div class="edit-field"><label>Sex</label>
               <select id="dp-sex"><option>Male</option><option>Female</option></select>
             </div>
@@ -1443,7 +1442,6 @@ function openClient(id){
   document.getElementById('dp-email').value=c.email||'';
   document.getElementById('dp-phone').value=c.phone||'';
   document.getElementById('dp-age').value=c.age||'';
-  document.getElementById('dp-training-age').value=c.training_age||'';
   document.getElementById('dp-occ').value=c.occupation||'';
   document.getElementById('dp-start').value=c.start_date||'';
   document.getElementById('dp-coach').value=c.coach||'Gavin Regnery';
@@ -3440,7 +3438,6 @@ function _doBuildPDF(jsPDF, c, setMsg){
     const email     =document.getElementById('dp-email')?.value||c.email||'—';
     const phone     =document.getElementById('dp-phone')?.value||'—';
     const age       =document.getElementById('dp-age')?.value||'—';
-    const trainAge  =document.getElementById('dp-training-age')?.value||'—';
     const sex       =document.getElementById('dp-sex')?.value||'—';
     const trainDaysRaw=getTrainingDays()||'—';
     const trainDays=trainDaysRaw.split(',').map(d=>d.trim().slice(0,3)).join(', ');
@@ -3852,7 +3849,6 @@ async function saveClient(){
     full_name:document.getElementById('dp-fullname').value||null,
     phone:document.getElementById('dp-phone').value||null,
     age:parseInt(document.getElementById('dp-age').value)||null,
-    training_age:parseFloat(document.getElementById('dp-training-age').value)||null,
     sex:document.getElementById('dp-sex').value||null,
     occupation:document.getElementById('dp-occ').value||null,
     start_date:document.getElementById('dp-start').value||null,
@@ -4130,7 +4126,6 @@ function gatherCurrentProtocol(){
 
   return {
     // ── General ──
-    training_age:parseFloat(document.getElementById('dp-training-age')?.value)||null,
 
     // ── Body Composition (DEXA) ──
     assessment_date:document.getElementById('bc-date')?.value||null,
@@ -4314,7 +4309,6 @@ async function applyProtocol(id){
   if(!confirm(`Apply "${p.name}" to ${currentClient.full_name||'this client'}? This will overwrite tabs 2–9.`)) return;
 
   // ── General ──
-  if(p.training_age) document.getElementById('dp-training-age').value=p.training_age;
 
   // ── Body Composition (DEXA) ──
   if(p.assessment_date)  document.getElementById('bc-date').value=p.assessment_date;
