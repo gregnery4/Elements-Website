@@ -3869,16 +3869,20 @@ async function saveClient(){
       full_name:document.getElementById('dp-fullname').value||null,
       phone:document.getElementById('dp-phone').value||null,
       age:parseInt(document.getElementById('dp-age').value)||null,
+      training_age:parseFloat(document.getElementById('dp-training-age').value)||null,
+      sex:document.getElementById('dp-sex').value||null,
       occupation:document.getElementById('dp-occ').value||null,
       start_date:document.getElementById('dp-start').value||null,
       coach:document.getElementById('dp-coach').value||null,
+      comm_pref:document.getElementById('dp-comm').value||null,
     }).eq('id',id);
     if(fb.error){
       msg.style.color='var(--red)';
       msg.textContent='Error: '+fb.error.message;
+      console.error('saveClient fallback error:',fb.error);
       return;
     }
-    msg.textContent='✓ Saved (core fields). Add missing columns in Supabase for full save.';
+    msg.textContent='✓ Saved. Run elements_supabase_migration.sql in Supabase to enable all fields.';
     msg.style.color='var(--gold)';
     setTimeout(()=>msg.textContent='',5000);
     await loadAll();
