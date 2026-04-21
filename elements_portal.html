@@ -236,16 +236,44 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
 
     <!-- NUTRITION TARGETS -->
     <div class="page" id="page-nutrition">
-      <div class="pg-h"><h2>Your <span>Nutrition Targets</span></h2><p>Daily macro and calorie targets set by your coach</p></div>
-      <div class="krow">
-        <div class="kcard"><div class="klbl">Calories</div><div class="kval" id="nt-cals">—</div><div class="ksub">per day</div></div>
-        <div class="kcard"><div class="klbl">Protein</div><div class="kval" id="nt-prot">—</div><div class="ksub">grams</div></div>
-        <div class="kcard"><div class="klbl">Carbs</div><div class="kval" id="nt-carb">—</div><div class="ksub">grams</div></div>
-        <div class="kcard"><div class="klbl">Additional Fats</div><div class="kval" id="nt-fat">—</div><div class="ksub">grams</div></div>
+      <div class="pg-h"><h2>Health Protocol <span>Summary</span></h2><p>Your personalised programme overview set by your coach</p></div>
+
+      <!-- Row 1: Protocol -->
+      <div class="krow" style="grid-template-columns:repeat(4,1fr)">
+        <div class="kcard"><div class="klbl">Goal</div><div class="kval" style="font-size:22px" id="hps-goal">—</div><div class="ksub">current phase</div></div>
+        <div class="kcard"><div class="klbl">Start Date</div><div class="kval" style="font-size:18px" id="hps-start">—</div></div>
+        <div class="kcard"><div class="klbl">Phase Duration</div><div class="kval" style="font-size:22px" id="hps-duration">—</div></div>
+        <div class="kcard"><div class="klbl">Proposed End Date</div><div class="kval" style="font-size:18px" id="hps-end">—</div></div>
       </div>
-      <div class="card" id="nt-notes-card" style="display:none">
-        <div class="card-hd">Coach Nutrition Notes</div>
-        <div id="nt-notes" style="font-size:13px;color:var(--muted);line-height:1.9"></div>
+
+      <!-- Row 2: Body Composition -->
+      <div class="krow" style="grid-template-columns:repeat(4,1fr);margin-top:2px">
+        <div class="kcard"><div class="klbl">Starting Weight</div><div class="kval" id="hps-sw">—</div><div class="ksub">lbs</div></div>
+        <div class="kcard"><div class="klbl">Starting Body Fat</div><div class="kval" id="hps-sbf">—</div><div class="ksub">%</div></div>
+        <div class="kcard"><div class="klbl">Goal Body Fat</div><div class="kval" id="hps-gbf">—</div><div class="ksub">%</div></div>
+        <div class="kcard"><div class="klbl">Goal Bodyweight</div><div class="kval" id="hps-gw">—</div><div class="ksub">lbs</div></div>
+      </div>
+
+      <!-- Row 3: Nutrition -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:2px">
+        <div class="kcard"><div class="klbl">Nutrition Approach</div><div style="font-size:14px;font-weight:500;color:var(--white);margin-top:6px" id="hps-nut-approach">—</div></div>
+        <div class="kcard"><div class="klbl">Tracking Responsibility</div><div style="font-size:14px;font-weight:500;color:var(--white);margin-top:6px" id="hps-tracking">—</div></div>
+      </div>
+
+      <!-- Row 4: Assessment Schedule -->
+      <div class="krow" style="grid-template-columns:repeat(4,1fr);margin-top:2px">
+        <div class="kcard"><div class="klbl">BW Recording Days</div><div style="font-size:12px;font-weight:500;color:var(--white);margin-top:6px;line-height:1.6" id="hps-bw-days">—</div></div>
+        <div class="kcard"><div class="klbl">Circumference</div><div style="font-size:13px;font-weight:500;color:var(--white);margin-top:6px" id="hps-circ">—</div></div>
+        <div class="kcard"><div class="klbl">Skinfolds</div><div style="font-size:13px;font-weight:500;color:var(--white);margin-top:6px" id="hps-skin">—</div></div>
+        <div class="kcard"><div class="klbl">DEXA Scan</div><div style="font-size:13px;font-weight:500;color:var(--white);margin-top:6px" id="hps-dexa">—</div></div>
+      </div>
+
+      <!-- Row 5: Training -->
+      <div class="krow" style="grid-template-columns:repeat(4,1fr);margin-top:2px">
+        <div class="kcard"><div class="klbl">Training Frequency</div><div class="kval" style="font-size:22px" id="hps-freq">—</div></div>
+        <div class="kcard"><div class="klbl">Training Method</div><div style="font-size:13px;font-weight:500;color:var(--white);margin-top:6px" id="hps-method">—</div></div>
+        <div class="kcard"><div class="klbl">Training Focus</div><div style="font-size:13px;font-weight:500;color:var(--white);margin-top:6px" id="hps-focus">—</div></div>
+        <div class="kcard"><div class="klbl">Training Days</div><div style="font-size:11px;font-weight:500;color:var(--white);margin-top:6px;line-height:1.6" id="hps-days">—</div></div>
       </div>
     </div>
 
@@ -381,8 +409,53 @@ async function loadApp(user){
 }
 
 async function loadOverview(){
-  const{data}=await sb.from('client_overview').select('goal').eq('client_id',uid).single();
-  if(data?.goal) document.getElementById('k-goal').textContent=data.goal;
+  const{data:ov}=await sb.from('client_overview').select('*').eq('client_id',uid).single();
+  const{data:m}=await sb.from('client_metrics').select('body_weight,body_fat').eq('client_id',uid).order('recorded_at',{ascending:false}).limit(1);
+  const{data:g}=await sb.from('client_metrics').select('goal_bf,goal_weight').eq('client_id',uid).order('recorded_at',{ascending:false}).limit(1);
+
+  // Dashboard goal card
+  if(ov?.goal) document.getElementById('k-goal').textContent=ov.goal;
+
+  if(!ov) return;
+  const fmtDate=d=>d?new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
+
+  // Row 1: Protocol
+  document.getElementById('hps-goal').textContent=ov.goal||'—';
+  document.getElementById('hps-start').textContent=fmtDate(ov.protocol_start);
+  document.getElementById('hps-duration').textContent=ov.phase_duration_weeks?ov.phase_duration_weeks+' wks':'—';
+  // Proposed end date
+  if(ov.protocol_start&&ov.phase_duration_weeks){
+    const end=new Date(ov.protocol_start);
+    end.setDate(end.getDate()+ov.phase_duration_weeks*7);
+    document.getElementById('hps-end').textContent=fmtDate(end.toISOString().split('T')[0]);
+  }
+
+  // Row 2: Body comp from latest metrics
+  const met=m?.[0];
+  if(met){
+    document.getElementById('hps-sw').textContent=met.body_weight||'—';
+    document.getElementById('hps-sbf').textContent=met.body_fat||'—';
+  }
+  // Goal bf/weight from goal_setting fields saved in client_metrics notes or overview
+  const notes=met?.notes?(typeof met.notes==='string'?JSON.parse(met.notes):met.notes):{};
+  document.getElementById('hps-gbf').textContent=ov.goal_bf||notes.goal_bf||'—';
+  document.getElementById('hps-gw').textContent=ov.goal_weight||notes.goal_weight||'—';
+
+  // Row 3: Nutrition
+  document.getElementById('hps-nut-approach').textContent=ov.nutrition_approach||'—';
+  document.getElementById('hps-tracking').textContent=ov.tracking_responsibility||'—';
+
+  // Row 4: Assessment schedule
+  document.getElementById('hps-bw-days').textContent=ov.bw_recording_days||'—';
+  document.getElementById('hps-circ').textContent=ov.circumference_frequency||'—';
+  document.getElementById('hps-skin').textContent=ov.skinfold_frequency||'—';
+  document.getElementById('hps-dexa').textContent=ov.dexa_frequency||'—';
+
+  // Row 5: Training
+  document.getElementById('hps-freq').textContent=ov.training_frequency||'—';
+  document.getElementById('hps-method').textContent=ov.training_method||'—';
+  document.getElementById('hps-focus').textContent=ov.training_focus||'—';
+  document.getElementById('hps-days').textContent=ov.training_days||'—';
 }
 
 async function loadMetrics(){
@@ -536,7 +609,7 @@ async function changePass(){
 function fmt(d){return new Date(d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
 function fmtT(d){return new Date(d).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});}
 
-const pgTitles={dashboard:'Dashboard',nutrition:'Nutrition Targets',mealplan:'Meal Plan',supplements:'Supplements',bodycomp:'Body Composition',reviews:'Weekly Reviews',settings:'Settings'};
+const pgTitles={dashboard:'Dashboard',nutrition:'Health Protocol Summary',mealplan:'Nutrition & Supplement Plan',supplements:'Training Performance',bodycomp:'Body Composition Progress',reviews:'Weekly Reviews',settings:'Settings'};
 function showPage(name,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('on'));
