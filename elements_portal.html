@@ -229,7 +229,7 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:3px;">
         <div class="card"><div class="card-hd">Daily Calories &amp; Macronutrient Targets</div><div id="d-macros"><div class="empty">No targets set yet.</div></div></div>
-        <div class="card"><div class="card-hd">Active Supplements</div><div id="d-supps"><div class="empty">No protocol assigned yet.</div></div></div>
+        <div class="card"><div class="card-hd">Supplement Protocol</div><div id="d-supps"><div class="empty">No protocol assigned yet.</div></div></div>
       </div>
       <div class="card"><div class="card-hd">Latest Compliance Score</div><div id="d-compliance"><div class="empty">No reviews recorded yet.</div></div></div>
     </div>
@@ -369,7 +369,7 @@ async function loadApp(user){
   document.getElementById('sb-name').textContent=name;
   document.getElementById('sb-since').textContent=p?.start_date?'Since '+new Date(p.start_date).toLocaleDateString('en-US',{month:'short',year:'numeric'}):'Active Member';
   document.getElementById('greet-name').textContent=name.split(' ')[0]+'.';
-  document.getElementById('greet-sub').textContent='Welcome to your performance dashboard.';
+  document.getElementById('greet-sub').textContent='Welcome to your Elements Health & Performance Dashboard.';
   document.getElementById('s-name').value=p?.full_name||'';
   document.getElementById('s-email').textContent=user.email;
   document.getElementById('s-phone').value=p?.phone||'';
