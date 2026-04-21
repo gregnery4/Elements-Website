@@ -875,23 +875,26 @@ function _buildPortalPlanPDF(jsPDF,p){
     meals.forEach((m,idx)=>{
       const mealN=idx+1;
       const mealSupps=suppByMeal[mealN]||[];
-      const kcal=(m.protein*4)+(m.carbs*4)+(m.fats*9);
-      const estH=14+12+(m.foods?8:0)+(mealSupps.length?7:0)+4;
+      const kcal=((m.protein||0)*4)+((m.carbs||0)*4)+((m.fats||0)*9);
+      const portions=m.foods?_getFoodPortionsText(m.foods,m.protein||0,m.carbs||0,m.fats||0):[];
+      const estH=12.5+11+(portions.length>0?5.5+portions.length*6.5+2:0)+(mealSupps.length>0?7:0)+4;
       checkY(estH);
 
-      // Meal header
+      // Meal header — gold top line + dark bar
       doc.setFillColor(...GOLD);doc.rect(M,y,col,0.8,'F');
       doc.setFillColor(30,30,30);doc.rect(M,y+0.8,col,11,'F');
       doc.setFillColor(...GOLD);doc.rect(M,y+0.8,3,11,'F');
-      doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(...WHT);doc.text(`MEAL ${mealN}`,M+6,y+8);
-      doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(...GOLD_DIM);doc.text(m.type||'Whole Food',M+32,y+8);
+      doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(...WHT);
+      doc.text(`MEAL ${mealN}`,M+6,y+8);
+      doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(...GOLD_DIM);
+      doc.text(m.type||'Whole Food',M+32,y+8);
       if(m.time){doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(...WHT);doc.text(m.time,W-M-3,y+6,{align:'right'});}
       if(kcal){doc.setFontSize(6.5);doc.setFont('helvetica','normal');doc.setTextColor(...GOLD_DIM);doc.text(kcal+' kcal',W-M-3,y+11,{align:'right'});}
       y+=12.5;
 
-      // Macros
+      // Macro row
       const b3=col/3;
-      [[m.protein+'g','PROTEIN',GOLD],[m.carbs+'g','CARBS',BLUE],[m.fats+'g','FATS',RED]].forEach(([v,l,clr],j)=>{
+      [[( m.protein||0)+'g','PROTEIN',GOLD],[(m.carbs||0)+'g','CARBS',BLUE],[(m.fats||0)+'g','FATS',RED]].forEach(([v,l,clr],j)=>{
         const x=M+j*b3;
         doc.setFillColor(...LG);doc.rect(x,y,b3-(j<2?0.5:0),10,'F');
         doc.setFontSize(5.5);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text(l,x+b3/2,y+3.5,{align:'center'});
@@ -899,16 +902,33 @@ function _buildPortalPlanPDF(jsPDF,p){
       });
       y+=11;
 
-      if(m.foods){
-        checkY(8);
-        doc.setFillColor(32,32,32);doc.rect(M,y,col,7,'F');
-        doc.setFontSize(6);doc.setFont('helvetica','bold');doc.setTextColor(...GOLD);doc.text('FOODS',M+3,y+4.8);
-        doc.setFont('helvetica','normal');doc.setTextColor(160,150,130);
-        const fl=doc.splitTextToSize(m.foods,col-20);
-        doc.text(fl[0],M+18,y+4.8);
-        y+=7;
+      // Food portions table
+      if(portions.length){
+        checkY(5.5+portions.length*6.5);
+        // Column header
+        doc.setFillColor(240,237,232);doc.rect(M,y,col,5.5,'F');
+        doc.setFontSize(6);doc.setFont('helvetica','bold');doc.setTextColor(...DG);
+        doc.text('FOOD',M+3,y+4);
+        doc.text('AMOUNT',M+90,y+4);
+        doc.text('P · C · F',W-M-3,y+4,{align:'right'});
+        y+=5.5;
+        portions.forEach(({name,portion,macros},fi)=>{
+          checkY(6.5);
+          if(fi%2===0){doc.setFillColor(...WHT);}else{doc.setFillColor(...LG);}
+          doc.rect(M,y,col,6.5,'F');
+          doc.setFillColor(...GOLD);doc.rect(M,y,1.2,6.5,'F');
+          doc.setFontSize(7.5);doc.setFont('helvetica','bold');doc.setTextColor(...DG);
+          doc.text(name,M+4,y+4.6);
+          doc.setFont('helvetica','normal');doc.setTextColor(90,85,80);
+          doc.text(portion,M+90,y+4.6);
+          doc.setFontSize(6.5);doc.setTextColor(...MG);
+          doc.text(macros,W-M-2,y+4.6,{align:'right'});
+          y+=6.5;
+        });
+        y+=2;
       }
 
+      // Supplements
       if(mealSupps.length){
         checkY(7);
         doc.setFillColor(28,28,28);doc.rect(M,y,col,7,'F');
