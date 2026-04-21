@@ -225,10 +225,10 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
         <div class="kcard"><div class="klbl">Body Weight</div><div class="kval" id="k-weight">—</div><div class="ksub">lbs</div></div>
         <div class="kcard"><div class="klbl">Body Fat</div><div class="kval" id="k-bf">—</div><div class="ksub">percent</div></div>
         <div class="kcard"><div class="klbl">Lean Mass</div><div class="kval" id="k-lean">—</div><div class="ksub">lbs</div></div>
-        <div class="kcard"><div class="klbl">Daily Calories</div><div class="kval" id="k-cals">—</div><div class="ksub">target</div></div>
+        <div class="kcard"><div class="klbl">Goal</div><div class="kval" id="k-goal" style="font-size:22px">—</div><div class="ksub">current phase</div></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:3px;">
-        <div class="card"><div class="card-hd">Macro Targets</div><div id="d-macros"><div class="empty">No targets set yet.</div></div></div>
+        <div class="card"><div class="card-hd">Daily Calories &amp; Macronutrient Targets</div><div id="d-macros"><div class="empty">No targets set yet.</div></div></div>
         <div class="card"><div class="card-hd">Active Supplements</div><div id="d-supps"><div class="empty">No protocol assigned yet.</div></div></div>
       </div>
       <div class="card"><div class="card-hd">Latest Compliance Score</div><div id="d-compliance"><div class="empty">No reviews recorded yet.</div></div></div>
@@ -376,8 +376,13 @@ async function loadApp(user){
   document.getElementById('s-occ').value=p?.occupation||'';
   document.getElementById('s-coach').textContent=p?.coach||'Gavin Regnery';
   document.getElementById('s-since').textContent=p?.start_date?new Date(p.start_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'—';
-  await Promise.all([loadMetrics(),loadNutrition(),loadMealPlan(),loadSupps(),loadBodyComp(),loadReviews()]);
+  await Promise.all([loadMetrics(),loadNutrition(),loadMealPlan(),loadSupps(),loadBodyComp(),loadReviews(),loadOverview()]);
   document.getElementById('app').classList.add('vis');
+}
+
+async function loadOverview(){
+  const{data}=await sb.from('client_overview').select('goal').eq('client_id',uid).single();
+  if(data?.goal) document.getElementById('k-goal').textContent=data.goal;
 }
 
 async function loadMetrics(){
@@ -392,9 +397,9 @@ async function loadNutrition(){
   const{data}=await sb.from('nutrition_targets').select('*').eq('client_id',uid).order('updated_at',{ascending:false}).limit(1);
   const n=data?.[0];if(!n)return;
   // Dashboard
-  document.getElementById('k-cals').textContent=n.calories||'—';
   document.getElementById('d-macros').innerHTML=`
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;text-align:center">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;text-align:center">
+      <div style="padding:14px;background:var(--c3)"><div class="klbl">Calories</div><div class="kval" style="font-size:28px">${n.calories||'—'}</div></div>
       <div style="padding:14px;background:var(--c3)"><div class="klbl">Protein</div><div class="kval" style="font-size:28px">${n.protein_g||'—'}g</div></div>
       <div style="padding:14px;background:var(--c3)"><div class="klbl">Carbs</div><div class="kval" style="font-size:28px">${n.carbs_g||'—'}g</div></div>
       <div style="padding:14px;background:var(--c3)"><div class="klbl">Additional Fats</div><div class="kval" style="font-size:28px">${n.fat_g||'—'}g</div></div>
