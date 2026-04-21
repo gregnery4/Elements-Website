@@ -3848,8 +3848,7 @@ async function saveClient(){
   const msg=document.getElementById('dp-save-msg');
   msg.textContent='Saving...';msg.style.color='var(--gold)';
 
-  // Try full save first (works once new columns are added in Supabase)
-  let{error}=await sb.from('profiles').update({
+  const{error}=await sb.from('profiles').update({
     full_name:document.getElementById('dp-fullname').value||null,
     phone:document.getElementById('dp-phone').value||null,
     age:parseInt(document.getElementById('dp-age').value)||null,
@@ -3859,36 +3858,14 @@ async function saveClient(){
     start_date:document.getElementById('dp-start').value||null,
     coach:document.getElementById('dp-coach').value||null,
     comm_pref:document.getElementById('dp-comm').value||null,
-    training_days:getTrainingDays()||null,
-    training_time:document.getElementById('dp-training-time').value||null,
   }).eq('id',id);
 
-  // If error (likely missing columns), fall back to core fields only
   if(error){
-    const fb=await sb.from('profiles').update({
-      full_name:document.getElementById('dp-fullname').value||null,
-      phone:document.getElementById('dp-phone').value||null,
-      age:parseInt(document.getElementById('dp-age').value)||null,
-      training_age:parseFloat(document.getElementById('dp-training-age').value)||null,
-      sex:document.getElementById('dp-sex').value||null,
-      occupation:document.getElementById('dp-occ').value||null,
-      start_date:document.getElementById('dp-start').value||null,
-      coach:document.getElementById('dp-coach').value||null,
-      comm_pref:document.getElementById('dp-comm').value||null,
-    }).eq('id',id);
-    if(fb.error){
-      msg.style.color='var(--red)';
-      msg.textContent='Error: '+fb.error.message;
-      console.error('saveClient fallback error:',fb.error);
-      return;
-    }
-    msg.textContent='✓ Saved. Run elements_supabase_migration.sql in Supabase to enable all fields.';
-    msg.style.color='var(--gold)';
-    setTimeout(()=>msg.textContent='',5000);
-    await loadAll();
+    msg.style.color='var(--red)';
+    msg.textContent='Error: '+error.message;
+    console.error('saveClient error:',error);
     return;
   }
-
   msg.textContent='✓ Saved successfully.';msg.style.color='var(--green)';
   setTimeout(()=>msg.textContent='',3000);
   await loadAll();
