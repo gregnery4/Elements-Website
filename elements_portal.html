@@ -279,8 +279,8 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
 
     <!-- MEAL PLAN -->
     <div class="page" id="page-mealplan">
-      <div class="pg-h"><h2>Your <span>Meal Plan</span></h2><p>Daily meal plan prescribed by your coach</p></div>
-      <div id="mp-content"><div class="empty">No meal plan assigned yet.</div></div>
+      <div class="pg-h"><h2>Nutrition &amp; <span>Supplement Plan</span></h2><p>Your personalised plans prescribed by your coach</p></div>
+      <div id="mp-content"><div class="empty">No plans assigned yet. Check back after your next session.</div></div>
     </div>
 
     <!-- SUPPLEMENTS -->
@@ -490,41 +490,255 @@ async function loadNutrition(){
 }
 
 async function loadMealPlan(){
-  // Meal plan is stored in the meal_plans table (or nutrition_targets notes for now)
-  // Try to load from meal_plans table if it exists
-  const{data}=await sb.from('meal_plans').select('*').eq('client_id',uid).order('created_at',{ascending:false}).limit(1);
-  if(!data||!data.length){
-    document.getElementById('mp-content').innerHTML='<div class="empty">Your coach hasn\'t published a meal plan yet. Check back after your next session.</div>';
+  const{data:protocols}=await sb.from('protocols')
+    .select('id,name,notes,created_at,goal,calories,protein_g,carbs_g,fat_g,meal_count,meals,supplements')
+    .eq('client_id',uid)
+    .order('created_at',{ascending:false});
+
+  const container=document.getElementById('mp-content');
+
+  if(!protocols||!protocols.length){
+    container.innerHTML='<div class="empty">No plans assigned yet. Check back after your next session.</div>';
     return;
   }
-  const plan=data[0];
-  let html='';
-  try{
-    const meals=typeof plan.meals==='string'?JSON.parse(plan.meals):plan.meals;
-    html=meals.map((m,i)=>`
-      <div style="background:var(--c2);border:1px solid var(--border);padding:24px;margin-bottom:3px">
-        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--borderw)">
+
+  container.innerHTML=protocols.map((p,i)=>{
+    const date=new Date(p.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const label=p.name||'Meal Plan';
+    return `
+    <div style="border:1px solid var(--border);margin-bottom:3px;overflow:hidden">
+      <!-- Header row -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--c2)">
+        <div onclick="togglePortalPlan(${i})" style="flex:1;cursor:pointer;display:flex;align-items:center;gap:14px" onmouseover="this.parentElement.style.background='var(--c3)'" onmouseout="this.parentElement.style.background='var(--c2)'">
+          <div style="width:3px;height:36px;background:linear-gradient(180deg,var(--gold-mid),var(--gold-dark));flex-shrink:0"></div>
           <div>
-            <span style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px">Meal ${i+1}</span>
-            <span style="font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-left:12px">${m.type||'Whole Food'}</span>
-          </div>
-          <div style="font-size:10px;color:var(--gold);letter-spacing:2px;text-transform:uppercase">Time: ${m.time||'—'}</div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-bottom:${m.foods?'14px':'0'}">
-          <div style="padding:10px 14px;background:var(--c3);text-align:center">
-            <div class="klbl">Protein</div><div class="kval" style="font-size:26px">${m.protein||0}g</div>
-          </div>
-          <div style="padding:10px 14px;background:var(--c3);text-align:center">
-            <div class="klbl">Carbs</div><div class="kval" style="font-size:26px;background:linear-gradient(135deg,#3A6BA8,#5B8FD4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${m.carbs||0}g</div>
-          </div>
-          <div style="padding:10px 14px;background:var(--c3);text-align:center">
-            <div class="klbl">Add. Fats</div><div class="kval" style="font-size:26px;background:linear-gradient(135deg,#8B3050,#CF6679);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${m.fats||0}g</div>
+            <div style="font-size:14px;font-weight:600;color:var(--white)">${label}</div>
+            <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:3px">${date}${p.goal?' · '+p.goal:''}${p.calories?' · '+p.calories+' cal':''}</div>
+            ${p.notes?`<div style="font-size:10px;color:var(--muted);margin-top:2px;font-style:italic">${p.notes}</div>`:''}
           </div>
         </div>
-        ${m.foods?`<div style="padding:10px 14px;background:var(--c3);font-size:11px;color:var(--muted)"><span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-right:10px">Food Preferences</span>${m.foods}</div>`:''}
-      </div>`).join('');
-  }catch(e){html='<div class="empty">Meal plan format error. Contact your coach.</div>';}
-  document.getElementById('mp-content').innerHTML=html;
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+          <button onclick="downloadPortalPlanPDF(${i})" style="padding:7px 14px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;font-weight:600">PDF ↓</button>
+          <span onclick="togglePortalPlan(${i})" id="pp-chev-${i}" style="font-size:14px;color:var(--muted);cursor:pointer;padding:4px 8px">▼</span>
+        </div>
+      </div>
+      <!-- Expandable meal plan -->
+      <div id="pp-body-${i}" style="display:none;background:var(--c1);border-top:1px solid var(--borderw)">
+        ${_renderPortalMealPlan(p)}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Store for PDF access
+  window._portalProtocols=protocols;
+}
+
+function togglePortalPlan(i){
+  const body=document.getElementById(`pp-body-${i}`);
+  const chev=document.getElementById(`pp-chev-${i}`);
+  const open=body.style.display==='block';
+  body.style.display=open?'none':'block';
+  if(chev) chev.textContent=open?'▼':'▲';
+}
+
+function _renderPortalMealPlan(p){
+  try{
+    const meals=p.meals?(typeof p.meals==='string'?JSON.parse(p.meals):p.meals):null;
+    const supps=p.supplements?(typeof p.supplements==='string'?JSON.parse(p.supplements):p.supplements):null;
+
+    // Build supp-per-meal lookup
+    const suppByMeal={};
+    if(supps) supps.forEach(s=>{
+      if(!s.timing)return;
+      s.timing.split(',').map(m=>m.trim()).forEach(m=>{
+        const n=parseInt(m.replace(/M/i,''));
+        if(!isNaN(n)){if(!suppByMeal[n])suppByMeal[n]=[];suppByMeal[n].push(s);}
+      });
+    });
+
+    if(!meals||!meals.length) return '<div style="padding:20px;font-size:12px;color:var(--muted);text-align:center">No meal data in this plan.</div>';
+
+    // Daily totals
+    const totP=meals.reduce((s,m)=>s+(m.protein||0),0);
+    const totC=meals.reduce((s,m)=>s+(m.carbs||0),0);
+    const totF=meals.reduce((s,m)=>s+(m.fats||0),0);
+    const totCal=(totP*4)+(totC*4)+(totF*9);
+
+    let html=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;padding:0">
+      ${[['Calories',totCal,'var(--gold)'],['Protein',totP+'g','var(--gold)'],['Carbs',totC+'g','#5B8FD4'],['Fats',totF+'g','#CF6679']].map(([l,v,c])=>`
+      <div style="padding:14px;background:var(--c2);text-align:center;border-bottom:1px solid var(--borderw)">
+        <div class="klbl">${l}</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:${c}">${v}</div>
+      </div>`).join('')}
+    </div>`;
+
+    html+=meals.map((m,idx)=>{
+      const mealN=idx+1;
+      const mealSupps=suppByMeal[mealN]||[];
+      const kcal=(m.protein*4)+(m.carbs*4)+(m.fats*9);
+      return `
+      <div style="border-bottom:1px solid var(--borderw)">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--c2)">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:3px;height:30px;background:linear-gradient(180deg,var(--gold-mid),var(--gold-dark))"></div>
+            <div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px">MEAL ${mealN}</div>
+              <div style="font-size:8px;color:var(--gold);letter-spacing:2px;text-transform:uppercase">${m.type||'Whole Food'}</div>
+            </div>
+          </div>
+          <div style="text-align:right">
+            ${m.time?`<div style="font-size:12px;color:var(--white);font-weight:500">${m.time}</div>`:''}
+            ${kcal?`<div style="font-size:9px;color:var(--muted)">${kcal} kcal</div>`:''}
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px">
+          <div style="padding:12px;background:var(--c3);text-align:center"><div class="klbl">Protein</div><div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold)">${m.protein||0}g</div></div>
+          <div style="padding:12px;background:var(--c3);text-align:center"><div class="klbl">Carbs</div><div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#5B8FD4">${m.carbs||0}g</div></div>
+          <div style="padding:12px;background:var(--c3);text-align:center"><div class="klbl">Fats</div><div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#CF6679">${m.fats||0}g</div></div>
+        </div>
+        ${m.foods?`<div style="padding:12px 20px;background:var(--c2);font-size:11px;color:var(--muted)"><span style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-right:8px">Foods</span>${m.foods}</div>`:''}
+        ${mealSupps.length?`<div style="padding:10px 20px;background:var(--c1);display:flex;flex-wrap:wrap;gap:6px">
+          <span style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-right:6px;align-self:center">With this meal</span>
+          ${mealSupps.map(s=>`<span style="padding:4px 10px;background:var(--c2);border:1px solid var(--borderw);font-size:10px;color:var(--white)">${s.name}${s.dose?' · '+s.dose:''}</span>`).join('')}
+        </div>`:''}
+      </div>`;
+    }).join('');
+
+    return html;
+  }catch(e){
+    return '<div style="padding:20px;font-size:12px;color:var(--muted)">Could not load meal plan data.</div>';
+  }
+}
+
+function downloadPortalPlanPDF(i){
+  const protocols=window._portalProtocols||[];
+  const p=protocols[i];
+  if(!p){return;}
+  const JsPDF=window.jspdf?.jsPDF||window.jsPDF;
+  if(!JsPDF){
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload=()=>setTimeout(()=>downloadPortalPlanPDF(i),200);
+    document.head.appendChild(s);return;
+  }
+  _buildPortalPlanPDF(JsPDF,p);
+}
+
+function _buildPortalPlanPDF(jsPDF,p){
+  try{
+    const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const W=doc.internal.pageSize.getWidth();
+    const M=16;const col=W-M*2;let y=0;
+    const GOLD=[168,129,58];const GOLD_DIM=[210,185,130];
+    const BLK=[22,22,22];const WHT=[255,255,255];
+    const LG=[248,246,242];const MG=[150,140,128];const DG=[70,65,60];
+    const BLUE=[58,100,168];const RED=[150,55,75];
+
+    const clientName=document.getElementById('sb-name')?.textContent||'Client';
+    const date=new Date(p.created_at).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+    const meals=p.meals?(typeof p.meals==='string'?JSON.parse(p.meals):p.meals):[];
+    const supps=p.supplements?(typeof p.supplements==='string'?JSON.parse(p.supplements):p.supplements):[];
+
+    const suppByMeal={};
+    supps.forEach(s=>{
+      if(!s.timing)return;
+      s.timing.split(',').map(m=>m.trim()).forEach(m=>{
+        const n=parseInt(m.replace(/M/i,''));
+        if(!isNaN(n)){if(!suppByMeal[n])suppByMeal[n]=[];suppByMeal[n].push(s);}
+      });
+    });
+
+    const addFooter=()=>{
+      const pg=doc.internal.getCurrentPageInfo().pageNumber;
+      const tot=doc.internal.getNumberOfPages();
+      doc.setFillColor(...BLK);doc.rect(0,285,W,12,'F');
+      doc.setDrawColor(...GOLD);doc.setLineWidth(0.4);doc.line(0,285,W,285);
+      doc.setFontSize(6.5);doc.setFont('helvetica','normal');doc.setTextColor(...MG);
+      doc.text('ELEMENTS Personal Training · Santa Monica, CA',M,291);
+      doc.text(`${clientName} · ${p.name}`,W/2,291,{align:'center'});
+      doc.text(`${pg} / ${tot}`,W-M,291,{align:'right'});
+    };
+    const checkY=h=>{if(y+h>281){addFooter();doc.addPage();y=M;}};
+
+    // Header
+    doc.setFillColor(...BLK);doc.rect(0,0,W,30,'F');
+    doc.setFillColor(...GOLD);doc.rect(0,30,W,2,'F');
+    doc.setFontSize(22);doc.setFont('helvetica','bold');doc.setTextColor(...WHT);doc.text('ELEMENTS',M,19);
+    doc.setFontSize(7.5);doc.setFont('helvetica','normal');doc.setTextColor(...GOLD_DIM);doc.text('PERSONAL TRAINING  ·  SANTA MONICA',M,25.5);
+    doc.setFontSize(13);doc.setFont('helvetica','bold');doc.setTextColor(...WHT);doc.text(clientName,W-M,14,{align:'right'});
+    doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(...GOLD_DIM);
+    doc.text(p.name,W-M,21,{align:'right'});
+    doc.text(date,W-M,27,{align:'right'});
+    y=38;
+
+    // Daily totals
+    const totP=meals.reduce((s,m)=>s+(m.protein||0),0);
+    const totC=meals.reduce((s,m)=>s+(m.carbs||0),0);
+    const totF=meals.reduce((s,m)=>s+(m.fats||0),0);
+    const totCal=(totP*4)+(totC*4)+(totF*9);
+    const mw=col/4;
+    [['CALORIES',String(totCal),WHT],['PROTEIN',totP+'g',[...GOLD]],['CARBOHYDRATES',totC+'g',BLUE],['FATS',totF+'g',RED]].forEach(([l,v,clr],i)=>{
+      const x=M+i*(mw+0.5);
+      doc.setFillColor(30,30,30);doc.rect(x,y,mw,16,'F');
+      doc.setFillColor(...GOLD);doc.rect(x,y,mw,0.8,'F');
+      doc.setFontSize(6);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text(l,x+mw/2,y+5.5,{align:'center'});
+      doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(...clr);doc.text(v,x+mw/2,y+13,{align:'center'});
+    });
+    y+=19;
+
+    // Meals
+    meals.forEach((m,idx)=>{
+      const mealN=idx+1;
+      const mealSupps=suppByMeal[mealN]||[];
+      const kcal=(m.protein*4)+(m.carbs*4)+(m.fats*9);
+      const estH=14+12+(m.foods?8:0)+(mealSupps.length?7:0)+4;
+      checkY(estH);
+
+      // Meal header
+      doc.setFillColor(...GOLD);doc.rect(M,y,col,0.8,'F');
+      doc.setFillColor(30,30,30);doc.rect(M,y+0.8,col,11,'F');
+      doc.setFillColor(...GOLD);doc.rect(M,y+0.8,3,11,'F');
+      doc.setFontSize(10);doc.setFont('helvetica','bold');doc.setTextColor(...WHT);doc.text(`MEAL ${mealN}`,M+6,y+8);
+      doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(...GOLD_DIM);doc.text(m.type||'Whole Food',M+32,y+8);
+      if(m.time){doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(...WHT);doc.text(m.time,W-M-3,y+6,{align:'right'});}
+      if(kcal){doc.setFontSize(6.5);doc.setFont('helvetica','normal');doc.setTextColor(...GOLD_DIM);doc.text(kcal+' kcal',W-M-3,y+11,{align:'right'});}
+      y+=12.5;
+
+      // Macros
+      const b3=col/3;
+      [[m.protein+'g','PROTEIN',GOLD],[m.carbs+'g','CARBS',BLUE],[m.fats+'g','FATS',RED]].forEach(([v,l,clr],j)=>{
+        const x=M+j*b3;
+        doc.setFillColor(...LG);doc.rect(x,y,b3-(j<2?0.5:0),10,'F');
+        doc.setFontSize(5.5);doc.setFont('helvetica','normal');doc.setTextColor(...MG);doc.text(l,x+b3/2,y+3.5,{align:'center'});
+        doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...clr);doc.text(v,x+b3/2,y+8.5,{align:'center'});
+      });
+      y+=11;
+
+      if(m.foods){
+        checkY(8);
+        doc.setFillColor(32,32,32);doc.rect(M,y,col,7,'F');
+        doc.setFontSize(6);doc.setFont('helvetica','bold');doc.setTextColor(...GOLD);doc.text('FOODS',M+3,y+4.8);
+        doc.setFont('helvetica','normal');doc.setTextColor(160,150,130);
+        const fl=doc.splitTextToSize(m.foods,col-20);
+        doc.text(fl[0],M+18,y+4.8);
+        y+=7;
+      }
+
+      if(mealSupps.length){
+        checkY(7);
+        doc.setFillColor(28,28,28);doc.rect(M,y,col,7,'F');
+        doc.setFontSize(6);doc.setFont('helvetica','bold');doc.setTextColor(...GOLD);doc.text('WITH THIS MEAL',M+3,y+4.8);
+        doc.setFont('helvetica','normal');doc.setTextColor(155,140,115);
+        const ss=mealSupps.map(s=>`${s.name}${s.dose?' · '+s.dose:''}`).join('    ');
+        doc.text(doc.splitTextToSize(ss,col-38)[0],M+38,y+4.8);
+        y+=7;
+      }
+      y+=4;
+    });
+
+    addFooter();
+    doc.save(`${clientName.replace(/\s+/g,'-')}-${p.name.replace(/\s+/g,'-')}.pdf`);
+  }catch(e){console.error('Portal PDF error:',e);alert('PDF error: '+e.message);}
 }
 
 async function loadSupps(){
