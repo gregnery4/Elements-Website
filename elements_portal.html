@@ -283,11 +283,23 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
       <div id="mp-content"><div class="empty">No plans assigned yet. Check back after your next session.</div></div>
     </div>
 
-    <!-- SUPPLEMENTS -->
+    <!-- TRAINING PERFORMANCE -->
     <div class="page" id="page-supplements">
-      <div class="pg-h"><h2>Your <span>Supplements</span></h2><p>Protocol assigned by your coach</p></div>
-      <div class="nd-banner"><div><h3>Shop Your Protocol</h3><p>Available through your personalized Nutridyn storefront. Free shipping over $75.</p></div><button class="nd-btn" onclick="window.open('https://nutridyn.com','_blank')">Shop Nutridyn →</button></div>
-      <div class="supp-grid" id="supp-grid"><div class="empty" style="grid-column:1/-1">No supplement protocol assigned yet.</div></div>
+      <div class="pg-h"><h2>Your <span>Training Performance</span></h2><p>Training programme and weekly session history</p></div>
+
+      <!-- Training programme overview from coach -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:3px">
+        <div class="kcard"><div class="klbl">Training Frequency</div><div class="kval" style="font-size:22px" id="tp-freq">—</div></div>
+        <div class="kcard"><div class="klbl">Training Method</div><div style="font-size:13px;font-weight:500;color:var(--white);margin-top:8px" id="tp-method">—</div></div>
+        <div class="kcard"><div class="klbl">Training Focus</div><div style="font-size:13px;font-weight:500;color:var(--white);margin-top:8px" id="tp-focus">—</div></div>
+        <div class="kcard"><div class="klbl">Training Days</div><div style="font-size:11px;font-weight:500;color:var(--white);margin-top:8px;line-height:1.7" id="tp-days">—</div></div>
+      </div>
+
+      <!-- Weekly session history from reviews -->
+      <div class="card">
+        <div class="card-hd">Weekly Session History</div>
+        <div id="tp-history"><div class="empty">No session history yet. Your coach will add weekly reviews after each check-in.</div></div>
+      </div>
     </div>
 
     <!-- BODY COMPOSITION -->
@@ -404,7 +416,7 @@ async function loadApp(user){
   document.getElementById('s-occ').value=p?.occupation||'';
   document.getElementById('s-coach').textContent=p?.coach||'Gavin Regnery';
   document.getElementById('s-since').textContent=p?.start_date?new Date(p.start_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'—';
-  await Promise.allSettled([loadMetrics(),loadNutrition(),loadMealPlan(),loadSupps(),loadBodyComp(),loadReviews(),loadOverview()]);
+  await Promise.allSettled([loadMetrics(),loadNutrition(),loadMealPlan(),loadBodyComp(),loadReviews(),loadOverview()]);
   document.getElementById('app').classList.add('vis');
 }
 
@@ -449,11 +461,24 @@ async function loadOverview(){
     document.getElementById('hps-skin').textContent=ov.skinfold_frequency||'—';
     document.getElementById('hps-dexa').textContent=ov.dexa_frequency||'—';
 
-    // Row 5: Training
-    document.getElementById('hps-freq').textContent=ov.training_frequency||'—';
-    document.getElementById('hps-method').textContent=ov.training_method||'—';
-    document.getElementById('hps-focus').textContent=ov.training_focus||'—';
-    document.getElementById('hps-days').textContent=ov.training_days||'—';
+    // Row 5: Training (also feeds Training Performance page)
+    const tFreq=ov.training_frequency||'—';
+    const tMethod=ov.training_method||'—';
+    const tFocus=ov.training_focus||'—';
+    const tDays=ov.training_days||'—';
+    document.getElementById('hps-freq').textContent=tFreq;
+    document.getElementById('hps-method').textContent=tMethod;
+    document.getElementById('hps-focus').textContent=tFocus;
+    document.getElementById('hps-days').textContent=tDays;
+    // Training Performance page
+    const tpFreq=document.getElementById('tp-freq');
+    const tpMethod=document.getElementById('tp-method');
+    const tpFocus=document.getElementById('tp-focus');
+    const tpDays=document.getElementById('tp-days');
+    if(tpFreq) tpFreq.textContent=tFreq;
+    if(tpMethod) tpMethod.textContent=tMethod;
+    if(tpFocus) tpFocus.textContent=tFocus;
+    if(tpDays) tpDays.textContent=tDays;
   }catch(e){
     console.warn('loadOverview error (non-fatal):',e);
   }
@@ -994,16 +1019,68 @@ async function loadBodyComp(){
 }
 
 async function loadReviews(){
-  // Weekly reviews are stored client-side in admin for now
-  // Show a placeholder that explains this
-  document.getElementById('reviews-content').innerHTML=`
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:3px" id="rev-scores"></div>
-    <div class="card" id="rev-empty" style="display:none"><div class="empty">No weekly reviews yet. Your coach will add them after each week's check-in.</div></div>`;
-  // Try loading from a weekly_reviews table if it exists in future
-  document.getElementById('rev-empty').style.display='block';
-  // Dashboard compliance placeholder
-  document.getElementById('d-compliance').innerHTML=`
-    <div style="font-size:12px;color:var(--muted);padding:16px 0;text-align:center">Your weekly compliance scores will appear here after your first data review with your coach.</div>`;
+  const{data:reviews}=await sb.from('weekly_reviews')
+    .select('week_number,week_start_date,sessions_done,sessions_target,training_notes,compliance_score,meals_logged')
+    .eq('client_id',uid)
+    .order('week_number',{ascending:false});
+
+  // Training Performance — session history
+  const tpHistory=document.getElementById('tp-history');
+  if(reviews&&reviews.length){
+    const rows=reviews.map(r=>{
+      const pct=r.sessions_target>0?Math.round((r.sessions_done/r.sessions_target)*100):null;
+      const clr=pct>=80?'var(--green)':pct>=50?'var(--gold)':'var(--red)';
+      const dateStr=r.week_start_date?new Date(r.week_start_date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
+      const barW=pct||0;
+      return `
+      <div style="padding:14px 0;border-bottom:1px solid var(--borderw)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px">Week ${r.week_number}</span>
+            <span style="font-size:9px;color:var(--muted)">${dateStr}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px">
+            <span style="font-size:11px;color:var(--muted)">${r.sessions_done||'—'} <span style="color:var(--muted);font-size:9px">of</span> ${r.sessions_target||'—'} sessions</span>
+            ${pct!==null?`<span style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:${clr}">${pct}%</span>`:''}
+          </div>
+        </div>
+        <div style="height:4px;background:var(--c3);border-radius:2px;overflow:hidden">
+          <div style="height:100%;width:${barW}%;background:${clr};transition:width .4s ease"></div>
+        </div>
+        ${r.training_notes?`<div style="font-size:10px;color:var(--muted);margin-top:8px;font-style:italic">${r.training_notes}</div>`:''}
+      </div>`;
+    }).join('');
+    if(tpHistory) tpHistory.innerHTML=`<div style="padding:0 4px">${rows}</div>`;
+
+    // Reviews page
+    document.getElementById('reviews-content').innerHTML=`
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:3px" id="rev-scores">
+        ${reviews.slice(0,4).map(r=>`
+        <div class="kcard" style="text-align:center">
+          <div class="klbl">Week ${r.week_number}</div>
+          <div class="kval" style="font-size:28px;color:${r.compliance_score>=80?'var(--green)':r.compliance_score>=50?'var(--gold)':'var(--red)'}">${r.compliance_score||'—'}${r.compliance_score?'%':''}</div>
+          <div class="ksub">${r.week_start_date?new Date(r.week_start_date).toLocaleDateString('en-US',{month:'short',day:'numeric'}):''}</div>
+        </div>`).join('')}
+      </div>`;
+
+    // Dashboard compliance
+    const latest=reviews[0];
+    if(latest?.compliance_score!=null){
+      const clr=latest.compliance_score>=80?'var(--green)':latest.compliance_score>=50?'var(--gold)':'var(--red)';
+      document.getElementById('d-compliance').innerHTML=`
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0">
+          <div>
+            <div style="font-size:11px;color:var(--muted)">Week ${latest.week_number} · ${latest.week_start_date?new Date(latest.week_start_date).toLocaleDateString('en-US',{month:'short',day:'numeric'}):''}</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:4px">${latest.compliance_score>=80?'Excellent week':''}${latest.compliance_score>=75&&latest.compliance_score<80?'Good week':''}${latest.compliance_score>=50&&latest.compliance_score<75?'Average week':''}${latest.compliance_score<50?'Below target':''}</div>
+          </div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:48px;color:${clr};line-height:1">${latest.compliance_score}%</div>
+        </div>`;
+    }
+  } else {
+    if(tpHistory) tpHistory.innerHTML='<div class="empty">No session history yet. Your coach will add weekly reviews after each check-in.</div>';
+    document.getElementById('reviews-content').innerHTML='<div class="card"><div class="empty">No weekly reviews yet.</div></div>';
+    document.getElementById('d-compliance').innerHTML='<div style="font-size:12px;color:var(--muted);padding:16px 0;text-align:center">Your weekly compliance scores will appear here after your first data review with your coach.</div>';
+  }
 }
 
 async function saveProfile(){
