@@ -1162,7 +1162,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       <div id="dptab-t8" style="display:none">
         <div class="dp-sec">
           <div class="dp-sec-title">Supplement Protocol</div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:14px">Select the supplements for this client's protocol, then hit Save Protocol.</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:14px">Select supplements, save the protocol, then assign each one to meals below. Supplements will appear on the Meal Plan tab and in the PDF.</div>
 
           <!-- Pill grid -->
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-bottom:10px" id="supp-pills-wrap">
@@ -4037,6 +4037,10 @@ async function saveSuppDetails(){
   msg.style.color='var(--green)';msg.textContent='✓ Supplement protocol saved.';
   setTimeout(()=>msg.textContent='',3000);
   await loadAll();
+  // Re-open client so currentClient.supplements is refreshed
+  if(currentClient) openClient(currentClient.id);
+  // Regenerate meal plan so supplements show immediately
+  generateMealPlan();
 }
 
 function loadSuppProtocol(supps){
