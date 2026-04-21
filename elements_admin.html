@@ -1557,6 +1557,7 @@ function dpTab(name,el){
   if(name==='t6'){loadBWScheduledDays();renderWkMealGrid();}
   if(name==='t9')loadProtocols();
   if(name==='t2')syncSummaryHeader();
+  if(name==='t3')syncBodyCompToGoals();
 }
 
 function generateMealPlan(){
@@ -4422,6 +4423,27 @@ async function deleteProtocol(id){
   if(!confirm('Delete this protocol? This cannot be undone.')) return;
   await sb.from('protocols').delete().eq('id',id);
   await loadProtocols();
+}
+
+function syncBodyCompToGoals(){
+  // Pull from Tab 2 DEXA fields into Tab 3 Goal Setting fields
+  const totalMass = document.getElementById('bc-total-mass')?.value;
+  const bfPct     = document.getElementById('bc-bf')?.value;
+  const leanMass  = document.getElementById('bc-lean')?.value;
+  const fatMass   = document.getElementById('bc-fat-mass')?.value;
+
+  const wt  = document.getElementById('dp-weight');
+  const bf  = document.getElementById('dp-bf');
+  const lm  = document.getElementById('dp-lean');
+  const fm  = document.getElementById('dp-fat-mass');
+
+  // Only overwrite if Tab 2 has data and Tab 3 is empty (or matches old value)
+  if(totalMass && wt) wt.value = totalMass;
+  if(bfPct     && bf) bf.value = bfPct;
+  if(leanMass  && lm) lm.value = leanMass;
+  if(fatMass   && fm) fm.value = fatMass;
+
+  if(totalMass || bfPct) calcGoals();
 }
 
 function syncSummaryHeader(){
