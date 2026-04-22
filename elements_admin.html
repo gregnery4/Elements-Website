@@ -455,6 +455,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
     <div class="dp-tabs" style="overflow-x:auto;flex-wrap:nowrap;">
       <div class="dp-tab on" onclick="dpTab('t_wizard',this)">New Health Plan</div>
       <div class="dp-tab" onclick="dpTab('t_assess',this)">Assessment Log</div>
+      <div class="dp-tab" onclick="dpTab('t_labs',this)">Labs</div>
       <div class="dp-tab" onclick="dpTab('t9',this)">Protocol History</div>
       <div class="dp-tab" onclick="dpTab('t6',this)">Reviews</div>
     </div>
@@ -1338,6 +1339,123 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       </div>
 
 
+      <!-- LABS TAB -->
+      <div id="dptab-t_labs" style="display:none">
+        <div class="dp-sec">
+          <div class="dp-sec-title" style="display:flex;align-items:center;justify-content:space-between">
+            Lab Results
+            <span style="font-size:10px;color:var(--muted);font-family:'Montserrat',sans-serif;font-weight:300;letter-spacing:1px">Upload PDF · Enter values below</span>
+          </div>
+
+          <!-- PDF Upload -->
+          <div id="labs-dropzone"
+            ondragover="event.preventDefault();this.classList.add('drag-over')"
+            ondragleave="this.classList.remove('drag-over')"
+            ondrop="handleLabsDrop(event)"
+            onclick="document.getElementById('labs-file-input').click()"
+            style="border:2px dashed rgba(201,168,108,0.3);background:var(--c3);padding:30px 24px;text-align:center;cursor:pointer;transition:all .25s;margin-bottom:16px">
+            <div style="font-size:28px;margin-bottom:10px">📋</div>
+            <div style="font-size:13px;color:var(--white);font-weight:500;margin-bottom:4px">Drop Lab Report PDF here</div>
+            <div style="font-size:11px;color:var(--muted)">or click to browse</div>
+            <input type="file" id="labs-file-input" accept=".pdf" style="display:none" onchange="handleLabsFile(this.files[0])">
+          </div>
+          <div id="labs-pdf-name" style="font-size:10px;color:var(--green);margin-bottom:16px;min-height:16px"></div>
+
+          <!-- Date + Label -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:24px">
+            <div class="edit-field"><label>Lab Date</label><input type="date" id="labs-date"></div>
+            <div class="edit-field"><label>Lab Provider / Clinic</label><input type="text" id="labs-provider" placeholder="e.g. Quest Diagnostics"></div>
+            <div class="edit-field"><label>Phase / Label</label><input type="text" id="labs-phase" placeholder="e.g. Fat Loss Phase 1"></div>
+          </div>
+
+          <!-- 5 Category Columns -->
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-bottom:20px">
+
+            <!-- Cardiovascular -->
+            <div style="background:var(--c3);border:1px solid var(--border);padding:14px">
+              <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;text-align:center">Cardiovascular</div>
+              <div class="edit-field"><label>Total Cholesterol</label><input type="number" id="lab-chol-total" step="0.1" placeholder="mg/dL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;200</div></div>
+              <div class="edit-field"><label>LDL</label><input type="number" id="lab-ldl" step="0.1" placeholder="mg/dL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;100</div></div>
+              <div class="edit-field"><label>HDL</label><input type="number" id="lab-hdl" step="0.1" placeholder="mg/dL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &gt;60</div></div>
+              <div class="edit-field"><label>Triglycerides</label><input type="number" id="lab-trig" step="0.1" placeholder="mg/dL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;150</div></div>
+              <div class="edit-field"><label>ApoB</label><input type="number" id="lab-apob" step="0.1" placeholder="mg/dL"></div>
+              <div class="edit-field"><label>Lp(a)</label><input type="number" id="lab-lpa" step="0.1" placeholder="nmol/L"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;75</div></div>
+            </div>
+
+            <!-- Metabolic -->
+            <div style="background:var(--c3);border:1px solid var(--border);padding:14px">
+              <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;text-align:center">Metabolic</div>
+              <div class="edit-field"><label>Fasting Glucose</label><input type="number" id="lab-glucose" step="0.1" placeholder="mg/dL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 70–99</div></div>
+              <div class="edit-field"><label>HbA1c</label><input type="number" id="lab-hba1c" step="0.1" placeholder="%"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;5.7%</div></div>
+              <div class="edit-field"><label>Fasting Insulin</label><input type="number" id="lab-insulin" step="0.1" placeholder="μIU/mL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;10</div></div>
+              <div class="edit-field"><label>HOMA-IR</label><input type="number" id="lab-homa" step="0.01" placeholder="index"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;2.0</div></div>
+              <div class="edit-field"><label>ALT</label><input type="number" id="lab-alt" step="0.1" placeholder="U/L"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 7–56</div></div>
+              <div class="edit-field"><label>AST</label><input type="number" id="lab-ast" step="0.1" placeholder="U/L"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 10–40</div></div>
+              <div class="edit-field"><label>GGT</label><input type="number" id="lab-ggt" step="0.1" placeholder="U/L"></div>
+              <div class="edit-field"><label>Uric Acid</label><input type="number" id="lab-uric" step="0.1" placeholder="mg/dL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 2.5–7.0</div></div>
+            </div>
+
+            <!-- Hormonal -->
+            <div style="background:var(--c3);border:1px solid var(--border);padding:14px">
+              <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;text-align:center">Hormonal</div>
+              <div class="edit-field"><label>Total Testosterone</label><input type="number" id="lab-test-total" step="0.1" placeholder="ng/dL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref M: 300–1000</div></div>
+              <div class="edit-field"><label>Free Testosterone</label><input type="number" id="lab-test-free" step="0.1" placeholder="pg/mL"></div>
+              <div class="edit-field"><label>SHBG</label><input type="number" id="lab-shbg" step="0.1" placeholder="nmol/L"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 10–57</div></div>
+              <div class="edit-field"><label>Estradiol (E2)</label><input type="number" id="lab-e2" step="0.1" placeholder="pg/mL"></div>
+              <div class="edit-field"><label>Cortisol</label><input type="number" id="lab-cortisol" step="0.1" placeholder="μg/dL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref AM: 6–23</div></div>
+              <div class="edit-field"><label>TSH</label><input type="number" id="lab-tsh" step="0.01" placeholder="mIU/L"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 0.4–4.0</div></div>
+              <div class="edit-field"><label>Free T3</label><input type="number" id="lab-ft3" step="0.1" placeholder="pg/mL"></div>
+              <div class="edit-field"><label>Free T4</label><input type="number" id="lab-ft4" step="0.01" placeholder="ng/dL"></div>
+              <div class="edit-field"><label>DHEA-S</label><input type="number" id="lab-dheas" step="0.1" placeholder="μg/dL"></div>
+              <div class="edit-field"><label>IGF-1</label><input type="number" id="lab-igf1" step="0.1" placeholder="ng/mL"></div>
+            </div>
+
+            <!-- Nutrients -->
+            <div style="background:var(--c3);border:1px solid var(--border);padding:14px">
+              <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;text-align:center">Nutrients</div>
+              <div class="edit-field"><label>Vitamin D (25-OH)</label><input type="number" id="lab-vitd" step="0.1" placeholder="ng/mL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 40–80</div></div>
+              <div class="edit-field"><label>Vitamin B12</label><input type="number" id="lab-b12" step="1" placeholder="pg/mL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 200–900</div></div>
+              <div class="edit-field"><label>Folate</label><input type="number" id="lab-folate" step="0.1" placeholder="ng/mL"></div>
+              <div class="edit-field"><label>Ferritin</label><input type="number" id="lab-ferritin" step="0.1" placeholder="ng/mL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 30–300</div></div>
+              <div class="edit-field"><label>Iron (Serum)</label><input type="number" id="lab-iron" step="0.1" placeholder="μg/dL"></div>
+              <div class="edit-field"><label>Magnesium</label><input type="number" id="lab-mag" step="0.01" placeholder="mg/dL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 1.7–2.2</div></div>
+              <div class="edit-field"><label>Zinc</label><input type="number" id="lab-zinc" step="0.1" placeholder="μg/dL"></div>
+              <div class="edit-field"><label>Omega-3 Index</label><input type="number" id="lab-omega3" step="0.1" placeholder="%"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &gt;8%</div></div>
+            </div>
+
+            <!-- Inflammation -->
+            <div style="background:var(--c3);border:1px solid var(--border);padding:14px">
+              <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;text-align:center">Inflammation</div>
+              <div class="edit-field"><label>hs-CRP</label><input type="number" id="lab-crp" step="0.01" placeholder="mg/L"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;1.0</div></div>
+              <div class="edit-field"><label>Homocysteine</label><input type="number" id="lab-hcy" step="0.1" placeholder="μmol/L"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;10</div></div>
+              <div class="edit-field"><label>Fibrinogen</label><input type="number" id="lab-fibrin" step="0.1" placeholder="mg/dL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 200–400</div></div>
+              <div class="edit-field"><label>IL-6</label><input type="number" id="lab-il6" step="0.1" placeholder="pg/mL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;7</div></div>
+              <div class="edit-field"><label>TNF-α</label><input type="number" id="lab-tnfa" step="0.1" placeholder="pg/mL"></div>
+              <div class="edit-field"><label>ESR</label><input type="number" id="lab-esr" step="0.1" placeholder="mm/hr"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;20</div></div>
+              <div class="edit-field"><label>WBC</label><input type="number" id="lab-wbc" step="0.1" placeholder="K/μL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 4.5–11.0</div></div>
+            </div>
+
+          </div>
+
+          <!-- Notes -->
+          <div class="edit-field" style="margin-bottom:20px">
+            <label>Coach Notes</label>
+            <textarea id="labs-notes" placeholder="Clinical observations, patterns, recommendations..." style="width:100%;background:var(--c3);border:1px solid var(--borderw);color:var(--white);font-family:'Montserrat',sans-serif;font-size:11px;padding:10px;resize:vertical;min-height:80px;outline:none"></textarea>
+          </div>
+
+          <button class="save-btn" onclick="saveLabEntry()">Save Lab Results →</button>
+          <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="labs-msg"></div>
+        </div>
+
+        <!-- Lab History Log -->
+        <div class="dp-sec">
+          <div class="dp-sec-title">Lab History</div>
+          <div id="labs-log-body">
+            <div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No lab results saved yet.</div>
+          </div>
+        </div>
+      </div>
+
       <!-- TAB 10: ELEMENTS PROTOCOLS -->
       <div id="dptab-t9" style="display:none">
         <div class="dp-sec">
@@ -1627,8 +1745,8 @@ function openClient(id){
 
   // Tab 8 — Supplements
   loadSuppProtocol(c.supplements||[]);
-  // Load assessment log from saved metrics
   loadAlFromMetrics(c.client_metrics||[]);
+  loadLabsFromMetrics(c.client_metrics||[]);
 
   // Weekly data — load from Supabase into local state
   const savedReviews=c.weekly_reviews||[];
@@ -1810,6 +1928,7 @@ function dpTab(name,el){
     return;
   }
   if(name==='t_assess'){ renderAlLog(); return; }
+  if(name==='t_labs'){ renderLabLog(); return; }
   if(name==='t5')syncMealTotals();
   if(name==='t11')generateMealPlan();
   if(name==='t6'){loadBWScheduledDays();renderWkMealGrid();}
@@ -5009,6 +5128,183 @@ function loadAlFromMetrics(metrics){
   });
   alAssessments.sort((a,b)=>new Date(b.date)-new Date(a.date));
   renderAlLog();
+}
+
+// ── LABS ──
+const LAB_FIELDS = {
+  cardiovascular: [
+    ['lab-chol-total','Total Cholesterol','mg/dL'],['lab-ldl','LDL','mg/dL'],['lab-hdl','HDL','mg/dL'],
+    ['lab-trig','Triglycerides','mg/dL'],['lab-apob','ApoB','mg/dL'],['lab-lpa','Lp(a)','nmol/L']
+  ],
+  metabolic: [
+    ['lab-glucose','Fasting Glucose','mg/dL'],['lab-hba1c','HbA1c','%'],['lab-insulin','Fasting Insulin','μIU/mL'],
+    ['lab-homa','HOMA-IR',''],['lab-alt','ALT','U/L'],['lab-ast','AST','U/L'],['lab-ggt','GGT','U/L'],['lab-uric','Uric Acid','mg/dL']
+  ],
+  hormonal: [
+    ['lab-test-total','Total Testosterone','ng/dL'],['lab-test-free','Free Testosterone','pg/mL'],
+    ['lab-shbg','SHBG','nmol/L'],['lab-e2','Estradiol (E2)','pg/mL'],['lab-cortisol','Cortisol','μg/dL'],
+    ['lab-tsh','TSH','mIU/L'],['lab-ft3','Free T3','pg/mL'],['lab-ft4','Free T4','ng/dL'],
+    ['lab-dheas','DHEA-S','μg/dL'],['lab-igf1','IGF-1','ng/mL']
+  ],
+  nutrients: [
+    ['lab-vitd','Vitamin D (25-OH)','ng/mL'],['lab-b12','Vitamin B12','pg/mL'],['lab-folate','Folate','ng/mL'],
+    ['lab-ferritin','Ferritin','ng/mL'],['lab-iron','Iron (Serum)','μg/dL'],['lab-mag','Magnesium','mg/dL'],
+    ['lab-zinc','Zinc','μg/dL'],['lab-omega3','Omega-3 Index','%']
+  ],
+  inflammation: [
+    ['lab-crp','hs-CRP','mg/L'],['lab-hcy','Homocysteine','μmol/L'],['lab-fibrin','Fibrinogen','mg/dL'],
+    ['lab-il6','IL-6','pg/mL'],['lab-tnfa','TNF-α','pg/mL'],['lab-esr','ESR','mm/hr'],['lab-wbc','WBC','K/μL']
+  ]
+};
+
+let labEntries = [];
+
+function handleLabsDrop(e){
+  e.preventDefault();
+  document.getElementById('labs-dropzone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if(file) handleLabsFile(file);
+}
+
+function handleLabsFile(file){
+  if(!file||file.type!=='application/pdf') return;
+  document.getElementById('labs-pdf-name').textContent = '📎 ' + file.name;
+}
+
+function getLabValues(){
+  const data = {};
+  Object.entries(LAB_FIELDS).forEach(([cat,fields])=>{
+    data[cat] = {};
+    fields.forEach(([id,label,unit])=>{
+      const v = document.getElementById(id)?.value;
+      if(v) data[cat][label] = {value: parseFloat(v), unit};
+    });
+  });
+  return data;
+}
+
+async function saveLabEntry(){
+  if(!currentClient){ alert('No client selected.'); return; }
+  const msg = document.getElementById('labs-msg');
+  msg.textContent = 'Saving...'; msg.style.color = 'var(--gold)';
+  const date = document.getElementById('labs-date').value || new Date().toISOString().split('T')[0];
+  const provider = document.getElementById('labs-provider').value;
+  const phase = document.getElementById('labs-phase').value;
+  const notes = document.getElementById('labs-notes').value;
+  const values = getLabValues();
+
+  const{error} = await sb.from('client_metrics').insert({
+    client_id: currentClient.id,
+    recorded_at: date,
+    notes: JSON.stringify({
+      source: 'labs',
+      provider, phase, notes,
+      lab_values: values
+    })
+  });
+
+  if(error){ msg.style.color='var(--red)'; msg.textContent='Error: '+error.message; return; }
+  msg.style.color='var(--green)'; msg.textContent='✓ Lab results saved.';
+  setTimeout(()=>msg.textContent='',3000);
+
+  labEntries.unshift({date,provider,phase,notes,values});
+  renderLabLog();
+
+  // Reset fields
+  Object.values(LAB_FIELDS).flat().forEach(([id])=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('labs-date').value='';
+  document.getElementById('labs-provider').value='';
+  document.getElementById('labs-phase').value='';
+  document.getElementById('labs-notes').value='';
+  document.getElementById('labs-pdf-name').textContent='';
+  await loadAll();
+}
+
+function renderLabLog(){
+  const container = document.getElementById('labs-log-body');
+  if(!container) return;
+  if(!labEntries.length){
+    container.innerHTML='<div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No lab results saved yet.</div>';
+    return;
+  }
+  container.innerHTML = labEntries.map((e,i)=>{
+    const dateStr = e.date ? new Date(e.date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '—';
+    // Count how many values were recorded
+    const count = Object.values(e.values||{}).reduce((s,cat)=>s+Object.keys(cat).length,0);
+
+    // Build category pills showing which had data
+    const catPills = Object.entries(e.values||{}).map(([cat,fields])=>{
+      const n = Object.keys(fields).length;
+      if(!n) return '';
+      return `<span style="padding:3px 10px;background:var(--c2);border:1px solid var(--borderw);font-size:9px;color:var(--gold);text-transform:uppercase;letter-spacing:1px">${cat} (${n})</span>`;
+    }).filter(Boolean).join('');
+
+    // Detail HTML — one section per category
+    const detailHtml = Object.entries(e.values||{}).map(([cat,fields])=>{
+      const entries = Object.entries(fields);
+      if(!entries.length) return '';
+      return `<div style="margin-bottom:16px">
+        <div style="font-size:8px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">${cat}</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:2px">
+          ${entries.map(([label,{value,unit}])=>`
+          <div style="background:var(--c2);border:1px solid var(--borderw);padding:10px;text-align:center">
+            <div style="font-size:7px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">${label}</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--white)">${value}</div>
+            <div style="font-size:7px;color:var(--muted)">${unit}</div>
+          </div>`).join('')}
+        </div>
+      </div>`;
+    }).join('');
+
+    return `
+    <div style="border:1px solid var(--border);margin-bottom:3px;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--c2)">
+        <div onclick="labToggle(${i})" style="flex:1;cursor:pointer;display:flex;align-items:center;gap:14px" onmouseover="this.parentElement.style.background='var(--c3)'" onmouseout="this.parentElement.style.background='var(--c2)'">
+          <div style="width:3px;height:36px;background:linear-gradient(180deg,var(--gold-mid),var(--gold-dark));flex-shrink:0"></div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--white)">${e.phase||'Lab Results'}</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:3px">${e.provider?e.provider+' · ':''}${dateStr} · ${count} markers</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${catPills}</div>
+          </div>
+        </div>
+        <span onclick="labToggle(${i})" id="lab-chev-${i}" style="font-size:13px;color:var(--muted);cursor:pointer;padding:0 6px;flex-shrink:0">▼</span>
+      </div>
+      <div id="lab-detail-${i}" style="display:none;padding:18px;background:var(--c1);border-top:1px solid var(--borderw)">
+        ${detailHtml}
+        ${e.notes?`<div style="padding:12px 16px;background:var(--c2);border:1px solid var(--borderw);font-size:11px;color:var(--muted)"><span style="font-size:8px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-right:10px">Notes</span>${e.notes}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function labToggle(i){
+  const body = document.getElementById(`lab-detail-${i}`);
+  const chev = document.getElementById(`lab-chev-${i}`);
+  if(!body) return;
+  const open = body.style.display==='block';
+  body.style.display = open?'none':'block';
+  if(chev) chev.textContent = open?'▼':'▲';
+}
+
+function loadLabsFromMetrics(metrics){
+  labEntries = [];
+  if(!metrics||!metrics.length) return;
+  metrics.forEach(m=>{
+    try{
+      const notes = m.notes?(typeof m.notes==='string'?JSON.parse(m.notes):m.notes):{};
+      if(notes.source==='labs'){
+        labEntries.push({
+          date: m.recorded_at,
+          provider: notes.provider||'',
+          phase: notes.phase||'',
+          notes: notes.notes||'',
+          values: notes.lab_values||{}
+        });
+      }
+    }catch(e){}
+  });
+  labEntries.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  renderLabLog();
 }
 
 function syncSummaryHeader(){
