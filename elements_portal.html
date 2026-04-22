@@ -285,7 +285,7 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
 
     <!-- TRAINING PERFORMANCE -->
     <div class="page" id="page-supplements">
-      <div class="pg-h"><h2>Your <span>Training Performance</span></h2><p>Current parameters and training history</p></div>
+      <div class="pg-h"><h2>Your <span>Training Performance</span></h2><p>Live data from Trainerize · Current parameters &amp; session history</p></div>
 
       <!-- Current Training Parameters -->
       <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Current Training Parameters</div>
@@ -296,40 +296,63 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
         <div class="kcard"><div class="klbl">Training Days</div><div style="font-size:11px;font-weight:500;color:var(--white);margin-top:8px;line-height:1.7" id="tp-days">—</div></div>
       </div>
 
+      <!-- Session Stats -->
+      <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Session Summary</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-bottom:28px">
+        <div class="kcard" style="text-align:center">
+          <div class="klbl">Total Sessions</div>
+          <div class="kval" id="tp-total-sessions">—</div>
+          <div class="ksub">logged via Trainerize</div>
+        </div>
+        <div class="kcard" style="text-align:center">
+          <div class="klbl">This Week</div>
+          <div class="kval" id="tp-this-week">—</div>
+          <div class="ksub">sessions completed</div>
+        </div>
+        <div class="kcard" style="text-align:center">
+          <div class="klbl">Last Session</div>
+          <div style="font-size:13px;font-weight:500;color:var(--white);margin-top:8px" id="tp-last-session">—</div>
+        </div>
+      </div>
+
       <!-- Training History Chart -->
       <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:16px">Training History</div>
-      <div style="background:var(--c2);border:1px solid var(--border);padding:24px">
-
-        <!-- Chart controls -->
+      <div style="background:var(--c2);border:1px solid var(--border);padding:24px;margin-bottom:28px">
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap">
           <div style="display:flex;align-items:center;gap:8px">
             <span style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">Training Variable</span>
             <select id="tp-y-axis" onchange="renderTrainingChart()" style="background:var(--c3);border:1px solid var(--borderw);color:var(--white);font-family:'Montserrat',sans-serif;font-size:10px;padding:6px 10px;outline:none;cursor:pointer">
               <option value="">— Select —</option>
+              <option value="sessions">Sessions per Week</option>
+              <option value="cumulative">Cumulative Sessions</option>
             </select>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
             <span style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">Time</span>
             <select id="tp-x-axis" onchange="renderTrainingChart()" style="background:var(--c3);border:1px solid var(--borderw);color:var(--white);font-family:'Montserrat',sans-serif;font-size:10px;padding:6px 10px;outline:none;cursor:pointer">
               <option value="">— Select —</option>
+              <option value="4w">Last 4 Weeks</option>
+              <option value="8w">Last 8 Weeks</option>
+              <option value="12w">Last 12 Weeks</option>
+              <option value="all">All Time</option>
             </select>
           </div>
         </div>
-
-        <!-- Chart canvas -->
-        <div style="position:relative;width:100%;height:340px;background:var(--c1);border:1px solid var(--borderw)">
+        <div style="position:relative;width:100%;height:300px;background:var(--c1);border:1px solid var(--borderw)">
           <canvas id="tp-chart" style="width:100%;height:100%"></canvas>
           <div id="tp-chart-empty" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">
-            <div style="font-size:11px;color:var(--muted);text-align:center">Select a training variable and time range<br>to visualise your progress</div>
+            <div style="font-size:11px;color:var(--muted);text-align:center">Select a variable and time range to visualise your progress</div>
           </div>
         </div>
-
-        <!-- Axis labels -->
         <div style="display:flex;justify-content:space-between;margin-top:8px">
           <div style="font-size:8px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase" id="tp-y-label">Training Variable</div>
           <div style="font-size:8px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase" id="tp-x-label">Time</div>
         </div>
       </div>
+
+      <!-- Session Log -->
+      <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Session Log</div>
+      <div id="tp-session-log"><div class="empty">No sessions logged yet. Complete a workout in Trainerize to see it here.</div></div>
     </div>
 
     <!-- BODY COMPOSITION -->
@@ -446,7 +469,7 @@ async function loadApp(user){
   document.getElementById('s-occ').value=p?.occupation||'';
   document.getElementById('s-coach').textContent=p?.coach||'Gavin Regnery';
   document.getElementById('s-since').textContent=p?.start_date?new Date(p.start_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'—';
-  await Promise.allSettled([loadMetrics(),loadNutrition(),loadMealPlan(),loadBodyComp(),loadReviews(),loadOverview()]);
+  await Promise.allSettled([loadMetrics(),loadNutrition(),loadMealPlan(),loadBodyComp(),loadReviews(),loadOverview(),loadTrainingSessions()]);
   document.getElementById('app').classList.add('vis');
 }
 
@@ -1048,16 +1071,174 @@ async function loadBodyComp(){
     <div style="font-size:10px;color:var(--muted);margin-top:12px;letter-spacing:1px">Last updated: ${new Date(latest.recorded_at).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})}</div>`;
 }
 
-function renderTrainingChart(){
-  const yVal=document.getElementById('tp-y-axis')?.value;
-  const xVal=document.getElementById('tp-x-axis')?.value;
-  const empty=document.getElementById('tp-chart-empty');
-  if(!yVal||!xVal){
-    if(empty) empty.style.display='flex';
+let _tpSessions = [];
+
+async function loadTrainingSessions(){
+  try{
+    const{data}=await sb.from('training_sessions')
+      .select('*')
+      .eq('client_email', (await sb.auth.getUser()).data.user?.email)
+      .order('created_at',{ascending:false});
+    _tpSessions = data||[];
+    renderTpStats();
+    renderTpSessionLog();
+  }catch(e){ console.warn('loadTrainingSessions:',e); }
+}
+
+function renderTpStats(){
+  const sessions = _tpSessions;
+  // Total sessions
+  const total = sessions.length;
+  const totalEl = document.getElementById('tp-total-sessions');
+  if(totalEl) totalEl.textContent = total||'0';
+
+  // This week
+  const now = new Date();
+  const weekStart = new Date(now);
+  weekStart.setDate(now.getDate() - now.getDay());
+  weekStart.setHours(0,0,0,0);
+  const thisWeek = sessions.filter(s=>new Date(s.created_at)>=weekStart).length;
+  const weekEl = document.getElementById('tp-this-week');
+  if(weekEl) weekEl.textContent = thisWeek||'0';
+
+  // Last session
+  const lastEl = document.getElementById('tp-last-session');
+  if(lastEl && sessions.length){
+    const last = sessions[0];
+    const d = new Date(last.created_at);
+    lastEl.textContent = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    if(last.workout_name){
+      lastEl.innerHTML += `<div style="font-size:9px;color:var(--muted);margin-top:3px">${last.workout_name}</div>`;
+    }
+  }
+}
+
+function renderTpSessionLog(){
+  const container = document.getElementById('tp-session-log');
+  if(!container) return;
+  const sessions = _tpSessions;
+  if(!sessions.length){
+    container.innerHTML='<div class="empty">No sessions logged yet. Complete a workout in Trainerize to see it here.</div>';
     return;
   }
+  container.innerHTML = sessions.map(s=>{
+    const d = new Date(s.created_at);
+    const dateStr = d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+    const timeStr = d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    return `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--c2);border:1px solid var(--border);margin-bottom:2px">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:3px;height:36px;background:linear-gradient(180deg,var(--gold-mid),var(--gold-dark));flex-shrink:0"></div>
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--white)">${s.workout_name||'Workout'}</div>
+          <div style="font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:0.5px">${dateStr} · ${timeStr}</div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:9px;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase">✓ Completed</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderTrainingChart(){
+  const yVal = document.getElementById('tp-y-axis')?.value;
+  const xVal = document.getElementById('tp-x-axis')?.value;
+  const empty = document.getElementById('tp-chart-empty');
+  const yLabel = document.getElementById('tp-y-label');
+  const xLabel = document.getElementById('tp-x-label');
+  if(!yVal||!xVal){ if(empty) empty.style.display='flex'; return; }
   if(empty) empty.style.display='none';
-  // Chart rendering will be wired up when data sources are defined
+
+  // Filter sessions by time range
+  const now = new Date();
+  const weeks = {['4w']:4,['8w']:8,['12w']:12,['all']:520}[xVal]||4;
+  const cutoff = new Date(now);
+  cutoff.setDate(now.getDate() - weeks*7);
+  const filtered = _tpSessions.filter(s=>new Date(s.created_at)>=cutoff);
+
+  // Group by week
+  const weekMap = {};
+  filtered.forEach(s=>{
+    const d = new Date(s.created_at);
+    const weekKey = `W${getWeekNumber(d)}`;
+    if(!weekMap[weekKey]) weekMap[weekKey]={label:weekKey,count:0};
+    weekMap[weekKey].count++;
+  });
+  const sorted = Object.values(weekMap).sort((a,b)=>a.label.localeCompare(b.label));
+  const labels = sorted.map(w=>w.label);
+  let values = sorted.map(w=>w.count);
+  if(yVal==='cumulative'){
+    let cum=0;
+    values = values.map(v=>{cum+=v;return cum;});
+  }
+
+  if(yLabel) yLabel.textContent = yVal==='sessions'?'Sessions per Week':'Cumulative Sessions';
+  if(xLabel) xLabel.textContent = {['4w']:'Last 4 Weeks',['8w']:'Last 8 Weeks',['12w']:'Last 12 Weeks',['all']:'All Time'}[xVal];
+
+  // Draw chart using canvas
+  const canvas = document.getElementById('tp-chart');
+  if(!canvas) return;
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width; const H = canvas.height;
+  const PAD = {top:20,right:20,bottom:40,left:40};
+  const chartW = W-PAD.left-PAD.right;
+  const chartH = H-PAD.top-PAD.bottom;
+
+  ctx.clearRect(0,0,W,H);
+  if(!values.length){
+    ctx.fillStyle='#666'; ctx.font='12px Montserrat,sans-serif'; ctx.textAlign='center';
+    ctx.fillText('No sessions in this period',W/2,H/2); return;
+  }
+
+  const maxV = Math.max(...values,1);
+  const xStep = chartW/(values.length||1);
+
+  // Grid lines
+  ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y = PAD.top + chartH - (i/4)*chartH;
+    ctx.beginPath(); ctx.moveTo(PAD.left,y); ctx.lineTo(PAD.left+chartW,y); ctx.stroke();
+    ctx.fillStyle='rgba(150,140,128,0.7)'; ctx.font='9px Montserrat,sans-serif'; ctx.textAlign='right';
+    ctx.fillText(Math.round((i/4)*maxV), PAD.left-6, y+3);
+  }
+
+  // Line
+  ctx.beginPath();
+  ctx.strokeStyle='rgba(168,129,58,0.8)'; ctx.lineWidth=2;
+  values.forEach((v,i)=>{
+    const x = PAD.left + i*xStep + xStep/2;
+    const y = PAD.top + chartH - (v/maxV)*chartH;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  // Fill under line
+  ctx.lineTo(PAD.left+(values.length-1)*xStep+xStep/2, PAD.top+chartH);
+  ctx.lineTo(PAD.left+xStep/2, PAD.top+chartH);
+  ctx.closePath();
+  ctx.fillStyle='rgba(168,129,58,0.08)'; ctx.fill();
+
+  // Dots + labels
+  values.forEach((v,i)=>{
+    const x = PAD.left + i*xStep + xStep/2;
+    const y = PAD.top + chartH - (v/maxV)*chartH;
+    ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2);
+    ctx.fillStyle='rgba(168,129,58,1)'; ctx.fill();
+    ctx.strokeStyle='#1a1a1a'; ctx.lineWidth=1.5; ctx.stroke();
+    // X label
+    ctx.fillStyle='rgba(150,140,128,0.8)'; ctx.font='8px Montserrat,sans-serif'; ctx.textAlign='center';
+    ctx.fillText(labels[i]||'', x, PAD.top+chartH+14);
+    // Value label
+    if(v>0){ctx.fillStyle='rgba(201,168,108,0.9)';ctx.font='9px Montserrat,sans-serif';ctx.fillText(v,x,y-8);}
+  });
+}
+
+function getWeekNumber(d){
+  const onejan = new Date(d.getFullYear(),0,1);
+  return Math.ceil((((d-onejan)/86400000)+onejan.getDay()+1)/7);
 }
 
 async function loadReviews(){
