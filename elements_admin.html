@@ -147,15 +147,15 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
 .dp-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 28px;background:var(--c1);position:sticky;top:73px;z-index:4;}
 .dp-tab{padding:14px 18px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .25s;}
 .wz-step{display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:pointer;border-bottom:3px solid transparent;border-right:1px solid var(--border);transition:all .2s;white-space:nowrap;flex-shrink:0;}
-.wz-step:hover{background:rgba(60,140,90,.08);}
-.wz-step.on{border-bottom-color:var(--green);background:rgba(60,140,90,.12);}
-.wz-step.done .wz-num{background:var(--green);color:var(--white);border-color:var(--green);}
+.wz-step:hover{background:var(--c3);}
+.wz-step.on{border-bottom-color:var(--gold-mid);background:var(--c3);}
+.wz-step.done .wz-num{background:var(--gold-mid);color:var(--white);border-color:var(--gold-mid);}
 .wz-num{width:24px;height:24px;border-radius:50%;background:var(--c3);border:1px solid var(--borderw);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--muted);flex-shrink:0;transition:all .2s;}
-.wz-step.on .wz-num{background:var(--green);color:var(--white);border-color:var(--green);}
+.wz-step.on .wz-num{background:var(--gold-mid);color:var(--white);border-color:var(--gold-mid);}
 .wz-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
-.wz-step.on .wz-lbl{color:var(--green);}
+.wz-step.on .wz-lbl{color:var(--white);}
 .wz-nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0 0;margin-top:8px;border-top:1px solid var(--borderw);}
-.wz-next-btn{padding:11px 28px;background:linear-gradient(135deg,#3C8C5A,#2A7040);color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600;}
+.wz-next-btn{padding:11px 28px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600;}
 .wz-back-btn{padding:11px 20px;background:transparent;color:var(--muted);border:1px solid var(--borderw);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;}
 .dp-tab.on{color:var(--gold);border-bottom-color:var(--gold-mid);}
 .dp-tab:hover{color:var(--white);}
@@ -907,10 +907,54 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
 
       <!-- ASSESSMENT LOG TAB -->
       <div id="dptab-t_assess" style="display:none">
+
+        <!-- ADD NEW ASSESSMENT -->
         <div class="dp-sec">
-          <div class="dp-sec-title">Assessment Log</div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:20px">Coming soon — client assessment history will be displayed here.</div>
+          <div class="dp-sec-title" style="display:flex;align-items:center;justify-content:space-between">
+            Add New Assessment
+            <span style="font-size:10px;color:var(--muted);font-family:'Montserrat',sans-serif;font-weight:300;letter-spacing:1px">Saved entries appear below</span>
+          </div>
+
+          <!-- Type + Date selector -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">
+            <div class="edit-field">
+              <label>Assessment Type</label>
+              <select id="al-type" onchange="renderAlFields()" style="width:100%">
+                <option value="">— Select —</option>
+                <option value="dexa">DEXA Scan</option>
+                <option value="skinfold">Caliper Skinfolds</option>
+                <option value="circumference">Circumference</option>
+                <option value="skinfold+circumference">Skinfolds + Circumference</option>
+              </select>
+            </div>
+            <div class="edit-field">
+              <label>Assessment Date</label>
+              <input type="date" id="al-date">
+            </div>
+            <div class="edit-field">
+              <label>Phase / Label</label>
+              <input type="text" id="al-phase" placeholder="e.g. Fat Loss Phase 1">
+            </div>
+          </div>
+
+          <!-- Dynamic fields -->
+          <div id="al-fields"></div>
+
+          <!-- Save button -->
+          <div id="al-save-row" style="display:none;margin-top:16px">
+            <button class="save-btn" onclick="saveAssessmentLog()">Save Assessment →</button>
+            <div style="font-size:10px;color:var(--green);margin-top:8px;min-height:16px" id="al-msg"></div>
+          </div>
         </div>
+
+        <!-- ASSESSMENT LOG -->
+        <div class="dp-sec">
+          <div class="dp-sec-title">Assessment History</div>
+          <div id="al-log-body">
+            <div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No assessments logged yet.</div>
+          </div>
+        </div>
+
       </div>
 
       <!-- TAB 6: WEEKLY DATA ENTRY -->
@@ -1583,6 +1627,8 @@ function openClient(id){
 
   // Tab 8 — Supplements
   loadSuppProtocol(c.supplements||[]);
+  // Load assessment log from saved metrics
+  loadAlFromMetrics(c.client_metrics||[]);
 
   // Weekly data — load from Supabase into local state
   const savedReviews=c.weekly_reviews||[];
@@ -1763,6 +1809,7 @@ function dpTab(name,el){
     goWizardStep(wzCurrentStep);
     return;
   }
+  if(name==='t_assess'){ renderAlLog(); return; }
   if(name==='t5')syncMealTotals();
   if(name==='t11')generateMealPlan();
   if(name==='t6'){loadBWScheduledDays();renderWkMealGrid();}
@@ -4659,6 +4706,309 @@ function syncBodyCompToGoals(){
   if(fatMass   && fm) fm.value = fatMass;
 
   if(totalMass || bfPct) calcGoals();
+}
+
+// ── ASSESSMENT LOG ──
+const AL_SK_SITES = {pec:'Pectoral',tri:'Triceps',bic:'Biceps',sub:'Subscapularis',sup1:'Suprailiac-1',sup2:'Suprailiac-2',mid:'Mid-Axillary',umb:'Umbilical',ham:'Hamstrings',qua:'Quadriceps'};
+const AL_SK_ORDER = ['pec','tri','bic','sub','sup1','sup2','mid','umb','ham','qua'];
+const AL_CM_SITES = {shoulder:'Shoulders',arm:'Upper Arm',waist:'Umbilical / Waist',hips:'Hips',thigh:'Thigh'};
+const AL_CM_ORDER = ['shoulder','arm','waist','hips','thigh'];
+let alAssessments = []; // in-memory log for current client
+
+function renderAlFields(){
+  const type = document.getElementById('al-type').value;
+  const container = document.getElementById('al-fields');
+  const saveRow = document.getElementById('al-save-row');
+  if(!type){ container.innerHTML=''; saveRow.style.display='none'; return; }
+  saveRow.style.display='block';
+  let html = '';
+
+  if(type==='dexa'){
+    html += `<div class="dp-sec" style="margin:0 0 16px;padding:18px;background:var(--c3);border:1px solid var(--border)">
+      <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:14px">DEXA Scan Results</div>
+      <div class="edit-grid">
+        <div class="edit-field"><label>Total Mass (lbs)</label><input type="number" id="al-dexa-mass" step="0.1" placeholder="0.0"></div>
+        <div class="edit-field"><label>Body Fat %</label><input type="number" id="al-dexa-bf" step="0.1" placeholder="0.0"></div>
+        <div class="edit-field"><label>Lean Mass (lbs)</label><input type="number" id="al-dexa-lean" step="0.1" placeholder="0.0"></div>
+        <div class="edit-field"><label>Fat Mass (lbs)</label><input type="number" id="al-dexa-fatmass" step="0.1" placeholder="0.0"></div>
+        <div class="edit-field"><label>BMC (lbs)</label><input type="number" id="al-dexa-bmc" step="0.01" placeholder="0.00"></div>
+        <div class="edit-field"><label>Visceral Fat (lbs)</label><input type="number" id="al-dexa-viscfat" step="0.01" placeholder="0.00"></div>
+        <div class="edit-field"><label>RMR (cal)</label><input type="number" id="al-dexa-rmr" placeholder="0"></div>
+      </div>
+    </div>`;
+  }
+
+  if(type==='skinfold'||type==='skinfold+circumference'){
+    html += `<div class="dp-sec" style="margin:0 0 16px;padding:18px;background:var(--c3);border:1px solid var(--border)">
+      <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:14px">Skinfold Sites & Measurements (mm)</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:10px" id="al-sk-sites-wrap">
+        ${AL_SK_ORDER.map(k=>`<label class="day-pill" id="al-sk-lbl-${k}"><input type="checkbox" id="al-sk-${k}" onchange="alUpdateSkSite('${k}')"> ${AL_SK_SITES[k]}</label>`).join('')}
+      </div>
+      <div id="al-sk-measurements" style="display:none;margin-top:10px">
+        <div style="font-size:8px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">Measurements</div>
+        <div class="edit-grid" id="al-sk-inputs"></div>
+      </div>
+    </div>`;
+  }
+
+  if(type==='circumference'||type==='skinfold+circumference'){
+    html += `<div class="dp-sec" style="margin:0 0 16px;padding:18px;background:var(--c3);border:1px solid var(--border)">
+      <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:14px">Circumference Measurements (inches)</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:2px">
+        ${AL_CM_ORDER.map(k=>`
+        <div style="background:var(--c2);border:1px solid var(--borderw);padding:10px">
+          <div style="font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:5px">${AL_CM_SITES[k]}</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input type="number" id="al-cm-${k}" step="0.1" placeholder="0.0" style="flex:1;min-width:0;background:transparent;border:none;border-bottom:1px solid var(--borderw);color:var(--white);font-size:13px;font-family:'Montserrat',sans-serif;padding:2px 0;outline:none">
+            <span style="font-size:9px;color:var(--muted)">in</span>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+function alUpdateSkSite(key){
+  const cb = document.getElementById(`al-sk-${key}`);
+  const lbl = document.getElementById(`al-sk-lbl-${key}`);
+  if(cb.checked) lbl.classList.add('selected'); else lbl.classList.remove('selected');
+  // Rebuild measurement inputs for checked sites
+  const selected = AL_SK_ORDER.filter(k=>document.getElementById(`al-sk-${k}`)?.checked);
+  const grid = document.getElementById('al-sk-inputs');
+  const wrap = document.getElementById('al-sk-measurements');
+  if(!selected.length){ if(wrap) wrap.style.display='none'; return; }
+  if(wrap) wrap.style.display='block';
+  grid.innerHTML = selected.map(k=>`
+    <div class="edit-field"><label>${AL_SK_SITES[k]} (mm)</label>
+    <input type="number" id="al-skm-${k}" step="0.1" placeholder="0.0"></div>`).join('');
+}
+
+async function saveAssessmentLog(){
+  if(!currentClient){ alert('No client selected.'); return; }
+  const msg = document.getElementById('al-msg');
+  const type = document.getElementById('al-type').value;
+  const date = document.getElementById('al-date').value || new Date().toISOString().split('T')[0];
+  const phase = document.getElementById('al-phase').value || '';
+  if(!type){ msg.style.color='var(--red)'; msg.textContent='Select an assessment type.'; return; }
+  msg.textContent='Saving...'; msg.style.color='var(--gold)';
+
+  const data = { type, date, phase };
+
+  if(type==='dexa'){
+    data.dexa = {
+      total_mass: parseFloat(document.getElementById('al-dexa-mass')?.value)||null,
+      body_fat:   parseFloat(document.getElementById('al-dexa-bf')?.value)||null,
+      lean_mass:  parseFloat(document.getElementById('al-dexa-lean')?.value)||null,
+      fat_mass:   parseFloat(document.getElementById('al-dexa-fatmass')?.value)||null,
+      bmc:        parseFloat(document.getElementById('al-dexa-bmc')?.value)||null,
+      visceral_fat: parseFloat(document.getElementById('al-dexa-viscfat')?.value)||null,
+      rmr:        parseFloat(document.getElementById('al-dexa-rmr')?.value)||null,
+    };
+  }
+  if(type==='skinfold'||type==='skinfold+circumference'){
+    data.skinfolds = {};
+    AL_SK_ORDER.forEach(k=>{
+      const v = document.getElementById(`al-skm-${k}`)?.value;
+      if(v) data.skinfolds[AL_SK_SITES[k]] = parseFloat(v);
+    });
+  }
+  if(type==='circumference'||type==='skinfold+circumference'){
+    data.circumferences = {};
+    AL_CM_ORDER.forEach(k=>{
+      const v = document.getElementById(`al-cm-${k}`)?.value;
+      if(v) data.circumferences[AL_CM_SITES[k]] = parseFloat(v);
+    });
+  }
+
+  // Save to client_metrics (same table as body comp)
+  const {error} = await sb.from('client_metrics').insert({
+    client_id: currentClient.id,
+    recorded_at: date,
+    body_weight: data.dexa?.total_mass || null,
+    body_fat:    data.dexa?.body_fat || null,
+    lean_mass:   data.dexa?.lean_mass || null,
+    notes: JSON.stringify({
+      source: 'assessment_log',
+      phase,
+      type,
+      fat_mass:     data.dexa?.fat_mass,
+      bmc:          data.dexa?.bmc,
+      visceral_fat: data.dexa?.visceral_fat,
+      rmr:          data.dexa?.rmr,
+      skinfolds:    data.skinfolds,
+      circumferences: data.circumferences,
+    })
+  });
+
+  if(error){ msg.style.color='var(--red)'; msg.textContent='Error: '+error.message; return; }
+
+  msg.style.color='var(--green)'; msg.textContent='✓ Assessment saved.';
+  setTimeout(()=>msg.textContent='', 3000);
+
+  // Add to in-memory log and re-render
+  alAssessments.unshift(data);
+  renderAlLog();
+
+  // Reset form
+  document.getElementById('al-type').value='';
+  document.getElementById('al-date').value='';
+  document.getElementById('al-phase').value='';
+  document.getElementById('al-fields').innerHTML='';
+  document.getElementById('al-save-row').style.display='none';
+
+  await loadAll();
+}
+
+function renderAlLog(){
+  const container = document.getElementById('al-log-body');
+  if(!container) return;
+  const entries = alAssessments;
+  if(!entries.length){
+    container.innerHTML='<div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No assessments logged yet.</div>';
+    return;
+  }
+
+  container.innerHTML = entries.map((e,i)=>{
+    const dateStr = e.date ? new Date(e.date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '—';
+    const typeLabel = {dexa:'DEXA Scan',skinfold:'Caliper Skinfolds',circumference:'Circumference','skinfold+circumference':'Skinfolds + Circumference'}[e.type]||e.type;
+
+    let detailHtml = '';
+    if(e.dexa){
+      const fields = [['Total Mass',e.dexa.total_mass,'lbs'],['Body Fat %',e.dexa.body_fat,'%'],['Lean Mass',e.dexa.lean_mass,'lbs'],['Fat Mass',e.dexa.fat_mass,'lbs'],['BMC',e.dexa.bmc,'lbs'],['Visceral Fat',e.dexa.visceral_fat,'lbs'],['RMR',e.dexa.rmr,'cal']].filter(([,v])=>v!=null);
+      detailHtml += `<div style="margin-bottom:14px">
+        <div style="font-size:8px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">DEXA Results</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:2px">
+          ${fields.map(([l,v,u])=>`<div style="background:var(--c2);border:1px solid var(--borderw);padding:10px;text-align:center">
+            <div style="font-size:7px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">${l}</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--white)">${v}${u}</div>
+          </div>`).join('')}
+        </div>
+      </div>`;
+    }
+    if(e.skinfolds && Object.keys(e.skinfolds).length){
+      detailHtml += `<div style="margin-bottom:14px">
+        <div style="font-size:8px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">Skinfolds (mm)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          ${Object.entries(e.skinfolds).map(([k,v])=>`<span style="padding:5px 12px;background:var(--c2);border:1px solid var(--borderw);font-size:10px;color:var(--white)">${k}: <strong>${v}mm</strong></span>`).join('')}
+        </div>
+      </div>`;
+    }
+    if(e.circumferences && Object.keys(e.circumferences).length){
+      detailHtml += `<div style="margin-bottom:14px">
+        <div style="font-size:8px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">Circumference (inches)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          ${Object.entries(e.circumferences).map(([k,v])=>`<span style="padding:5px 12px;background:var(--c2);border:1px solid var(--borderw);font-size:10px;color:var(--white)">${k}: <strong>${v}"</strong></span>`).join('')}
+        </div>
+      </div>`;
+    }
+
+    return `
+    <div style="border:1px solid var(--border);margin-bottom:3px;overflow:hidden">
+      <!-- Header row -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--c2)">
+        <div onclick="alToggle(${i})" style="flex:1;cursor:pointer;display:flex;align-items:center;gap:14px" onmouseover="this.parentElement.style.background='var(--c3)'" onmouseout="this.parentElement.style.background='var(--c2)'">
+          <div style="width:3px;height:36px;background:linear-gradient(180deg,var(--gold-mid),var(--gold-dark));flex-shrink:0"></div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--white)">${e.phase||typeLabel}</div>
+            <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:3px">${typeLabel} · ${dateStr}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+          <button onclick="alApplyToReview(${i})" style="padding:6px 12px;background:var(--c3);border:1px solid var(--borderw);color:var(--gold);font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--gold-mid)'" onmouseout="this.style.borderColor='var(--borderw)'">Apply to Review</button>
+          <span onclick="alToggle(${i})" id="al-chev-${i}" style="font-size:13px;color:var(--muted);cursor:pointer;padding:0 6px">▼</span>
+        </div>
+      </div>
+      <!-- Expandable detail -->
+      <div id="al-detail-${i}" style="display:none;padding:18px;background:var(--c1);border-top:1px solid var(--borderw)">
+        ${detailHtml||'<div style="font-size:11px;color:var(--muted)">No measurement data recorded.</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function alToggle(i){
+  const body = document.getElementById(`al-detail-${i}`);
+  const chev = document.getElementById(`al-chev-${i}`);
+  if(!body) return;
+  const open = body.style.display==='block';
+  body.style.display = open?'none':'block';
+  if(chev) chev.textContent = open?'▼':'▲';
+}
+
+function alApplyToReview(i){
+  const e = alAssessments[i];
+  if(!e){ return; }
+  // Pre-check the relevant assessment checkboxes in the review tab
+  if(e.type==='dexa'||e.type==='skinfold'||e.type==='circumference'||e.type==='skinfold+circumference'){
+    const cbDexa = document.getElementById('wka-cb-dexa');
+    const cbSk   = document.getElementById('wka-cb-skinfold');
+    const cbCm   = document.getElementById('wka-cb-circumference');
+    if(e.type==='dexa'&&cbDexa){ cbDexa.checked=true; }
+    if((e.type==='skinfold'||e.type==='skinfold+circumference')&&cbSk){ cbSk.checked=true; }
+    if((e.type==='circumference'||e.type==='skinfold+circumference')&&cbCm){ cbCm.checked=true; }
+    toggleWkAssessment();
+    // Populate values
+    setTimeout(()=>{
+      if(e.dexa){
+        const map=[['al-dexa-mass','wka-dexa-mass'],['al-dexa-bf','wka-dexa-bf'],['al-dexa-lean','wka-dexa-lean'],['al-dexa-fatmass','wka-dexa-fatmass'],['al-dexa-bmc','wka-dexa-bmc'],['al-dexa-viscfat','wka-dexa-viscfat'],['al-dexa-rmr','wka-dexa-rmr']];
+        const vals={mass:e.dexa.total_mass,bf:e.dexa.body_fat,lean:e.dexa.lean_mass,fatmass:e.dexa.fat_mass,bmc:e.dexa.bmc,viscfat:e.dexa.visceral_fat,rmr:e.dexa.rmr};
+        if(document.getElementById('wka-dexa-mass')) document.getElementById('wka-dexa-mass').value=e.dexa.total_mass||'';
+        if(document.getElementById('wka-dexa-bf'))   document.getElementById('wka-dexa-bf').value=e.dexa.body_fat||'';
+        if(document.getElementById('wka-dexa-lean')) document.getElementById('wka-dexa-lean').value=e.dexa.lean_mass||'';
+        if(document.getElementById('wka-dexa-fatmass')) document.getElementById('wka-dexa-fatmass').value=e.dexa.fat_mass||'';
+        if(document.getElementById('wka-dexa-bmc'))  document.getElementById('wka-dexa-bmc').value=e.dexa.bmc||'';
+        if(document.getElementById('wka-dexa-viscfat')) document.getElementById('wka-dexa-viscfat').value=e.dexa.visceral_fat||'';
+        if(document.getElementById('wka-dexa-rmr'))  document.getElementById('wka-dexa-rmr').value=e.dexa.rmr||'';
+      }
+      if(e.skinfolds){
+        Object.entries(e.skinfolds).forEach(([name,val])=>{
+          const k=Object.keys(AL_SK_SITES).find(k=>AL_SK_SITES[k]===name);
+          const el=document.getElementById(`wka-sk-${name.toLowerCase().replace(/[^a-z0-9]/g,'')}`);
+          if(el) el.value=val;
+        });
+      }
+      if(e.circumferences){
+        const cmKeyMap={'Shoulders':'shoulder','Upper Arm':'arm','Umbilical / Waist':'waist','Hips':'hips','Thigh':'thigh'};
+        Object.entries(e.circumferences).forEach(([name,val])=>{
+          const k=cmKeyMap[name];
+          if(k&&document.getElementById(`wka-cm-${k}`)) document.getElementById(`wka-cm-${k}`).value=val;
+        });
+      }
+    }, 300);
+    // Set the assessment date
+    if(e.date&&document.getElementById('wk-assessment-date')) document.getElementById('wk-assessment-date').value=e.date;
+  }
+  // Switch to Reviews tab
+  const reviewTab=document.querySelector('.dp-tab:last-child');
+  dpTab('t6',reviewTab);
+  // Brief confirmation
+  const msg=document.getElementById('al-msg');
+  if(msg){ msg.style.color='var(--green)'; msg.textContent='✓ Data applied to weekly review.'; setTimeout(()=>msg.textContent='',3000); }
+}
+
+function loadAlFromMetrics(metrics){
+  // Populate assessment log from saved client_metrics that have source=assessment_log
+  alAssessments=[];
+  if(!metrics||!metrics.length) return;
+  metrics.forEach(m=>{
+    try{
+      const notes=m.notes?(typeof m.notes==='string'?JSON.parse(m.notes):m.notes):{};
+      if(notes.source==='assessment_log'){
+        alAssessments.push({
+          type: notes.type||'dexa',
+          date: m.recorded_at,
+          phase: notes.phase||'',
+          dexa: notes.type==='dexa'?{total_mass:m.body_weight,body_fat:m.body_fat,lean_mass:m.lean_mass,fat_mass:notes.fat_mass,bmc:notes.bmc,visceral_fat:notes.visceral_fat,rmr:notes.rmr}:null,
+          skinfolds: notes.skinfolds||null,
+          circumferences: notes.circumferences||null,
+        });
+      }
+    }catch(e){}
+  });
+  alAssessments.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  renderAlLog();
 }
 
 function syncSummaryHeader(){
