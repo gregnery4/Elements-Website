@@ -521,7 +521,6 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             <div class="edit-field"><label>Occupation</label><input type="text" id="dp-occ" placeholder="e.g. Tech Founder"></div>
           </div>
         </div>
-        <button class="save-btn" onclick="saveClient()">Save Client Info →</button>
         <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-save-msg"></div>
         <div class="wz-nav">
           <div></div>
@@ -547,7 +546,6 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           <input type="hidden" id="ov-end-1">
           <input type="hidden" id="ov-dur-1">
         </div>
-        <button class="save-btn" onclick="saveOverview(this)">Save Protocol →</button>
         <div class="wz-nav">
           <button class="wz-back-btn" onclick="goWizardStep(0)">← Back</button>
           <button class="wz-next-btn" onclick="wzSaveAndNext(1,'saveOverview',this)">Save &amp; Continue →</button>
@@ -610,7 +608,6 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             <div class="edit-field"><label>Training Time</label><input type="time" id="dp-training-time"></div>
           </div>
         </div>
-        <button class="save-btn" onclick="saveOverview(this)">Save Training Program →</button>
         <div class="wz-nav">
           <button class="wz-back-btn" onclick="goWizardStep(7)">← Back</button>
           <button class="wz-next-btn" onclick="wzSaveAndNext(8,'saveOverview',this)">Save &amp; Continue →</button>
@@ -741,7 +738,6 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             </div>
           </div>
         </div>
-        <button class="save-btn" onclick="saveOverview(this)" style="margin-top:14px">Save Overview →</button>
         <div class="wz-nav">
           <button class="wz-back-btn" onclick="goWizardStep(8)">← Back</button>
           <button class="wz-next-btn" onclick="wzSaveAndNext(9,'saveOverview',this)">Save &amp; Complete ✓</button>
@@ -773,7 +769,6 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           <div style="color:var(--gold);font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">Calculated Results</div>
           <div id="goal-calc-text"></div>
         </div>
-        <button class="save-btn" onclick="saveGoalData()">Save Goal Data →</button>
         <div class="wz-nav">
           <button class="wz-back-btn" onclick="goWizardStep(2)">← Back</button>
           <button class="wz-next-btn" onclick="wzSaveAndNext(3,'saveGoalData')">Save &amp; Continue →</button>
@@ -831,7 +826,6 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             </div>
           </div>
         </div>
-        <button class="save-btn" onclick="saveNutrition()">Save Nutrition Targets →</button>
         <div class="wz-nav">
           <button class="wz-back-btn" onclick="goWizardStep(3)">← Back</button>
           <button class="wz-next-btn" onclick="wzSaveAndNext(4,'saveNutrition')">Save &amp; Continue →</button>
@@ -883,8 +877,10 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           </div>
           <div id="meal-fields"></div>
         </div>
-        <button class="save-btn" onclick="saveMealPlan(this)">Save Meal Plan →</button>
-        <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="md-save-msg"></div>
+        <div class="wz-nav">
+          <button class="wz-back-btn" onclick="goWizardStep(4)">← Back</button>
+          <button class="wz-next-btn" onclick="wzSaveAndNext(5,'saveMealPlan',this)">Save &amp; Continue →</button>
+        </div>
       </div>
 
       <!-- TAB 11: MEAL PLAN PREVIEW -->
@@ -898,8 +894,10 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             <div style="font-size:12px;color:var(--muted);padding:20px 0;text-align:center">Fill in the Meal Design tab then click Generate to build the meal plan.</div>
           </div>
         </div>
-        <button class="save-btn" onclick="saveMealPlan(this)">Save Meal Plan →</button>
-        <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="mp-save-msg"></div>
+        <div class="wz-nav">
+          <button class="wz-back-btn" onclick="goWizardStep(6)">← Back</button>
+          <button class="wz-next-btn" onclick="wzSaveAndNext(7,'saveMealPlan',this)">Save &amp; Continue →</button>
+        </div>
       </div>
 
       </div><!-- end wizard-content -->
@@ -1226,7 +1224,6 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             </div>
           </div>
         </div>
-        <button class="save-btn" onclick="saveBodyComp()">Save Assessment →</button>
         <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="bc-msg"></div>
         <div class="wz-nav">
           <button class="wz-back-btn" onclick="goWizardStep(1)">← Back</button>
@@ -1698,44 +1695,51 @@ function goWizardStep(stepIdx){
 }
 
 async function wzSaveAndNext(stepIdx, saveFnName, btnArg){
-  // Call the existing save function
-  const fn = window[saveFnName];
-  if(typeof fn === 'function'){
-    if(btnArg) await fn(btnArg);
-    else await fn();
+  // Find the Save & Continue button and show saving state
+  const btn=event?.currentTarget;
+  if(btn){ btn.textContent='Saving...'; btn.style.opacity='0.7'; btn.disabled=true; }
+
+  try{
+    const fn=window[saveFnName];
+    if(typeof fn==='function'){
+      if(btnArg) await fn(btnArg);
+      else await fn();
+    }
+  } catch(e){ console.error('wzSaveAndNext error:',e); }
+
+  if(btn){ btn.textContent='Saved ✓'; btn.style.opacity='1'; btn.disabled=false;
+    setTimeout(()=>{ btn.textContent= stepIdx<9?'Save & Continue →':'Save & Complete ✓'; },1200);
   }
+
   // Mark step complete
   wzCompleted.add(stepIdx);
-  const stepEl = document.getElementById('wz-step-'+stepIdx);
+  const stepEl=document.getElementById('wz-step-'+stepIdx);
   if(stepEl){ stepEl.classList.add('done'); stepEl.classList.remove('on'); }
 
-  const nextStep = stepIdx + 1;
+  const nextStep=stepIdx+1;
   if(nextStep < WZ_STEPS.length){
-    goWizardStep(nextStep);
+    setTimeout(()=>goWizardStep(nextStep), 400);
   } else {
-    // Step 9 complete — show completion message
-    const wc = document.getElementById('wizard-content');
-    const existing = document.getElementById('wz-complete-msg');
-    if(!existing && wc){
-      const msg = document.createElement('div');
-      msg.id = 'wz-complete-msg';
-      msg.style.cssText = 'background:rgba(60,140,90,.12);border:1px solid rgba(60,140,90,.4);padding:20px 24px;margin-top:16px;display:flex;align-items:center;gap:16px';
-      msg.innerHTML = `<div style="width:10px;height:10px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
+    // Step 9 complete
+    const existing=document.getElementById('wz-complete-msg');
+    if(!existing){
+      const msg=document.createElement('div');
+      msg.id='wz-complete-msg';
+      msg.style.cssText='background:rgba(60,140,90,.12);border:1px solid rgba(60,140,90,.4);padding:20px 24px;margin-top:16px;display:flex;align-items:center;gap:16px';
+      msg.innerHTML=`<div style="width:10px;height:10px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
         <div>
           <div style="font-size:11px;font-weight:600;color:var(--white);letter-spacing:1px;margin-bottom:3px">Health Macro-Cycle Complete</div>
           <div style="font-size:10px;color:var(--muted)">All 9 steps saved. The client's protocol is ready.</div>
         </div>`;
-      const tabEl = document.getElementById('dptab-t2');
+      const tabEl=document.getElementById('dptab-t2');
       if(tabEl) tabEl.appendChild(msg);
     }
-    // Mark all steps done
-    WZ_STEPS.forEach((_,i) => {
+    WZ_STEPS.forEach((_,i)=>{
       wzCompleted.add(i);
-      const s = document.getElementById('wz-step-'+i);
+      const s=document.getElementById('wz-step-'+i);
       if(s){ s.classList.add('done'); s.classList.remove('on'); }
     });
-    const last = document.getElementById('wz-step-9');
-    if(last) last.classList.add('on');
+    document.getElementById('wz-step-9')?.classList.add('on');
   }
 }
 
