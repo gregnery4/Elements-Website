@@ -146,6 +146,17 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
 .dp-close svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;}
 .dp-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 28px;background:var(--c1);position:sticky;top:73px;z-index:4;}
 .dp-tab{padding:14px 18px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .25s;}
+.wz-step{display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:pointer;border-bottom:3px solid transparent;border-right:1px solid var(--border);transition:all .2s;white-space:nowrap;flex-shrink:0;}
+.wz-step:hover{background:var(--c3);}
+.wz-step.on{border-bottom-color:var(--gold-mid);background:var(--c3);}
+.wz-step.done .wz-num{background:var(--green);color:var(--white);}
+.wz-num{width:24px;height:24px;border-radius:50%;background:var(--c3);border:1px solid var(--borderw);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--muted);flex-shrink:0;transition:all .2s;}
+.wz-step.on .wz-num{background:var(--gold-mid);color:var(--white);border-color:var(--gold-mid);}
+.wz-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.wz-step.on .wz-lbl{color:var(--white);}
+.wz-nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0 0;margin-top:8px;border-top:1px solid var(--borderw);}
+.wz-next-btn{padding:11px 28px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600;}
+.wz-back-btn{padding:11px 20px;background:transparent;color:var(--muted);border:1px solid var(--borderw);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;}
 .dp-tab.on{color:var(--gold);border-bottom-color:var(--gold-mid);}
 .dp-tab:hover{color:var(--white);}
 .dp-body{padding:28px;}
@@ -442,20 +453,51 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       </button>
     </div>
     <div class="dp-tabs" style="overflow-x:auto;flex-wrap:nowrap;">
-      <div class="dp-tab on" onclick="dpTab('t1',this)">General Information</div>
-      <div class="dp-tab" onclick="dpTab('t12',this)">1. Health Protocol Selection</div>
-      <div class="dp-tab" onclick="dpTab('t7',this)">2. Body Composition Assessments</div>
-      <div class="dp-tab" onclick="dpTab('t3',this)">3. Goal Setting</div>
-      <div class="dp-tab" onclick="dpTab('t4',this)">4. Calories &amp; Macro-Nutrients</div>
-      <div class="dp-tab" onclick="dpTab('t5',this)">5. Meal Design</div>
-      <div class="dp-tab" onclick="dpTab('t8',this)">6. Supplement Design</div>
-      <div class="dp-tab" onclick="dpTab('t11',this)">7. Meal Plan</div>
-      <div class="dp-tab" onclick="dpTab('t13',this)">8. Training Program Design</div>
-      <div class="dp-tab" onclick="dpTab('t2',this)">9. Summary</div>
-      <div class="dp-tab" onclick="dpTab('t9',this)">10. Elements Protocols</div>
+      <div class="dp-tab on" onclick="dpTab('t_wizard',this)">New Health Macro-Cycle</div>
+      <div class="dp-tab" onclick="dpTab('t9',this)">Elements Protocols</div>
       <div class="dp-tab" onclick="dpTab('t6',this)">Weekly &amp; Monthly Review</div>
     </div>
     <div class="dp-body">
+
+      <!-- NEW HEALTH MACRO-CYCLE WIZARD -->
+      <div id="dptab-t_wizard">
+
+        <!-- Step indicator -->
+        <div id="wizard-steps" style="display:flex;align-items:stretch;margin-bottom:0;border-bottom:1px solid var(--border);overflow-x:auto;background:var(--c2)">
+          <div class="wz-step on" id="wz-step-0" onclick="goWizardStep(0)" data-step="0">
+            <div class="wz-num">GI</div><div class="wz-lbl">General Info</div>
+          </div>
+          <div class="wz-step" id="wz-step-1" onclick="goWizardStep(1)" data-step="1">
+            <div class="wz-num">1</div><div class="wz-lbl">Health Protocol</div>
+          </div>
+          <div class="wz-step" id="wz-step-2" onclick="goWizardStep(2)" data-step="2">
+            <div class="wz-num">2</div><div class="wz-lbl">Body Composition</div>
+          </div>
+          <div class="wz-step" id="wz-step-3" onclick="goWizardStep(3)" data-step="3">
+            <div class="wz-num">3</div><div class="wz-lbl">Goal Setting</div>
+          </div>
+          <div class="wz-step" id="wz-step-4" onclick="goWizardStep(4)" data-step="4">
+            <div class="wz-num">4</div><div class="wz-lbl">Calories &amp; Macros</div>
+          </div>
+          <div class="wz-step" id="wz-step-5" onclick="goWizardStep(5)" data-step="5">
+            <div class="wz-num">5</div><div class="wz-lbl">Meal Design</div>
+          </div>
+          <div class="wz-step" id="wz-step-6" onclick="goWizardStep(6)" data-step="6">
+            <div class="wz-num">6</div><div class="wz-lbl">Supplements</div>
+          </div>
+          <div class="wz-step" id="wz-step-7" onclick="goWizardStep(7)" data-step="7">
+            <div class="wz-num">7</div><div class="wz-lbl">Meal Plan</div>
+          </div>
+          <div class="wz-step" id="wz-step-8" onclick="goWizardStep(8)" data-step="8">
+            <div class="wz-num">8</div><div class="wz-lbl">Training Program</div>
+          </div>
+          <div class="wz-step" id="wz-step-9" onclick="goWizardStep(9)" data-step="9">
+            <div class="wz-num">9</div><div class="wz-lbl">Summary</div>
+          </div>
+        </div>
+
+        <!-- Step panels use the existing dptab-* divs shown/hidden by goWizardStep() -->
+        <div id="wizard-content">
 
       <!-- TAB 1: CLIENT INFORMATION -->
       <div id="dptab-t1">
@@ -481,6 +523,10 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
         </div>
         <button class="save-btn" onclick="saveClient()">Save Client Info →</button>
         <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-save-msg"></div>
+        <div class="wz-nav">
+          <div></div>
+          <button class="wz-next-btn" onclick="wzSaveAndNext(0,'saveClient')">Save &amp; Continue →</button>
+        </div>
       </div>
 
       <!-- TAB 12: HEALTH PROTOCOL SELECTION -->
@@ -502,6 +548,10 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           <input type="hidden" id="ov-dur-1">
         </div>
         <button class="save-btn" onclick="saveOverview(this)">Save Protocol →</button>
+        <div class="wz-nav">
+          <button class="wz-back-btn" onclick="goWizardStep(0)">← Back</button>
+          <button class="wz-next-btn" onclick="wzSaveAndNext(1,'saveOverview',this)">Save &amp; Continue →</button>
+        </div>
         <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-proto-msg"></div>
       </div>
 
@@ -561,6 +611,10 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           </div>
         </div>
         <button class="save-btn" onclick="saveOverview(this)">Save Training Program →</button>
+        <div class="wz-nav">
+          <button class="wz-back-btn" onclick="goWizardStep(7)">← Back</button>
+          <button class="wz-next-btn" onclick="wzSaveAndNext(8,'saveOverview',this)">Save &amp; Continue →</button>
+        </div>
         <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-training-msg"></div>
       </div>
 
@@ -688,6 +742,10 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           </div>
         </div>
         <button class="save-btn" onclick="saveOverview(this)" style="margin-top:14px">Save Overview →</button>
+        <div class="wz-nav">
+          <button class="wz-back-btn" onclick="goWizardStep(8)">← Back</button>
+          <button class="wz-next-btn" onclick="wzSaveAndNext(9,'saveOverview',this)">Save &amp; Complete ✓</button>
+        </div>
       </div>
 
       <!-- TAB 3: GOAL SETTING CALCULATOR -->
@@ -716,6 +774,10 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           <div id="goal-calc-text"></div>
         </div>
         <button class="save-btn" onclick="saveGoalData()">Save Goal Data →</button>
+        <div class="wz-nav">
+          <button class="wz-back-btn" onclick="goWizardStep(2)">← Back</button>
+          <button class="wz-next-btn" onclick="wzSaveAndNext(3,'saveGoalData')">Save &amp; Continue →</button>
+        </div>
         <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-goal-msg"></div>
       </div>
 
@@ -770,6 +832,10 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           </div>
         </div>
         <button class="save-btn" onclick="saveNutrition()">Save Nutrition Targets →</button>
+        <div class="wz-nav">
+          <button class="wz-back-btn" onclick="goWizardStep(3)">← Back</button>
+          <button class="wz-next-btn" onclick="wzSaveAndNext(4,'saveNutrition')">Save &amp; Continue →</button>
+        </div>
         <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-nut-msg"></div>
       </div>
 
@@ -1158,6 +1224,10 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
         </div>
         <button class="save-btn" onclick="saveBodyComp()">Save Assessment →</button>
         <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="bc-msg"></div>
+        <div class="wz-nav">
+          <button class="wz-back-btn" onclick="goWizardStep(1)">← Back</button>
+          <button class="wz-next-btn" onclick="wzSaveAndNext(2,'saveBodyComp')">Save &amp; Continue →</button>
+        </div>
       </div>
       <div id="dptab-t8" style="display:none">
         <div class="dp-sec">
@@ -1204,10 +1274,18 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Dose & Meals</div>
             <div id="supp-detail-grid" class="edit-grid"></div>
             <button class="save-btn" style="margin-top:12px" onclick="saveSuppDetails()">Save Dose & Meals →</button>
+            <div class="wz-nav">
+              <button class="wz-back-btn" onclick="goWizardStep(5)">← Back</button>
+              <button class="wz-next-btn" onclick="wzSaveAndNext(6,'saveSuppDetails')">Save &amp; Continue →</button>
+            </div>
             <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-supp-msg"></div>
           </div>
         </div>
       </div>
+
+      </div><!-- end wizard-content -->
+
+      </div><!-- end dptab-t_wizard -->
 
       <!-- TAB 10: ELEMENTS PROTOCOLS -->
       <div id="dptab-t9" style="display:none">
@@ -1437,6 +1515,32 @@ function openClient(id){
   document.getElementById('dp-name').textContent=name;
   document.getElementById('dp-meta').textContent='Active Client · Elements Personal Training';
 
+  // Reset wizard — mark steps as done based on existing data
+  wzCompleted.clear();
+  wzCurrentStep=0;
+  // Remove old completion message if any
+  const oldMsg=document.getElementById('wz-complete-msg');
+  if(oldMsg) oldMsg.remove();
+  // Mark steps that have saved data
+  if(c.full_name||c.phone) wzCompleted.add(0);
+  if(c.client_overview?.[0]?.goal) wzCompleted.add(1);
+  const metrics=c.client_metrics?.sort((a,b)=>new Date(b.recorded_at)-new Date(a.recorded_at))[0];
+  if(metrics?.body_weight) wzCompleted.add(2);
+  if(metrics?.body_fat) wzCompleted.add(3);
+  if(c.nutrition_targets?.[0]?.calories) wzCompleted.add(4);
+  if(c.meal_plans?.[0]?.meals) { wzCompleted.add(5); wzCompleted.add(7); }
+  if(c.supplements?.length) wzCompleted.add(6);
+  if(c.client_overview?.[0]?.training_frequency) wzCompleted.add(8);
+  if(c.client_overview?.[0]?.nutrition_approach) wzCompleted.add(9);
+  // Update step indicators
+  WZ_STEPS.forEach((_,si)=>{
+    const s=document.getElementById('wz-step-'+si);
+    if(!s)return;
+    s.classList.remove('on','done');
+    if(wzCompleted.has(si)) s.classList.add('done');
+  });
+  document.getElementById('wz-step-0')?.classList.add('on');
+
   // Tab 1 — Client Info
   document.getElementById('dp-fullname').value=c.full_name||'';
   document.getElementById('dp-email').value=c.email||'';
@@ -1547,11 +1651,104 @@ function openClient(id){
 
 function closeDetail(){document.getElementById('detail-overlay').classList.remove('open');document.body.style.overflow='';}
 
+// ── WIZARD ──
+const WZ_STEPS = ['t1','t12','t7','t3','t4','t5','t8','t11','t13','t2'];
+let wzCurrentStep = 0;
+const wzCompleted = new Set();
+
+function goWizardStep(stepIdx){
+  // Hide all wizard step tab divs
+  WZ_STEPS.forEach(id => {
+    const el = document.getElementById('dptab-'+id);
+    if(el) el.style.display = 'none';
+  });
+
+  // Show the target step
+  const tabId = WZ_STEPS[stepIdx];
+  const el = document.getElementById('dptab-'+tabId);
+  if(el) el.style.display = 'block';
+
+  wzCurrentStep = stepIdx;
+
+  // Update step indicator
+  WZ_STEPS.forEach((_,i) => {
+    const s = document.getElementById('wz-step-'+i);
+    if(!s) return;
+    s.classList.remove('on');
+    if(wzCompleted.has(i)) s.classList.add('done');
+    else s.classList.remove('done');
+  });
+  const activeStep = document.getElementById('wz-step-'+stepIdx);
+  if(activeStep) activeStep.classList.add('on');
+
+  // Fire existing tab hooks
+  if(tabId==='t5') syncMealTotals();
+  if(tabId==='t11') generateMealPlan();
+  if(tabId==='t6'){ loadBWScheduledDays(); renderWkMealGrid(); }
+  if(tabId==='t9') loadProtocols();
+  if(tabId==='t2') syncSummaryHeader();
+  if(tabId==='t3') syncBodyCompToGoals();
+
+  // Scroll wizard content to top
+  const wc = document.getElementById('wizard-content');
+  if(wc) wc.scrollTop = 0;
+  const body = document.querySelector('.dp-body');
+  if(body) body.scrollTop = 0;
+}
+
+async function wzSaveAndNext(stepIdx, saveFnName, btnArg){
+  // Call the existing save function
+  const fn = window[saveFnName];
+  if(typeof fn === 'function'){
+    if(btnArg) await fn(btnArg);
+    else await fn();
+  }
+  // Mark step complete
+  wzCompleted.add(stepIdx);
+  const stepEl = document.getElementById('wz-step-'+stepIdx);
+  if(stepEl){ stepEl.classList.add('done'); stepEl.classList.remove('on'); }
+
+  const nextStep = stepIdx + 1;
+  if(nextStep < WZ_STEPS.length){
+    goWizardStep(nextStep);
+  } else {
+    // Step 9 complete — show completion message
+    const wc = document.getElementById('wizard-content');
+    const existing = document.getElementById('wz-complete-msg');
+    if(!existing && wc){
+      const msg = document.createElement('div');
+      msg.id = 'wz-complete-msg';
+      msg.style.cssText = 'background:rgba(60,140,90,.12);border:1px solid rgba(60,140,90,.4);padding:20px 24px;margin-top:16px;display:flex;align-items:center;gap:16px';
+      msg.innerHTML = `<div style="width:10px;height:10px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--white);letter-spacing:1px;margin-bottom:3px">Health Macro-Cycle Complete</div>
+          <div style="font-size:10px;color:var(--muted)">All 9 steps saved. The client's protocol is ready.</div>
+        </div>`;
+      const tabEl = document.getElementById('dptab-t2');
+      if(tabEl) tabEl.appendChild(msg);
+    }
+    // Mark all steps done
+    WZ_STEPS.forEach((_,i) => {
+      wzCompleted.add(i);
+      const s = document.getElementById('wz-step-'+i);
+      if(s){ s.classList.add('done'); s.classList.remove('on'); }
+    });
+    const last = document.getElementById('wz-step-9');
+    if(last) last.classList.add('on');
+  }
+}
+
 function dpTab(name,el){
-  document.querySelectorAll('[id^="dptab-"]').forEach(t=>t.style.display='none');
+  // Hide all top-level tabs
+  document.querySelectorAll('.dp-body > [id^="dptab-"]').forEach(t=>t.style.display='none');
   document.querySelectorAll('.dp-tab').forEach(t=>t.classList.remove('on'));
-  document.getElementById('dptab-'+name).style.display='block';
-  if(el)el.classList.add('on');
+  const target=document.getElementById('dptab-'+name);
+  if(target) target.style.display='block';
+  if(el) el.classList.add('on');
+  if(name==='t_wizard'){
+    goWizardStep(wzCurrentStep);
+    return;
+  }
   if(name==='t5')syncMealTotals();
   if(name==='t11')generateMealPlan();
   if(name==='t6'){loadBWScheduledDays();renderWkMealGrid();}
