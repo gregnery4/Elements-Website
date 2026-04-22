@@ -1361,11 +1361,9 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           </div>
           <div id="labs-pdf-name" style="font-size:10px;color:var(--green);margin-bottom:16px;min-height:16px"></div>
 
-          <!-- Date + Label -->
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:24px">
-            <div class="edit-field"><label>Lab Date</label><input type="date" id="labs-date"></div>
-            <div class="edit-field"><label>Lab Provider / Clinic</label><input type="text" id="labs-provider" placeholder="e.g. Quest Diagnostics"></div>
-            <div class="edit-field"><label>Phase / Label</label><input type="text" id="labs-phase" placeholder="e.g. Fat Loss Phase 1"></div>
+          <!-- Date only -->
+          <div style="margin-bottom:24px">
+            <div class="edit-field" style="max-width:220px"><label>Lab Date</label><input type="date" id="labs-date"></div>
           </div>
 
           <!-- 5 Category Columns -->
@@ -1435,12 +1433,6 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
               <div class="edit-field"><label>WBC</label><input type="number" id="lab-wbc" step="0.1" placeholder="K/μL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 4.5–11.0</div></div>
             </div>
 
-          </div>
-
-          <!-- Notes -->
-          <div class="edit-field" style="margin-bottom:20px">
-            <label>Coach Notes</label>
-            <textarea id="labs-notes" placeholder="Clinical observations, patterns, recommendations..." style="width:100%;background:var(--c3);border:1px solid var(--borderw);color:var(--white);font-family:'Montserrat',sans-serif;font-size:11px;padding:10px;resize:vertical;min-height:80px;outline:none"></textarea>
           </div>
 
           <button class="save-btn" onclick="saveLabEntry()">Save Lab Results →</button>
@@ -5188,34 +5180,23 @@ async function saveLabEntry(){
   const msg = document.getElementById('labs-msg');
   msg.textContent = 'Saving...'; msg.style.color = 'var(--gold)';
   const date = document.getElementById('labs-date').value || new Date().toISOString().split('T')[0];
-  const provider = document.getElementById('labs-provider').value;
-  const phase = document.getElementById('labs-phase').value;
-  const notes = document.getElementById('labs-notes').value;
   const values = getLabValues();
 
   const{error} = await sb.from('client_metrics').insert({
     client_id: currentClient.id,
     recorded_at: date,
-    notes: JSON.stringify({
-      source: 'labs',
-      provider, phase, notes,
-      lab_values: values
-    })
+    notes: JSON.stringify({ source: 'labs', lab_values: values })
   });
 
   if(error){ msg.style.color='var(--red)'; msg.textContent='Error: '+error.message; return; }
   msg.style.color='var(--green)'; msg.textContent='✓ Lab results saved.';
   setTimeout(()=>msg.textContent='',3000);
 
-  labEntries.unshift({date,provider,phase,notes,values});
+  labEntries.unshift({date,values});
   renderLabLog();
 
-  // Reset fields
   Object.values(LAB_FIELDS).flat().forEach(([id])=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('labs-date').value='';
-  document.getElementById('labs-provider').value='';
-  document.getElementById('labs-phase').value='';
-  document.getElementById('labs-notes').value='';
   document.getElementById('labs-pdf-name').textContent='';
   await loadAll();
 }
@@ -5262,8 +5243,8 @@ function renderLabLog(){
         <div onclick="labToggle(${i})" style="flex:1;cursor:pointer;display:flex;align-items:center;gap:14px" onmouseover="this.parentElement.style.background='var(--c3)'" onmouseout="this.parentElement.style.background='var(--c2)'">
           <div style="width:3px;height:36px;background:linear-gradient(180deg,var(--gold-mid),var(--gold-dark));flex-shrink:0"></div>
           <div>
-            <div style="font-size:13px;font-weight:600;color:var(--white)">${e.phase||'Lab Results'}</div>
-            <div style="font-size:9px;color:var(--muted);margin-top:3px">${e.provider?e.provider+' · ':''}${dateStr} · ${count} markers</div>
+            <div style="font-size:13px;font-weight:600;color:var(--white)">Lab Results</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:3px">${dateStr} · ${count} markers</div>
             <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${catPills}</div>
           </div>
         </div>
@@ -5271,7 +5252,6 @@ function renderLabLog(){
       </div>
       <div id="lab-detail-${i}" style="display:none;padding:18px;background:var(--c1);border-top:1px solid var(--borderw)">
         ${detailHtml}
-        ${e.notes?`<div style="padding:12px 16px;background:var(--c2);border:1px solid var(--borderw);font-size:11px;color:var(--muted)"><span style="font-size:8px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-right:10px">Notes</span>${e.notes}</div>`:''}
       </div>
     </div>`;
   }).join('');
@@ -5295,9 +5275,6 @@ function loadLabsFromMetrics(metrics){
       if(notes.source==='labs'){
         labEntries.push({
           date: m.recorded_at,
-          provider: notes.provider||'',
-          phase: notes.phase||'',
-          notes: notes.notes||'',
           values: notes.lab_values||{}
         });
       }
