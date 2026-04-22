@@ -453,9 +453,10 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       </button>
     </div>
     <div class="dp-tabs" style="overflow-x:auto;flex-wrap:nowrap;">
-      <div class="dp-tab on" onclick="dpTab('t_wizard',this)">New Health Macro-Cycle</div>
-      <div class="dp-tab" onclick="dpTab('t9',this)">Elements Protocols</div>
-      <div class="dp-tab" onclick="dpTab('t6',this)">Weekly &amp; Monthly Review</div>
+      <div class="dp-tab on" onclick="dpTab('t_wizard',this)">New Health Plan</div>
+      <div class="dp-tab" onclick="dpTab('t_assess',this)">Assessment Log</div>
+      <div class="dp-tab" onclick="dpTab('t9',this)">Protocol History</div>
+      <div class="dp-tab" onclick="dpTab('t6',this)">Reviews</div>
     </div>
     <div class="dp-body">
 
@@ -903,6 +904,14 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       </div><!-- end wizard-content -->
 
       </div><!-- end dptab-t_wizard -->
+
+      <!-- ASSESSMENT LOG TAB -->
+      <div id="dptab-t_assess" style="display:none">
+        <div class="dp-sec">
+          <div class="dp-sec-title">Assessment Log</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:20px">Coming soon — client assessment history will be displayed here.</div>
+        </div>
+      </div>
 
       <!-- TAB 6: WEEKLY DATA ENTRY -->
       <div id="dptab-t6" style="display:none">
