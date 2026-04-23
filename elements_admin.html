@@ -1354,9 +1354,9 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             ondrop="handleLabsDrop(event)"
             onclick="document.getElementById('labs-file-input').click()"
             style="border:2px dashed rgba(201,168,108,0.3);background:var(--c3);padding:30px 24px;text-align:center;cursor:pointer;transition:all .25s;margin-bottom:16px">
-            <div style="font-size:28px;margin-bottom:10px">📋</div>
-            <div style="font-size:13px;color:var(--white);font-weight:500;margin-bottom:4px">Drop Lab Report PDF here</div>
-            <div style="font-size:11px;color:var(--muted)">or click to browse</div>
+            <div style="font-size:28px;margin-bottom:10px" id="labs-dz-icon">📋</div>
+            <div style="font-size:13px;color:var(--white);font-weight:500;margin-bottom:4px" id="labs-dz-title">Drop Lab Report PDF here</div>
+            <div style="font-size:11px;color:var(--muted)" id="labs-dz-sub">or click to browse — Claude AI will auto-fill the fields</div>
             <input type="file" id="labs-file-input" accept=".pdf" style="display:none" onchange="handleLabsFile(this.files[0])">
           </div>
           <div id="labs-pdf-name" style="font-size:10px;color:var(--green);margin-bottom:16px;min-height:16px"></div>
@@ -5158,9 +5158,167 @@ function handleLabsDrop(e){
   if(file) handleLabsFile(file);
 }
 
-function handleLabsFile(file){
-  if(!file||file.type!=='application/pdf') return;
-  document.getElementById('labs-pdf-name').textContent = '📎 ' + file.name;
+async function handleLabsFile(file){
+  if(!file||file.type!=='application/pdf'){
+    document.getElementById('labs-pdf-name').style.color='var(--red)';
+    document.getElementById('labs-pdf-name').textContent='Please upload a PDF file.';
+    return;
+  }
+
+  // Show parsing state
+  const dz = document.getElementById('labs-dropzone');
+  document.getElementById('labs-dz-icon').textContent='⏳';
+  document.getElementById('labs-dz-title').textContent='Reading lab report...';
+  document.getElementById('labs-dz-sub').textContent='Claude AI is extracting your values — this takes a few seconds';
+  dz.style.borderColor='rgba(201,168,108,0.8)';
+  dz.style.pointerEvents='none';
+  document.getElementById('labs-pdf-name').style.color='var(--gold)';
+  document.getElementById('labs-pdf-name').textContent='📎 '+file.name+' — analysing...';
+
+  try{
+    // Convert PDF to base64
+    const base64 = await new Promise((res,rej)=>{
+      const r = new FileReader();
+      r.onload = ()=>res(r.result.split(',')[1]);
+      r.onerror = ()=>rej(new Error('File read failed'));
+      r.readAsDataURL(file);
+    });
+
+    // Build the field list for Claude to extract
+    const fieldList = Object.entries(LAB_FIELDS).map(([cat,fields])=>
+      `${cat.toUpperCase()}: ${fields.map(([,label,unit])=>`${label} (${unit})`).join(', ')}`
+    ).join('\n');
+
+    const prompt = `You are a medical lab report parser. Extract the following lab values from this PDF lab report. Return ONLY a valid JSON object with no markdown, no explanation, no preamble.
+
+The JSON must have this exact structure — use null for any value not found in the report:
+{
+  "lab_date": "YYYY-MM-DD or null",
+  "cardiovascular": {
+    "Total Cholesterol": number_or_null,
+    "LDL": number_or_null,
+    "HDL": number_or_null,
+    "Triglycerides": number_or_null,
+    "ApoB": number_or_null,
+    "Lp(a)": number_or_null
+  },
+  "metabolic": {
+    "Fasting Glucose": number_or_null,
+    "HbA1c": number_or_null,
+    "Fasting Insulin": number_or_null,
+    "HOMA-IR": number_or_null,
+    "ALT": number_or_null,
+    "AST": number_or_null,
+    "GGT": number_or_null,
+    "Uric Acid": number_or_null
+  },
+  "hormonal": {
+    "Total Testosterone": number_or_null,
+    "Free Testosterone": number_or_null,
+    "SHBG": number_or_null,
+    "Estradiol (E2)": number_or_null,
+    "Cortisol": number_or_null,
+    "TSH": number_or_null,
+    "Free T3": number_or_null,
+    "Free T4": number_or_null,
+    "DHEA-S": number_or_null,
+    "IGF-1": number_or_null
+  },
+  "nutrients": {
+    "Vitamin D (25-OH)": number_or_null,
+    "Vitamin B12": number_or_null,
+    "Folate": number_or_null,
+    "Ferritin": number_or_null,
+    "Iron (Serum)": number_or_null,
+    "Magnesium": number_or_null,
+    "Zinc": number_or_null,
+    "Omega-3 Index": number_or_null
+  },
+  "inflammation": {
+    "hs-CRP": number_or_null,
+    "Homocysteine": number_or_null,
+    "Fibrinogen": number_or_null,
+    "IL-6": number_or_null,
+    "TNF-α": number_or_null,
+    "ESR": number_or_null,
+    "WBC": number_or_null
+  }
+}
+
+Only return the JSON. No other text.`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{
+          role:'user',
+          content:[
+            {type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},
+            {type:'text',text:prompt}
+          ]
+        }]
+      })
+    });
+
+    const data = await response.json();
+    const raw = data.content?.find(b=>b.type==='text')?.text||'';
+
+    // Parse JSON response
+    let parsed;
+    try{
+      const clean = raw.replace(/```json|```/g,'').trim();
+      parsed = JSON.parse(clean);
+    }catch(e){
+      throw new Error('Could not parse AI response. Try again or enter values manually.');
+    }
+
+    // Populate fields
+    let filled = 0;
+    const fieldMap = {
+      cardiovascular: [['Total Cholesterol','lab-chol-total'],['LDL','lab-ldl'],['HDL','lab-hdl'],['Triglycerides','lab-trig'],['ApoB','lab-apob'],['Lp(a)','lab-lpa']],
+      metabolic:      [['Fasting Glucose','lab-glucose'],['HbA1c','lab-hba1c'],['Fasting Insulin','lab-insulin'],['HOMA-IR','lab-homa'],['ALT','lab-alt'],['AST','lab-ast'],['GGT','lab-ggt'],['Uric Acid','lab-uric']],
+      hormonal:       [['Total Testosterone','lab-test-total'],['Free Testosterone','lab-test-free'],['SHBG','lab-shbg'],['Estradiol (E2)','lab-e2'],['Cortisol','lab-cortisol'],['TSH','lab-tsh'],['Free T3','lab-ft3'],['Free T4','lab-ft4'],['DHEA-S','lab-dheas'],['IGF-1','lab-igf1']],
+      nutrients:      [['Vitamin D (25-OH)','lab-vitd'],['Vitamin B12','lab-b12'],['Folate','lab-folate'],['Ferritin','lab-ferritin'],['Iron (Serum)','lab-iron'],['Magnesium','lab-mag'],['Zinc','lab-zinc'],['Omega-3 Index','lab-omega3']],
+      inflammation:   [['hs-CRP','lab-crp'],['Homocysteine','lab-hcy'],['Fibrinogen','lab-fibrin'],['IL-6','lab-il6'],['TNF-α','lab-tnfa'],['ESR','lab-esr'],['WBC','lab-wbc']]
+    };
+    Object.entries(fieldMap).forEach(([cat,fields])=>{
+      fields.forEach(([label,id])=>{
+        const val = parsed[cat]?.[label];
+        if(val!==null&&val!==undefined){
+          const el = document.getElementById(id);
+          if(el){ el.value=val; el.style.background='rgba(60,140,90,.08)'; el.style.borderColor='rgba(60,140,90,.4)'; filled++; }
+        }
+      });
+    });
+
+    // Auto-fill date if found
+    if(parsed.lab_date&&document.getElementById('labs-date')){
+      document.getElementById('labs-date').value = parsed.lab_date;
+    }
+
+    // Restore dropzone
+    document.getElementById('labs-dz-icon').textContent='✓';
+    document.getElementById('labs-dz-title').textContent='Lab report analysed';
+    document.getElementById('labs-dz-sub').textContent=`${filled} values extracted — review and save below`;
+    dz.style.borderColor='rgba(60,140,90,0.5)';
+    dz.style.background='rgba(60,140,90,.05)';
+    dz.style.pointerEvents='auto';
+    document.getElementById('labs-pdf-name').style.color='var(--green)';
+    document.getElementById('labs-pdf-name').textContent=`✓ ${file.name} — ${filled} values found`;
+
+  }catch(err){
+    console.error('Lab PDF parse error:',err);
+    document.getElementById('labs-dz-icon').textContent='⚠️';
+    document.getElementById('labs-dz-title').textContent='Could not auto-fill';
+    document.getElementById('labs-dz-sub').textContent=err.message||'Enter values manually below';
+    dz.style.borderColor='rgba(160,50,70,0.5)';
+    dz.style.pointerEvents='auto';
+    document.getElementById('labs-pdf-name').style.color='var(--red)';
+    document.getElementById('labs-pdf-name').textContent='⚠ '+file.name+' — enter values manually';
+  }
 }
 
 function getLabValues(){
