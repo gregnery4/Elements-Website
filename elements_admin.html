@@ -156,6 +156,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
 .wz-step.on .wz-lbl{color:var(--white);}
 .wz-nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0 0;margin-top:8px;border-top:1px solid var(--borderw);}
 .wz-next-btn{padding:11px 28px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600;}
+.lab-ref{font-size:8px;color:var(--muted);margin-top:2px;}
 .wz-back-btn{padding:11px 20px;background:transparent;color:var(--muted);border:1px solid var(--borderw);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;}
 .dp-tab.on{color:var(--gold);border-bottom-color:var(--gold-mid);}
 .dp-tab:hover{color:var(--white);}
@@ -1369,68 +1370,98 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           <!-- 5 Category Columns -->
           <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-bottom:20px">
 
-            <!-- Cardiovascular -->
+            <!-- CARDIOVASCULAR -->
             <div style="background:var(--c3);border:1px solid var(--border);padding:14px">
               <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;text-align:center">Cardiovascular</div>
-              <div class="edit-field"><label>Total Cholesterol</label><input type="number" id="lab-chol-total" step="0.1" placeholder="mg/dL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;200</div></div>
-              <div class="edit-field"><label>LDL</label><input type="number" id="lab-ldl" step="0.1" placeholder="mg/dL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;100</div></div>
-              <div class="edit-field"><label>HDL</label><input type="number" id="lab-hdl" step="0.1" placeholder="mg/dL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &gt;60</div></div>
-              <div class="edit-field"><label>Triglycerides</label><input type="number" id="lab-trig" step="0.1" placeholder="mg/dL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;150</div></div>
-              <div class="edit-field"><label>ApoB</label><input type="number" id="lab-apob" step="0.1" placeholder="mg/dL"></div>
-              <div class="edit-field"><label>Lp(a)</label><input type="number" id="lab-lpa" step="0.1" placeholder="nmol/L"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;75</div></div>
+              <div class="edit-field"><label>Total Cholesterol</label><input type="number" id="lab-chol-total" step="0.1" placeholder="mg/dL"><div class="lab-ref">Ref: &lt;200</div></div>
+              <div class="edit-field"><label>LDL</label><input type="number" id="lab-ldl" step="0.1" placeholder="mg/dL"><div class="lab-ref">Ref: &lt;100</div></div>
+              <div class="edit-field"><label>HDL</label><input type="number" id="lab-hdl" step="0.1" placeholder="mg/dL"><div class="lab-ref">Ref: &gt;60</div></div>
+              <div class="edit-field"><label>Triglycerides</label><input type="number" id="lab-trig" step="0.1" placeholder="mg/dL"><div class="lab-ref">Ref: &lt;150</div></div>
+              <div class="edit-field"><label>ApoB</label><input type="number" id="lab-apob" step="0.1" placeholder="mg/dL"><div class="lab-ref">Ref: &lt;90</div></div>
+              <div class="edit-field"><label>Lp(a)</label><input type="number" id="lab-lpa" step="0.1" placeholder="nmol/L"><div class="lab-ref">Ref: &lt;75</div></div>
+              <div class="edit-field"><label>Cystatin C</label><input type="number" id="lab-cystatinc" step="0.01" placeholder="mg/L"><div class="lab-ref">Ref: 0.5–1.0</div></div>
+              <div style="font-size:7px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin:10px 0 6px">CBC</div>
+              <div class="edit-field"><label>WBC</label><input type="number" id="lab-wbc" step="0.1" placeholder="K/μL"><div class="lab-ref">Ref: 4.5–11.0</div></div>
+              <div class="edit-field"><label>RBC</label><input type="number" id="lab-rbc" step="0.01" placeholder="M/μL"><div class="lab-ref">Ref: 4.5–5.9</div></div>
+              <div class="edit-field"><label>Hemoglobin</label><input type="number" id="lab-hgb" step="0.1" placeholder="g/dL"><div class="lab-ref">Ref M: 13.5–17.5</div></div>
+              <div class="edit-field"><label>Hematocrit</label><input type="number" id="lab-hct" step="0.1" placeholder="%"><div class="lab-ref">Ref M: 41–53%</div></div>
+              <div class="edit-field"><label>Platelets</label><input type="number" id="lab-plt" step="1" placeholder="K/μL"><div class="lab-ref">Ref: 150–400</div></div>
+              <div class="edit-field"><label>MCV</label><input type="number" id="lab-mcv" step="0.1" placeholder="fL"><div class="lab-ref">Ref: 80–100</div></div>
+              <div class="edit-field"><label>Neutrophils %</label><input type="number" id="lab-neut" step="0.1" placeholder="%"><div class="lab-ref">Ref: 50–70%</div></div>
+              <div class="edit-field"><label>Lymphocytes %</label><input type="number" id="lab-lymph" step="0.1" placeholder="%"><div class="lab-ref">Ref: 20–40%</div></div>
             </div>
 
-            <!-- Metabolic -->
+            <!-- METABOLIC -->
             <div style="background:var(--c3);border:1px solid var(--border);padding:14px">
               <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;text-align:center">Metabolic</div>
-              <div class="edit-field"><label>Fasting Glucose</label><input type="number" id="lab-glucose" step="0.1" placeholder="mg/dL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 70–99</div></div>
-              <div class="edit-field"><label>HbA1c</label><input type="number" id="lab-hba1c" step="0.1" placeholder="%"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;5.7%</div></div>
-              <div class="edit-field"><label>Fasting Insulin</label><input type="number" id="lab-insulin" step="0.1" placeholder="μIU/mL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;10</div></div>
-              <div class="edit-field"><label>HOMA-IR</label><input type="number" id="lab-homa" step="0.01" placeholder="index"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;2.0</div></div>
-              <div class="edit-field"><label>ALT</label><input type="number" id="lab-alt" step="0.1" placeholder="U/L"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 7–56</div></div>
-              <div class="edit-field"><label>AST</label><input type="number" id="lab-ast" step="0.1" placeholder="U/L"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 10–40</div></div>
-              <div class="edit-field"><label>GGT</label><input type="number" id="lab-ggt" step="0.1" placeholder="U/L"></div>
-              <div class="edit-field"><label>Uric Acid</label><input type="number" id="lab-uric" step="0.1" placeholder="mg/dL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 2.5–7.0</div></div>
+              <div class="edit-field"><label>Fasting Glucose</label><input type="number" id="lab-glucose" step="0.1" placeholder="mg/dL"><div class="lab-ref">Ref: 70–99</div></div>
+              <div class="edit-field"><label>HbA1c</label><input type="number" id="lab-hba1c" step="0.1" placeholder="%"><div class="lab-ref">Ref: &lt;5.7%</div></div>
+              <div class="edit-field"><label>Fasting Insulin</label><input type="number" id="lab-insulin" step="0.1" placeholder="μIU/mL"><div class="lab-ref">Ref: &lt;10</div></div>
+              <div class="edit-field"><label>HOMA-IR</label><input type="number" id="lab-homa" step="0.01" placeholder="index"><div class="lab-ref">Ref: &lt;2.0</div></div>
+              <div style="font-size:7px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin:10px 0 6px">Metabolic Panel</div>
+              <div class="edit-field"><label>ALT</label><input type="number" id="lab-alt" step="0.1" placeholder="U/L"><div class="lab-ref">Ref: 7–56</div></div>
+              <div class="edit-field"><label>AST</label><input type="number" id="lab-ast" step="0.1" placeholder="U/L"><div class="lab-ref">Ref: 10–40</div></div>
+              <div class="edit-field"><label>GGT</label><input type="number" id="lab-ggt" step="0.1" placeholder="U/L"><div class="lab-ref">Ref M: &lt;55</div></div>
+              <div class="edit-field"><label>Alkaline Phosphatase</label><input type="number" id="lab-alp" step="0.1" placeholder="U/L"><div class="lab-ref">Ref: 44–147</div></div>
+              <div class="edit-field"><label>Total Bilirubin</label><input type="number" id="lab-tbili" step="0.01" placeholder="mg/dL"><div class="lab-ref">Ref: 0.1–1.2</div></div>
+              <div class="edit-field"><label>BUN</label><input type="number" id="lab-bun" step="0.1" placeholder="mg/dL"><div class="lab-ref">Ref: 7–25</div></div>
+              <div class="edit-field"><label>Creatinine</label><input type="number" id="lab-creat" step="0.01" placeholder="mg/dL"><div class="lab-ref">Ref M: 0.7–1.3</div></div>
+              <div class="edit-field"><label>eGFR</label><input type="number" id="lab-egfr" step="0.1" placeholder="mL/min"><div class="lab-ref">Ref: &gt;60</div></div>
+              <div class="edit-field"><label>Sodium</label><input type="number" id="lab-sodium" step="0.1" placeholder="mEq/L"><div class="lab-ref">Ref: 136–145</div></div>
+              <div class="edit-field"><label>Potassium</label><input type="number" id="lab-potassium" step="0.01" placeholder="mEq/L"><div class="lab-ref">Ref: 3.5–5.1</div></div>
+              <div class="edit-field"><label>Uric Acid</label><input type="number" id="lab-uric" step="0.1" placeholder="mg/dL"><div class="lab-ref">Ref: 2.5–7.0</div></div>
             </div>
 
-            <!-- Hormonal -->
+            <!-- HORMONAL -->
             <div style="background:var(--c3);border:1px solid var(--border);padding:14px">
               <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;text-align:center">Hormonal</div>
-              <div class="edit-field"><label>Total Testosterone</label><input type="number" id="lab-test-total" step="0.1" placeholder="ng/dL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref M: 300–1000</div></div>
+              <div class="edit-field"><label>Total Testosterone</label><input type="number" id="lab-test-total" step="0.1" placeholder="ng/dL"><div class="lab-ref">Ref M: 300–1000</div></div>
               <div class="edit-field"><label>Free Testosterone</label><input type="number" id="lab-test-free" step="0.1" placeholder="pg/mL"></div>
-              <div class="edit-field"><label>SHBG</label><input type="number" id="lab-shbg" step="0.1" placeholder="nmol/L"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 10–57</div></div>
-              <div class="edit-field"><label>Estradiol (E2)</label><input type="number" id="lab-e2" step="0.1" placeholder="pg/mL"></div>
-              <div class="edit-field"><label>Cortisol</label><input type="number" id="lab-cortisol" step="0.1" placeholder="μg/dL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref AM: 6–23</div></div>
-              <div class="edit-field"><label>TSH</label><input type="number" id="lab-tsh" step="0.01" placeholder="mIU/L"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 0.4–4.0</div></div>
-              <div class="edit-field"><label>Free T3</label><input type="number" id="lab-ft3" step="0.1" placeholder="pg/mL"></div>
-              <div class="edit-field"><label>Free T4</label><input type="number" id="lab-ft4" step="0.01" placeholder="ng/dL"></div>
+              <div class="edit-field"><label>DHT</label><input type="number" id="lab-dht" step="0.1" placeholder="ng/dL"><div class="lab-ref">Ref M: 30–85</div></div>
+              <div class="edit-field"><label>SHBG</label><input type="number" id="lab-shbg" step="0.1" placeholder="nmol/L"><div class="lab-ref">Ref: 10–57</div></div>
+              <div class="edit-field"><label>Estradiol, Sensitive</label><input type="number" id="lab-e2" step="0.1" placeholder="pg/mL"></div>
+              <div class="edit-field"><label>LH</label><input type="number" id="lab-lh" step="0.1" placeholder="mIU/mL"><div class="lab-ref">Ref M: 1.7–8.6</div></div>
+              <div class="edit-field"><label>FSH</label><input type="number" id="lab-fsh" step="0.1" placeholder="mIU/mL"><div class="lab-ref">Ref M: 1.5–12.4</div></div>
+              <div class="edit-field"><label>Prolactin</label><input type="number" id="lab-prolactin" step="0.1" placeholder="ng/mL"><div class="lab-ref">Ref M: 2–18</div></div>
+              <div class="edit-field"><label>Cortisol</label><input type="number" id="lab-cortisol" step="0.1" placeholder="μg/dL"><div class="lab-ref">Ref AM: 6–23</div></div>
               <div class="edit-field"><label>DHEA-S</label><input type="number" id="lab-dheas" step="0.1" placeholder="μg/dL"></div>
               <div class="edit-field"><label>IGF-1</label><input type="number" id="lab-igf1" step="0.1" placeholder="ng/mL"></div>
+              <div class="edit-field"><label>TSH</label><input type="number" id="lab-tsh" step="0.01" placeholder="mIU/L"><div class="lab-ref">Ref: 0.4–4.0</div></div>
+              <div class="edit-field"><label>Free T3</label><input type="number" id="lab-ft3" step="0.1" placeholder="pg/mL"></div>
+              <div class="edit-field"><label>Free T4</label><input type="number" id="lab-ft4" step="0.01" placeholder="ng/dL"></div>
+              <div style="font-size:7px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin:10px 0 6px">Male Only</div>
+              <div class="edit-field"><label>PSA</label><input type="number" id="lab-psa" step="0.01" placeholder="ng/mL"><div class="lab-ref">Ref: &lt;4.0</div></div>
+              <div style="font-size:7px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin:10px 0 6px">Female Only</div>
+              <div class="edit-field"><label>Progesterone</label><input type="number" id="lab-prog" step="0.1" placeholder="ng/mL"></div>
+              <div class="edit-field"><label>AMH</label><input type="number" id="lab-amh" step="0.01" placeholder="ng/mL"></div>
+              <div class="edit-field"><label>TPO Antibodies</label><input type="number" id="lab-tpo" step="0.1" placeholder="IU/mL"><div class="lab-ref">Ref: &lt;35</div></div>
+              <div class="edit-field"><label>TG Antibodies</label><input type="number" id="lab-tgab" step="0.1" placeholder="IU/mL"><div class="lab-ref">Ref: &lt;20</div></div>
             </div>
 
-            <!-- Nutrients -->
+            <!-- NUTRIENTS -->
             <div style="background:var(--c3);border:1px solid var(--border);padding:14px">
               <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;text-align:center">Nutrients</div>
-              <div class="edit-field"><label>Vitamin D (25-OH)</label><input type="number" id="lab-vitd" step="0.1" placeholder="ng/mL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 40–80</div></div>
-              <div class="edit-field"><label>Vitamin B12</label><input type="number" id="lab-b12" step="1" placeholder="pg/mL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 200–900</div></div>
+              <div class="edit-field"><label>Vitamin D (25-OH)</label><input type="number" id="lab-vitd" step="0.1" placeholder="ng/mL"><div class="lab-ref">Ref: 40–80</div></div>
+              <div class="edit-field"><label>Vitamin B12</label><input type="number" id="lab-b12" step="1" placeholder="pg/mL"><div class="lab-ref">Ref: 200–900</div></div>
               <div class="edit-field"><label>Folate</label><input type="number" id="lab-folate" step="0.1" placeholder="ng/mL"></div>
-              <div class="edit-field"><label>Ferritin</label><input type="number" id="lab-ferritin" step="0.1" placeholder="ng/mL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 30–300</div></div>
+              <div class="edit-field"><label>Ferritin</label><input type="number" id="lab-ferritin" step="0.1" placeholder="ng/mL"><div class="lab-ref">Ref: 30–300</div></div>
               <div class="edit-field"><label>Iron (Serum)</label><input type="number" id="lab-iron" step="0.1" placeholder="μg/dL"></div>
-              <div class="edit-field"><label>Magnesium</label><input type="number" id="lab-mag" step="0.01" placeholder="mg/dL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 1.7–2.2</div></div>
+              <div class="edit-field"><label>TIBC</label><input type="number" id="lab-tibc" step="0.1" placeholder="μg/dL"><div class="lab-ref">Ref: 250–370</div></div>
+              <div class="edit-field"><label>Iron Saturation</label><input type="number" id="lab-iron-sat" step="0.1" placeholder="%"><div class="lab-ref">Ref: 20–50%</div></div>
+              <div class="edit-field"><label>RBC Magnesium</label><input type="number" id="lab-mag" step="0.01" placeholder="mg/dL"><div class="lab-ref">Ref: 4.2–6.8</div></div>
               <div class="edit-field"><label>Zinc</label><input type="number" id="lab-zinc" step="0.1" placeholder="μg/dL"></div>
-              <div class="edit-field"><label>Omega-3 Index</label><input type="number" id="lab-omega3" step="0.1" placeholder="%"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &gt;8%</div></div>
+              <div class="edit-field"><label>Omega-3 Index</label><input type="number" id="lab-omega3" step="0.1" placeholder="%"><div class="lab-ref">Ref: &gt;8%</div></div>
             </div>
 
-            <!-- Inflammation -->
+            <!-- INFLAMMATION -->
             <div style="background:var(--c3);border:1px solid var(--border);padding:14px">
               <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;text-align:center">Inflammation</div>
-              <div class="edit-field"><label>hs-CRP</label><input type="number" id="lab-crp" step="0.01" placeholder="mg/L"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;1.0</div></div>
-              <div class="edit-field"><label>Homocysteine</label><input type="number" id="lab-hcy" step="0.1" placeholder="μmol/L"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;10</div></div>
-              <div class="edit-field"><label>Fibrinogen</label><input type="number" id="lab-fibrin" step="0.1" placeholder="mg/dL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 200–400</div></div>
-              <div class="edit-field"><label>IL-6</label><input type="number" id="lab-il6" step="0.1" placeholder="pg/mL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;7</div></div>
+              <div class="edit-field"><label>hs-CRP</label><input type="number" id="lab-crp" step="0.01" placeholder="mg/L"><div class="lab-ref">Ref: &lt;1.0</div></div>
+              <div class="edit-field"><label>Homocysteine</label><input type="number" id="lab-hcy" step="0.1" placeholder="μmol/L"><div class="lab-ref">Ref: &lt;10</div></div>
+              <div class="edit-field"><label>Fibrinogen</label><input type="number" id="lab-fibrin" step="0.1" placeholder="mg/dL"><div class="lab-ref">Ref: 200–400</div></div>
+              <div class="edit-field"><label>IL-6</label><input type="number" id="lab-il6" step="0.1" placeholder="pg/mL"><div class="lab-ref">Ref: &lt;7</div></div>
               <div class="edit-field"><label>TNF-α</label><input type="number" id="lab-tnfa" step="0.1" placeholder="pg/mL"></div>
-              <div class="edit-field"><label>ESR</label><input type="number" id="lab-esr" step="0.1" placeholder="mm/hr"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: &lt;20</div></div>
-              <div class="edit-field"><label>WBC</label><input type="number" id="lab-wbc" step="0.1" placeholder="K/μL"><div style="font-size:8px;color:var(--muted);margin-top:2px">Ref: 4.5–11.0</div></div>
+              <div class="edit-field"><label>ESR</label><input type="number" id="lab-esr" step="0.1" placeholder="mm/hr"><div class="lab-ref">Ref: &lt;20</div></div>
             </div>
 
           </div>
@@ -5126,26 +5157,38 @@ function loadAlFromMetrics(metrics){
 const LAB_FIELDS = {
   cardiovascular: [
     ['lab-chol-total','Total Cholesterol','mg/dL'],['lab-ldl','LDL','mg/dL'],['lab-hdl','HDL','mg/dL'],
-    ['lab-trig','Triglycerides','mg/dL'],['lab-apob','ApoB','mg/dL'],['lab-lpa','Lp(a)','nmol/L']
+    ['lab-trig','Triglycerides','mg/dL'],['lab-apob','ApoB','mg/dL'],['lab-lpa','Lp(a)','nmol/L'],
+    ['lab-cystatinc','Cystatin C','mg/L'],
+    ['lab-wbc','WBC','K/μL'],['lab-rbc','RBC','M/μL'],['lab-hgb','Hemoglobin','g/dL'],
+    ['lab-hct','Hematocrit','%'],['lab-plt','Platelets','K/μL'],['lab-mcv','MCV','fL'],
+    ['lab-neut','Neutrophils %','%'],['lab-lymph','Lymphocytes %','%']
   ],
   metabolic: [
     ['lab-glucose','Fasting Glucose','mg/dL'],['lab-hba1c','HbA1c','%'],['lab-insulin','Fasting Insulin','μIU/mL'],
-    ['lab-homa','HOMA-IR',''],['lab-alt','ALT','U/L'],['lab-ast','AST','U/L'],['lab-ggt','GGT','U/L'],['lab-uric','Uric Acid','mg/dL']
+    ['lab-homa','HOMA-IR',''],['lab-alt','ALT','U/L'],['lab-ast','AST','U/L'],['lab-ggt','GGT','U/L'],
+    ['lab-alp','Alkaline Phosphatase','U/L'],['lab-tbili','Total Bilirubin','mg/dL'],
+    ['lab-bun','BUN','mg/dL'],['lab-creat','Creatinine','mg/dL'],['lab-egfr','eGFR','mL/min'],
+    ['lab-sodium','Sodium','mEq/L'],['lab-potassium','Potassium','mEq/L'],['lab-uric','Uric Acid','mg/dL']
   ],
   hormonal: [
     ['lab-test-total','Total Testosterone','ng/dL'],['lab-test-free','Free Testosterone','pg/mL'],
-    ['lab-shbg','SHBG','nmol/L'],['lab-e2','Estradiol (E2)','pg/mL'],['lab-cortisol','Cortisol','μg/dL'],
+    ['lab-dht','DHT','ng/dL'],['lab-shbg','SHBG','nmol/L'],['lab-e2','Estradiol, Sensitive','pg/mL'],
+    ['lab-lh','LH','mIU/mL'],['lab-fsh','FSH','mIU/mL'],['lab-prolactin','Prolactin','ng/mL'],
+    ['lab-cortisol','Cortisol','μg/dL'],['lab-dheas','DHEA-S','μg/dL'],['lab-igf1','IGF-1','ng/mL'],
     ['lab-tsh','TSH','mIU/L'],['lab-ft3','Free T3','pg/mL'],['lab-ft4','Free T4','ng/dL'],
-    ['lab-dheas','DHEA-S','μg/dL'],['lab-igf1','IGF-1','ng/mL']
+    ['lab-psa','PSA','ng/mL'],
+    ['lab-prog','Progesterone','ng/mL'],['lab-amh','AMH','ng/mL'],
+    ['lab-tpo','TPO Antibodies','IU/mL'],['lab-tgab','TG Antibodies','IU/mL']
   ],
   nutrients: [
     ['lab-vitd','Vitamin D (25-OH)','ng/mL'],['lab-b12','Vitamin B12','pg/mL'],['lab-folate','Folate','ng/mL'],
-    ['lab-ferritin','Ferritin','ng/mL'],['lab-iron','Iron (Serum)','μg/dL'],['lab-mag','Magnesium','mg/dL'],
-    ['lab-zinc','Zinc','μg/dL'],['lab-omega3','Omega-3 Index','%']
+    ['lab-ferritin','Ferritin','ng/mL'],['lab-iron','Iron (Serum)','μg/dL'],
+    ['lab-tibc','TIBC','μg/dL'],['lab-iron-sat','Iron Saturation','%'],
+    ['lab-mag','RBC Magnesium','mg/dL'],['lab-zinc','Zinc','μg/dL'],['lab-omega3','Omega-3 Index','%']
   ],
   inflammation: [
     ['lab-crp','hs-CRP','mg/L'],['lab-hcy','Homocysteine','μmol/L'],['lab-fibrin','Fibrinogen','mg/dL'],
-    ['lab-il6','IL-6','pg/mL'],['lab-tnfa','TNF-α','pg/mL'],['lab-esr','ESR','mm/hr'],['lab-wbc','WBC','K/μL']
+    ['lab-il6','IL-6','pg/mL'],['lab-tnfa','TNF-α','pg/mL'],['lab-esr','ESR','mm/hr']
   ]
 };
 
@@ -5195,53 +5238,33 @@ The JSON must have this exact structure — use null for any value not found in 
 {
   "lab_date": "YYYY-MM-DD or null",
   "cardiovascular": {
-    "Total Cholesterol": number_or_null,
-    "LDL": number_or_null,
-    "HDL": number_or_null,
-    "Triglycerides": number_or_null,
-    "ApoB": number_or_null,
-    "Lp(a)": number_or_null
+    "Total Cholesterol": null, "LDL": null, "HDL": null, "Triglycerides": null,
+    "ApoB": null, "Lp(a)": null, "Cystatin C": null,
+    "WBC": null, "RBC": null, "Hemoglobin": null, "Hematocrit": null,
+    "Platelets": null, "MCV": null, "Neutrophils %": null, "Lymphocytes %": null
   },
   "metabolic": {
-    "Fasting Glucose": number_or_null,
-    "HbA1c": number_or_null,
-    "Fasting Insulin": number_or_null,
-    "HOMA-IR": number_or_null,
-    "ALT": number_or_null,
-    "AST": number_or_null,
-    "GGT": number_or_null,
-    "Uric Acid": number_or_null
+    "Fasting Glucose": null, "HbA1c": null, "Fasting Insulin": null, "HOMA-IR": null,
+    "ALT": null, "AST": null, "GGT": null, "Alkaline Phosphatase": null,
+    "Total Bilirubin": null, "BUN": null, "Creatinine": null, "eGFR": null,
+    "Sodium": null, "Potassium": null, "Uric Acid": null
   },
   "hormonal": {
-    "Total Testosterone": number_or_null,
-    "Free Testosterone": number_or_null,
-    "SHBG": number_or_null,
-    "Estradiol (E2)": number_or_null,
-    "Cortisol": number_or_null,
-    "TSH": number_or_null,
-    "Free T3": number_or_null,
-    "Free T4": number_or_null,
-    "DHEA-S": number_or_null,
-    "IGF-1": number_or_null
+    "Total Testosterone": null, "Free Testosterone": null, "DHT": null, "SHBG": null,
+    "Estradiol, Sensitive": null, "LH": null, "FSH": null, "Prolactin": null,
+    "Cortisol": null, "DHEA-S": null, "IGF-1": null,
+    "TSH": null, "Free T3": null, "Free T4": null,
+    "PSA": null, "Progesterone": null, "AMH": null,
+    "TPO Antibodies": null, "TG Antibodies": null
   },
   "nutrients": {
-    "Vitamin D (25-OH)": number_or_null,
-    "Vitamin B12": number_or_null,
-    "Folate": number_or_null,
-    "Ferritin": number_or_null,
-    "Iron (Serum)": number_or_null,
-    "Magnesium": number_or_null,
-    "Zinc": number_or_null,
-    "Omega-3 Index": number_or_null
+    "Vitamin D (25-OH)": null, "Vitamin B12": null, "Folate": null,
+    "Ferritin": null, "Iron (Serum)": null, "TIBC": null, "Iron Saturation": null,
+    "RBC Magnesium": null, "Zinc": null, "Omega-3 Index": null
   },
   "inflammation": {
-    "hs-CRP": number_or_null,
-    "Homocysteine": number_or_null,
-    "Fibrinogen": number_or_null,
-    "IL-6": number_or_null,
-    "TNF-α": number_or_null,
-    "ESR": number_or_null,
-    "WBC": number_or_null
+    "hs-CRP": null, "Homocysteine": null, "Fibrinogen": null,
+    "IL-6": null, "TNF-α": null, "ESR": null
   }
 }
 
@@ -5278,11 +5301,35 @@ Only return the JSON. No other text.`;
     // Populate fields
     let filled = 0;
     const fieldMap = {
-      cardiovascular: [['Total Cholesterol','lab-chol-total'],['LDL','lab-ldl'],['HDL','lab-hdl'],['Triglycerides','lab-trig'],['ApoB','lab-apob'],['Lp(a)','lab-lpa']],
-      metabolic:      [['Fasting Glucose','lab-glucose'],['HbA1c','lab-hba1c'],['Fasting Insulin','lab-insulin'],['HOMA-IR','lab-homa'],['ALT','lab-alt'],['AST','lab-ast'],['GGT','lab-ggt'],['Uric Acid','lab-uric']],
-      hormonal:       [['Total Testosterone','lab-test-total'],['Free Testosterone','lab-test-free'],['SHBG','lab-shbg'],['Estradiol (E2)','lab-e2'],['Cortisol','lab-cortisol'],['TSH','lab-tsh'],['Free T3','lab-ft3'],['Free T4','lab-ft4'],['DHEA-S','lab-dheas'],['IGF-1','lab-igf1']],
-      nutrients:      [['Vitamin D (25-OH)','lab-vitd'],['Vitamin B12','lab-b12'],['Folate','lab-folate'],['Ferritin','lab-ferritin'],['Iron (Serum)','lab-iron'],['Magnesium','lab-mag'],['Zinc','lab-zinc'],['Omega-3 Index','lab-omega3']],
-      inflammation:   [['hs-CRP','lab-crp'],['Homocysteine','lab-hcy'],['Fibrinogen','lab-fibrin'],['IL-6','lab-il6'],['TNF-α','lab-tnfa'],['ESR','lab-esr'],['WBC','lab-wbc']]
+      cardiovascular: [
+        ['Total Cholesterol','lab-chol-total'],['LDL','lab-ldl'],['HDL','lab-hdl'],['Triglycerides','lab-trig'],
+        ['ApoB','lab-apob'],['Lp(a)','lab-lpa'],['Cystatin C','lab-cystatinc'],
+        ['WBC','lab-wbc'],['RBC','lab-rbc'],['Hemoglobin','lab-hgb'],['Hematocrit','lab-hct'],
+        ['Platelets','lab-plt'],['MCV','lab-mcv'],['Neutrophils %','lab-neut'],['Lymphocytes %','lab-lymph']
+      ],
+      metabolic: [
+        ['Fasting Glucose','lab-glucose'],['HbA1c','lab-hba1c'],['Fasting Insulin','lab-insulin'],['HOMA-IR','lab-homa'],
+        ['ALT','lab-alt'],['AST','lab-ast'],['GGT','lab-ggt'],['Alkaline Phosphatase','lab-alp'],
+        ['Total Bilirubin','lab-tbili'],['BUN','lab-bun'],['Creatinine','lab-creat'],['eGFR','lab-egfr'],
+        ['Sodium','lab-sodium'],['Potassium','lab-potassium'],['Uric Acid','lab-uric']
+      ],
+      hormonal: [
+        ['Total Testosterone','lab-test-total'],['Free Testosterone','lab-test-free'],['DHT','lab-dht'],
+        ['SHBG','lab-shbg'],['Estradiol, Sensitive','lab-e2'],['LH','lab-lh'],['FSH','lab-fsh'],
+        ['Prolactin','lab-prolactin'],['Cortisol','lab-cortisol'],['DHEA-S','lab-dheas'],['IGF-1','lab-igf1'],
+        ['TSH','lab-tsh'],['Free T3','lab-ft3'],['Free T4','lab-ft4'],
+        ['PSA','lab-psa'],['Progesterone','lab-prog'],['AMH','lab-amh'],
+        ['TPO Antibodies','lab-tpo'],['TG Antibodies','lab-tgab']
+      ],
+      nutrients: [
+        ['Vitamin D (25-OH)','lab-vitd'],['Vitamin B12','lab-b12'],['Folate','lab-folate'],
+        ['Ferritin','lab-ferritin'],['Iron (Serum)','lab-iron'],['TIBC','lab-tibc'],
+        ['Iron Saturation','lab-iron-sat'],['RBC Magnesium','lab-mag'],['Zinc','lab-zinc'],['Omega-3 Index','lab-omega3']
+      ],
+      inflammation: [
+        ['hs-CRP','lab-crp'],['Homocysteine','lab-hcy'],['Fibrinogen','lab-fibrin'],
+        ['IL-6','lab-il6'],['TNF-α','lab-tnfa'],['ESR','lab-esr']
+      ]
     };
     Object.entries(fieldMap).forEach(([cat,fields])=>{
       fields.forEach(([label,id])=>{
@@ -6063,10 +6110,9 @@ async function saveOverview(btn){
 
 async function saveMealPlan(btn){
   if(!currentClient)return;
-  // Support both Meal Design (md-save-msg) and Meal Plan (mp-save-msg) tabs
-  const msgId = btn?.closest('#dptab-t5') ? 'md-save-msg' : 'mp-save-msg';
-  const msg=document.getElementById(msgId);
-  if(btn){btn.textContent='Saving...';btn.disabled=true;}
+  // Find message div — try both possible IDs, fall back gracefully
+  const msg = document.getElementById('md-save-msg') || document.getElementById('mp-save-msg') || null;
+  if(btn){btn.disabled=true;}
   if(msg){msg.textContent='Saving...';msg.style.color='var(--gold)';}
   const count=parseInt(document.getElementById('dp-meal-count')?.value)||4;
   const meals=[];
@@ -6090,15 +6136,12 @@ async function saveMealPlan(btn){
   if(btn){btn.disabled=false;}
   if(error){
     if(msg){msg.style.color='var(--red)';msg.textContent='Error: '+error.message;}
-    if(btn){btn.textContent='Error — try again';btn.style.background='var(--red)';}
     return;
   }
-  if(msg){msg.style.color='var(--green)';msg.textContent='✓ Saved — visible in client portal.';}
-  if(btn){btn.textContent='✓ Saved!';btn.style.background='linear-gradient(135deg,#2A5040,#1A3A28)';}
-  setTimeout(()=>{
-    if(msg)msg.textContent='';
-    if(btn){btn.textContent='Save Meal Plan →';btn.style.background='';}
-  },3000);
+  if(msg){
+    msg.style.color='var(--green)';msg.textContent='✓ Saved.';
+    setTimeout(()=>{msg.textContent='';},3000);
+  }
 }
 
 function sendMsg(){
