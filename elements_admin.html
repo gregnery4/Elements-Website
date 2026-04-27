@@ -968,7 +968,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
         </div>
         <div class="wz-nav">
           <button class="wz-back-btn" onclick="goWizardStep(4)">← Back</button>
-          <button class="wz-next-btn" onclick="wzSaveAndNext(5,'saveMealPlan',this)">Save &amp; Continue →</button>
+          <button class="wz-next-btn" onclick="wzSaveAndNext(5,'saveMealPlan',null)">Save &amp; Continue →</button>
         </div>
       </div>
 
@@ -985,7 +985,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
         </div>
         <div class="wz-nav">
           <button class="wz-back-btn" onclick="goWizardStep(6)">← Back</button>
-          <button class="wz-next-btn" onclick="wzSaveAndNext(7,'saveMealPlan',this)">Save &amp; Continue →</button>
+          <button class="wz-next-btn" onclick="wzSaveAndNext(7,'saveMealPlan',null)">Save &amp; Continue →</button>
         </div>
       </div>
 
@@ -1998,16 +1998,13 @@ function goWizardStep(stepIdx){
 }
 
 async function wzSaveAndNext(stepIdx, saveFnName, btnArg){
-  // Find the Save & Continue button and show saving state
-  const btn=event?.currentTarget;
+  // Get the button — use btnArg if provided, otherwise find the closest wz-next-btn from event
+  const btn = btnArg || (typeof event!=='undefined' && event?.target?.classList?.contains('wz-next-btn') ? event.target : null);
   if(btn){ btn.textContent='Saving...'; btn.style.opacity='0.7'; btn.disabled=true; }
 
   try{
     const fn=window[saveFnName];
-    if(typeof fn==='function'){
-      if(btnArg) await fn(btnArg);
-      else await fn();
-    }
+    if(typeof fn==='function') await fn();
   } catch(e){ console.error('wzSaveAndNext error:',e); }
 
   if(btn){ btn.textContent='Saved ✓'; btn.style.opacity='1'; btn.disabled=false;
