@@ -1940,10 +1940,17 @@ function openClient(id, skipWizardReset=false){
 
   document.getElementById('detail-overlay').classList.add('open');
   document.body.style.overflow='hidden';
-  dpTab('t1',document.querySelector('.dp-tab'));
+  // Show the wizard tab and start at step 0
+  const wizTab = document.querySelector('.dp-tab');
+  dpTab('t_wizard', wizTab);
+  goWizardStep(wzCurrentStep);
 }
 
-function closeDetail(){document.getElementById('detail-overlay').classList.remove('open');document.body.style.overflow='';}
+function closeDetail(){
+  document.getElementById('detail-overlay').classList.remove('open');
+  document.body.style.overflow='';
+  currentClient=null;
+}
 
 // ── WIZARD ──
 const WZ_STEPS = ['t1','t12','t7','t3','t4','t5','t8','t11','t13','t2'];
