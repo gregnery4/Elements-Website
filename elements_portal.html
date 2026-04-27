@@ -289,11 +289,35 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
 
       <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Current Training Parameters</div>
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-bottom:28px">
-        <div class="kcard"><div class="klbl">Training Frequency</div><div class="kval" style="font-size:22px" id="tp-freq">—</div></div>
-        <div class="kcard"><div class="klbl">Training Method</div><div style="font-size:13px;font-weight:500;color:var(--white);margin-top:8px" id="tp-method">—</div></div>
-        <div class="kcard"><div class="klbl">Training Focus</div><div style="font-size:13px;font-weight:500;color:var(--white);margin-top:8px" id="tp-focus">—</div></div>
-        <div class="kcard"><div class="klbl">Training Days</div><div style="font-size:11px;font-weight:500;color:var(--white);margin-top:8px;line-height:1.7" id="tp-days">—</div></div>
-        <div class="kcard"><div class="klbl">Predictor Exercises</div><div id="tp-predictors" style="margin-top:8px"><span style="font-size:11px;color:var(--muted)">—</span></div></div>
+
+        <div class="kcard" style="text-align:center">
+          <div class="klbl">Training Frequency</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--white);line-height:1;margin-top:10px" id="tp-freq">—</div>
+          <div class="ksub" style="margin-top:4px">per week</div>
+        </div>
+
+        <div class="kcard" style="text-align:center">
+          <div class="klbl">Training Method</div>
+          <div style="font-size:12px;font-weight:600;color:var(--white);margin-top:12px;line-height:1.5;text-align:center" id="tp-method">—</div>
+        </div>
+
+        <div class="kcard" style="text-align:center">
+          <div class="klbl">Training Focus</div>
+          <div style="font-size:12px;font-weight:600;color:var(--white);margin-top:12px;line-height:1.5;text-align:center" id="tp-focus">—</div>
+        </div>
+
+        <div class="kcard">
+          <div class="klbl" style="text-align:center;margin-bottom:10px">Training Days</div>
+          <div id="tp-days" style="display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:11px;color:var(--muted)">—</span>
+          </div>
+        </div>
+
+        <div class="kcard">
+          <div class="klbl" style="text-align:center;margin-bottom:10px">Predictor Exercises</div>
+          <div id="tp-predictors"><span style="font-size:11px;color:var(--muted)">—</span></div>
+        </div>
+
       </div>
     </div>
 
@@ -473,7 +497,13 @@ async function loadOverview(){
     if(tpFreq) tpFreq.textContent=tFreq;
     if(tpMethod) tpMethod.textContent=tMethod;
     if(tpFocus) tpFocus.textContent=tFocus;
-    if(tpDays) tpDays.textContent=tDays;
+    const tpDaysEl=document.getElementById('tp-days');
+    if(tpDaysEl){
+      const days = tDays==='—'?[]:tDays.split(',').map(d=>d.trim()).filter(Boolean);
+      tpDaysEl.innerHTML = days.length
+        ? days.map(d=>`<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--white);font-weight:500"><span style="width:5px;height:5px;border-radius:50%;background:var(--gold-mid);flex-shrink:0;display:inline-block"></span>${d}</div>`).join('')
+        : '<span style="font-size:11px;color:var(--muted)">—</span>';
+    }
   }catch(e){
     console.warn('loadOverview error (non-fatal):',e);
   }
@@ -1064,7 +1094,7 @@ async function loadReviews(){
 
   if(predEl && exercises.length){
     predEl.innerHTML = exercises.map(ex=>
-      `<div style="font-size:11px;font-weight:600;color:var(--white);margin-bottom:6px">${ex}</div>`
+      `<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--white);font-weight:500;margin-bottom:5px"><span style="width:5px;height:5px;border-radius:50%;background:var(--gold-mid);flex-shrink:0;display:inline-block"></span>${ex}</div>`
     ).join('');
   }
 
