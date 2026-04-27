@@ -925,7 +925,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       <!-- TAB 5: MEAL DESIGN -->
       <div id="dptab-t5" style="display:none">
         <div class="dp-sec">
-          <div class="dp-sec-title">Daily Totals (from Calculator)</div>
+          <div class="dp-sec-title">Daily Totals <span style="font-size:9px;color:var(--muted);font-weight:400;letter-spacing:1px">(updates as you enter meals)</span></div>
           <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:8px">
             <div id="meal-card-cals" style="background:var(--c3);border:1px solid var(--border);padding:14px;text-align:center;transition:border-color .3s">
               <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Calories</div>
@@ -2790,6 +2790,16 @@ function updateMealTotals(){
     usedFat+=parseInt(document.getElementById(`m${i}-fat`)?.value)||0;
   }
   const usedCals=(usedProt*4)+(usedCarb*4)+(usedFat*9);
+
+  // Update the total boxes to show actual meal sums
+  const totCalsEl=document.getElementById('meal-tot-cals');
+  const totProtEl=document.getElementById('meal-tot-prot');
+  const totCarbEl=document.getElementById('meal-tot-carb');
+  const totFatEl=document.getElementById('meal-tot-fat');
+  if(totCalsEl) totCalsEl.textContent=usedCals||'0';
+  if(totProtEl) totProtEl.textContent=(usedProt||'0')+'g';
+  if(totCarbEl) totCarbEl.textContent=(usedCarb||'0')+'g';
+  if(totFatEl)  totFatEl.textContent=(usedFat||'0')+'g';
 
   const remCals=targetCals-usedCals;
   const remProt=targetProt-usedProt;
