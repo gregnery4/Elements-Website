@@ -328,15 +328,54 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap">
           <div style="display:flex;align-items:center;gap:8px">
             <span style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">Exercise</span>
-            <select id="perf-ex-select" onchange="renderPerfChart()" style="background:var(--c3);border:1px solid var(--borderw);color:var(--white);font-family:'Montserrat',sans-serif;font-size:10px;padding:6px 10px;outline:none;cursor:pointer;min-width:200px">
+            <select id="perf-ex-select" onchange="renderPerfChart()" style="background:var(--c3);border:1px solid var(--borderw);color:var(--white);font-family:'Montserrat',sans-serif;font-size:10px;padding:6px 10px;outline:none;cursor:pointer;min-width:220px">
               <option value="">— Select Exercise —</option>
+              <option value="Flat Press - DB">Flat Press - DB</option>
+              <option value="Low Incline Press - DB">Low Incline Press - DB</option>
+              <option value="High Incline Press - DB">High Incline Press - DB</option>
+              <option value="Bench Press - Flat - Barbell">Bench Press - Flat - Barbell</option>
+              <option value="Bench Press - Incline - Barbell">Bench Press - Incline - Barbell</option>
+              <option value="Shoulder Press - Seated - DB">Shoulder Press - Seated - DB</option>
+              <option value="Shoulder Press - Seated - Barbell">Shoulder Press - Seated - Barbell</option>
+              <option value="Shoulder Press - Standing - Barbell">Shoulder Press - Standing - Barbell</option>
+              <option value="Push Press - Barbell">Push Press - Barbell</option>
+              <option value="Chin-Up - Neutral Grip">Chin-Up - Neutral Grip</option>
+              <option value="Chin-Up - Semi-Supinated Grip">Chin-Up - Semi-Supinated Grip</option>
+              <option value="Pull-Up">Pull-Up</option>
+              <option value="Deadlift - Trap Bar">Deadlift - Trap Bar</option>
+              <option value="Deadlift - Barbell">Deadlift - Barbell</option>
+              <option value="Romanian Deadlift - Barbell">Romanian Deadlift - Barbell</option>
+              <option value="Back Squat - Barbell">Back Squat - Barbell</option>
+              <option value="Front Squat - Barbell">Front Squat - Barbell</option>
+              <option value="Split Squat - FFF">Split Squat - FFF</option>
+              <option value="Split Squat - FFE">Split Squat - FFE</option>
+              <option value="Split Squat - RFE">Split Squat - RFE</option>
+              <option value="Glute Bridge - Barbell">Glute Bridge - Barbell</option>
+              <option value="Incline Hip Extension - DB">Incline Hip Extension - DB</option>
+              <option value="Hack Squat - Machine">Hack Squat - Machine</option>
+              <option value="Push-Up">Push-Up</option>
+              <option value="Dips">Dips</option>
             </select>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">Metric</span>
+            <span style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">Metric - Reps</span>
             <select id="perf-metric-select" onchange="renderPerfChart()" style="background:var(--c3);border:1px solid var(--borderw);color:var(--white);font-family:'Montserrat',sans-serif;font-size:10px;padding:6px 10px;outline:none;cursor:pointer">
               <option value="weight">Weight (lbs)</option>
-              <option value="reps">Reps</option>
+              <option value="1">1 Rep</option>
+              <option value="2">2 Reps</option>
+              <option value="3">3 Reps</option>
+              <option value="4">4 Reps</option>
+              <option value="5">5 Reps</option>
+              <option value="6">6 Reps</option>
+              <option value="7">7 Reps</option>
+              <option value="8">8 Reps</option>
+              <option value="9">9 Reps</option>
+              <option value="10">10 Reps</option>
+              <option value="11">11 Reps</option>
+              <option value="12">12 Reps</option>
+              <option value="13">13 Reps</option>
+              <option value="14">14 Reps</option>
+              <option value="15">15 Reps</option>
             </select>
           </div>
         </div>
@@ -1118,11 +1157,18 @@ function renderPerfChart(){
 
   if(!exSel){ if(empty) empty.style.display='flex'; return; }
   if(empty) empty.style.display='none';
-  if(yLabel) yLabel.textContent = metric==='weight'?'Weight (lbs)':'Reps';
+  const isWeight = metric==='weight';
+  if(yLabel) yLabel.textContent = isWeight?'Weight (lbs)':`Weight @ ${metric} Rep${metric==='1'?'':'s'} (lbs)`;
 
   // Filter and sort data for selected exercise
   const points = _perfReviewData
-    .filter(d=>d.exercise===exSel && (metric==='weight'?d.weight:d.reps))
+    .filter(d=>{
+      if(d.exercise!==exSel) return false;
+      if(isWeight) return d.weight&&parseFloat(d.weight)>0;
+      if(!d.reps) return false;
+      const repNums=d.reps.toString().split(/[,\s\/\-x]+/).map(n=>parseInt(n.trim())).filter(n=>!isNaN(n));
+      return repNums.includes(parseInt(metric));
+    })
     .sort((a,b)=>a.weekNum-b.weekNum);
 
   const canvas = document.getElementById('perf-chart');
@@ -1141,11 +1187,11 @@ function renderPerfChart(){
     ctx.fillStyle='rgba(150,140,128,0.6)';
     ctx.font='11px Montserrat,sans-serif';
     ctx.textAlign='center';
-    ctx.fillText('No data yet for this exercise',W/2,H/2);
+    ctx.fillText('No data yet for this selection',W/2,H/2);
     return;
   }
 
-  const values = points.map(p=>metric==='weight'?parseFloat(p.weight)||0:parseFloat(p.reps)||0);
+  const values = points.map(p=>parseFloat(p.weight)||0);
   const labels = points.map(p=>p.date?new Date(p.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}): 'Wk '+p.weekNum);
   const maxV = Math.max(...values,1);
   const minV = Math.min(...values,0);
@@ -1256,9 +1302,6 @@ async function loadReviews(){
         });
       }catch(e){}
     });
-    // Populate exercise dropdown with unique exercises
-    const uniqueEx = [...new Set(_perfReviewData.map(d=>d.exercise))];
-    populatePerfExerciseDropdown(uniqueEx);
 
     // Reviews page
     document.getElementById('reviews-content').innerHTML=`
