@@ -1695,7 +1695,7 @@ function renderClientTable(){
 // ── DETAIL PANEL ──
 let currentClient=null;
 
-function openClient(id){
+function openClient(id, skipWizardReset=false){
   currentClient=allClients.find(c=>c.id===id);
   if(!currentClient)return;
   const c=currentClient;
@@ -1707,8 +1707,8 @@ function openClient(id){
   document.getElementById('dp-name').textContent=name;
   document.getElementById('dp-meta').textContent='Active Client · Elements Personal Training';
 
-  // Reset wizard — mark steps as done based on existing data
-  wzCompleted.clear();
+  // Reset wizard only when opening a new client, not on data refresh
+  if(!skipWizardReset){
   wzCurrentStep=0;
   // Remove old completion message if any
   const oldMsg=document.getElementById('wz-complete-msg');
@@ -1732,6 +1732,7 @@ function openClient(id){
     if(wzCompleted.has(si)) s.classList.add('done');
   });
   document.getElementById('wz-step-0')?.classList.add('on');
+  } // end !skipWizardReset
 
   // Tab 1 — Client Info
   document.getElementById('dp-fullname').value=c.full_name||'';
@@ -2947,8 +2948,10 @@ async function saveBodyComp(){
   if(error){msg.style.color='var(--red)';msg.textContent='Error: '+error.message;return;}
   msg.style.color='var(--green)';msg.textContent='✓ Assessment saved.';
   setTimeout(()=>msg.textContent='',3000);
+  const savedStep = wzCurrentStep;
   await loadAll();
-  openClient(currentClient.id);
+  openClient(currentClient.id, true);
+  goWizardStep(savedStep);
 }
 
 // ── WEEKLY ENTRY ──
@@ -4451,10 +4454,10 @@ async function saveSuppDetails(){
   }
   msg.style.color='var(--green)';msg.textContent='✓ Supplement protocol saved.';
   setTimeout(()=>msg.textContent='',3000);
+  const savedStep = wzCurrentStep;
   await loadAll();
-  // Re-open client so currentClient.supplements is refreshed
-  if(currentClient) openClient(currentClient.id);
-  // Regenerate meal plan so supplements show immediately
+  if(currentClient) openClient(currentClient.id, true);
+  goWizardStep(savedStep);
   generateMealPlan();
 }
 
