@@ -2948,10 +2948,10 @@ async function saveBodyComp(){
   if(error){msg.style.color='var(--red)';msg.textContent='Error: '+error.message;return;}
   msg.style.color='var(--green)';msg.textContent='✓ Assessment saved.';
   setTimeout(()=>msg.textContent='',3000);
-  const savedStep = wzCurrentStep;
+  // Refresh data silently without resetting wizard navigation
   await loadAll();
-  openClient(currentClient.id, true);
-  goWizardStep(savedStep);
+  const refreshed=allClients.find(c=>c.id===currentClient.id);
+  if(refreshed) currentClient=refreshed;
 }
 
 // ── WEEKLY ENTRY ──
@@ -4454,10 +4454,9 @@ async function saveSuppDetails(){
   }
   msg.style.color='var(--green)';msg.textContent='✓ Supplement protocol saved.';
   setTimeout(()=>msg.textContent='',3000);
-  const savedStep = wzCurrentStep;
   await loadAll();
-  if(currentClient) openClient(currentClient.id, true);
-  goWizardStep(savedStep);
+  const refreshed=allClients.find(c=>c.id===currentClient?.id);
+  if(refreshed) currentClient=refreshed;
   generateMealPlan();
 }
 
