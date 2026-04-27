@@ -1071,6 +1071,15 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             </div>
           </div>
 
+          <!-- SECTION 1b: Training Performance -->
+          <div style="background:var(--c3);border:1px solid var(--border);padding:18px;margin-bottom:3px">
+            <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:6px">Training Performance</div>
+            <div style="font-size:10px;color:var(--muted);margin-bottom:16px">Primary exercises selected in Tab 8 · Enter sets, reps and weight for this week</div>
+            <div id="wk-perf-grid">
+              <div style="font-size:11px;color:var(--muted);font-style:italic">No primary exercises selected. Set them in Training Program Design (Tab 8).</div>
+            </div>
+          </div>
+
           <!-- SECTION 2: Bodyweight Recording -->
           <div style="background:var(--c3);border:1px solid var(--border);padding:18px;margin-bottom:3px">
             <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:14px">2. Bodyweight Recording</div>
@@ -1861,6 +1870,7 @@ function openClient(id, skipWizardReset=false){
       sessions_done:r.sessions_done,
       sessions_target:r.sessions_target,
       training_notes:r.training_notes,
+      perf_data:r.perf_data||null,
       bw_days:r.bw_days_completed,
       bw_compliance:r.bw_compliance,
       meals_compliance:r.meals_compliance,
@@ -2038,7 +2048,7 @@ function dpTab(name,el){
   if(name==='t_labs'){ renderLabLog(); return; }
   if(name==='t5')syncMealTotals();
   if(name==='t11')generateMealPlan();
-  if(name==='t6'){loadBWScheduledDays();renderWkMealGrid();}
+  if(name==='t6'){loadBWScheduledDays();renderWkMealGrid();renderWkPerfGrid();}
   if(name==='t9')loadProtocols();
   if(name==='t2')syncSummaryHeader();
   if(name==='t3')syncBodyCompToGoals();
@@ -3232,6 +3242,68 @@ function setWkMealData(data){
   });
 }
 
+function renderWkPerfGrid(){
+  const grid = document.getElementById('wk-perf-grid');
+  if(!grid) return;
+  const exercises = [
+    document.getElementById('ov-exercise-selection-1')?.value,
+    document.getElementById('ov-exercise-selection-2')?.value,
+    document.getElementById('ov-exercise-selection-3')?.value,
+  ].filter(Boolean);
+
+  if(!exercises.length){
+    grid.innerHTML='<div style="font-size:11px;color:var(--muted);font-style:italic">No primary exercises selected. Set them in Training Program Design (Tab 8).</div>';
+    return;
+  }
+
+  grid.innerHTML = exercises.map((ex,i)=>`
+    <div style="background:var(--c2);border:1px solid var(--borderw);padding:14px;margin-bottom:3px">
+      <div style="font-size:10px;font-weight:600;color:var(--white);margin-bottom:12px;letter-spacing:0.5px">${ex}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div class="edit-field" style="margin:0">
+          <label>Sets</label>
+          <input type="number" id="wk-perf-${i}-sets" placeholder="0" min="0" style="width:100%">
+        </div>
+        <div class="edit-field" style="margin:0">
+          <label>Reps</label>
+          <input type="text" id="wk-perf-${i}-reps" placeholder="e.g. 8, 8, 6" style="width:100%">
+        </div>
+        <div class="edit-field" style="margin:0">
+          <label>Weight (lbs)</label>
+          <input type="text" id="wk-perf-${i}-weight" placeholder="e.g. 185" style="width:100%">
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function getWkPerfData(){
+  const exercises = [
+    document.getElementById('ov-exercise-selection-1')?.value,
+    document.getElementById('ov-exercise-selection-2')?.value,
+    document.getElementById('ov-exercise-selection-3')?.value,
+  ].filter(Boolean);
+  return exercises.map((ex,i)=>({
+    exercise: ex,
+    sets: document.getElementById(`wk-perf-${i}-sets`)?.value||'',
+    reps: document.getElementById(`wk-perf-${i}-reps`)?.value||'',
+    weight: document.getElementById(`wk-perf-${i}-weight`)?.value||'',
+  }));
+}
+
+function setWkPerfData(data){
+  if(!data||!data.length) return;
+  setTimeout(()=>{
+    data.forEach((d,i)=>{
+      const sets = document.getElementById(`wk-perf-${i}-sets`);
+      const reps = document.getElementById(`wk-perf-${i}-reps`);
+      const weight = document.getElementById(`wk-perf-${i}-weight`);
+      if(sets) sets.value = d.sets||'';
+      if(reps) reps.value = d.reps||'';
+      if(weight) weight.value = d.weight||'';
+    });
+  },200);
+}
+
 function loadBWScheduledDays(){
   const raw=getBWDays();
   const scheduledDays=raw?raw.split(',').map(s=>s.trim()).filter(Boolean):[];
@@ -3438,6 +3510,7 @@ async function addWeeklyEntry(){
     sessions_target:document.getElementById('wk-sessions-target').value,
     training_compliance:'auto',
     training_notes:document.getElementById('wk-training-notes').value,
+    perf_data:JSON.stringify(getWkPerfData()),
     bw_days:getWkBWDays().join(', '),
     bw_compliance:(()=>{const sc=getBWDays().split(',').map(s=>s.trim()).filter(Boolean);const co=getWkBWDays();return sc.length>0?Math.round((co.length/sc.length)*100)+''||'auto':'auto';})(),
     meals_compliance:JSON.stringify(getWkMealData()),
@@ -3794,6 +3867,22 @@ function renderWeeklyLog(){
             <div style="margin-top:8px"><span style="font-size:10px;color:${complianceColor[e.training_compliance]||'var(--muted)'}">${complianceLabel[e.training_compliance]||'—'}</span></div>
             ${e.training_notes?`<div style="font-size:11px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--borderw)">${e.training_notes}</div>`:''}
           </div>
+          <!-- Training Performance -->
+          ${(()=>{
+            try{
+              const pd=e.perf_data?(typeof e.perf_data==='string'?JSON.parse(e.perf_data):e.perf_data):[];
+              if(!pd||!pd.length) return '';
+              return `<div style="background:var(--c2);border:1px solid var(--border);padding:14px">
+                <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Training Performance</div>
+                ${pd.map(p=>`<div style="padding:8px 0;border-bottom:1px solid var(--borderw);display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;align-items:center">
+                  <div style="font-size:10px;font-weight:600;color:var(--white)">${p.exercise}</div>
+                  <div style="text-align:center"><div style="font-size:7px;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Sets</div><div style="font-size:13px;color:var(--white)">${p.sets||'—'}</div></div>
+                  <div style="text-align:center"><div style="font-size:7px;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Reps</div><div style="font-size:13px;color:var(--white)">${p.reps||'—'}</div></div>
+                  <div style="text-align:center"><div style="font-size:7px;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Weight</div><div style="font-size:13px;color:var(--gold)">${p.weight?p.weight+' lbs':'—'}</div></div>
+                </div>`).join('')}
+              </div>`;
+            }catch(e2){return '';}
+          })()}
           <!-- Bodyweight -->
           <div style="background:var(--c2);border:1px solid var(--border);padding:14px">
             <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Bodyweight Recording</div>
