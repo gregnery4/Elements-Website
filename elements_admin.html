@@ -2094,17 +2094,22 @@ function generateMealPlan(){
     const foods=document.getElementById(`m${i}-foods`)?.value||'';
     const mealSupps=suppByMeal[i]||[];
 
-    // Calculate food portions — use their summed macros if foods are entered for accuracy
+    // Calculate food portions
     const portions = foods ? _getFoodPortionsText(foods, prot, carb, fat) : [];
+
+    // Sum macros exactly from the portions for the macro row and totals
     let dispProt=prot, dispCarb=carb, dispFat=fat;
     if(portions.length){
-      // Sum macros from portions for accurate display
       let pSum=0,cSum=0,fSum=0;
       portions.forEach(({macros})=>{
-        const m=macros.match(/P:(\d+).*?C:(\d+).*?F:(\d+)/i);
-        if(m){pSum+=parseInt(m[1])||0;cSum+=parseInt(m[2])||0;fSum+=parseInt(m[3])||0;}
+        // macros format: "50P · 45C · 8F"
+        const pm=macros.match(/(\d+)P/); const cm=macros.match(/(\d+)C/); const fm=macros.match(/(\d+)F/);
+        if(pm) pSum+=parseInt(pm[1]);
+        if(cm) cSum+=parseInt(cm[1]);
+        if(fm) fSum+=parseInt(fm[1]);
       });
-      if(pSum||cSum||fSum){dispProt=pSum;dispCarb=cSum;dispFat=fSum;}
+      // Only use summed values if we got meaningful data
+      if(pSum||cSum||fSum){ dispProt=pSum; dispCarb=cSum; dispFat=fSum; }
     }
     const cals=(dispProt*4)+(dispCarb*4)+(dispFat*9);
     totProt+=dispProt; totCarb+=dispCarb; totFat+=dispFat; totCals+=cals;
