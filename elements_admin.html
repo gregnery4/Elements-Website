@@ -1724,9 +1724,9 @@ async function loadAll(){
     client_metrics(body_weight,body_fat,lean_mass,recorded_at),
     supplements(id,name,brand,dose,timing,active),
     nutrition_targets(calories,protein_g,carbs_g,fat_g,protein_pct,carb_pct,fat_pct,ref_weight,maintenance_multiplier,coach_notes),
-    client_overview(goal,protocol_start,protocol_end,phase_duration_weeks,training_frequency,training_method,training_focus,nutrition_approach,tracking_responsibility,bw_recording_days,circumference_frequency,skinfold_frequency,dexa_frequency),
+    client_overview(goal,protocol_start,protocol_end,phase_duration_weeks,training_frequency,training_method,training_focus,training_days,exercise_selection,exercise_selection_2,exercise_selection_3,nutrition_approach,tracking_responsibility,bw_recording_days,circumference_frequency,skinfold_frequency,dexa_frequency),
     meal_plans(meals,meal_count,updated_at),
-    weekly_reviews(id,week_number,week_start_date,sessions_done,sessions_target,training_notes,bw_days_completed,bw_compliance,meals_compliance,meals_logged,nutrition_adherence,nutrition_notes,assessment_type,assessment_date,assessment_data,compliance_score,created_at),
+    weekly_reviews(id,week_number,week_start_date,sessions_done,sessions_target,training_notes,bw_days_completed,bw_compliance,meals_compliance,meals_logged,nutrition_adherence,nutrition_notes,assessment_type,assessment_date,assessment_data,compliance_score,perf_data,created_at),
     protocols(id,name,notes,goal,calories,protein_g,carbs_g,fat_g,phase_duration_weeks,body_weight,body_fat,meal_count,created_at)
   `).eq('role','client').order('created_at',{ascending:false});
 
@@ -3251,11 +3251,12 @@ function setWkMealData(data){
 function renderWkPerfGrid(){
   const grid = document.getElementById('wk-perf-grid');
   if(!grid) return;
-  const exercises = [
-    document.getElementById('ov-exercise-selection-1')?.value,
-    document.getElementById('ov-exercise-selection-2')?.value,
-    document.getElementById('ov-exercise-selection-3')?.value,
-  ].filter(Boolean);
+  // Try DOM first, fall back to currentClient saved overview
+  const ov = currentClient?.client_overview?.[0] || currentClient?.client_overview || {};
+  const ex1 = document.getElementById('ov-exercise-selection-1')?.value || ov.exercise_selection || '';
+  const ex2 = document.getElementById('ov-exercise-selection-2')?.value || ov.exercise_selection_2 || '';
+  const ex3 = document.getElementById('ov-exercise-selection-3')?.value || ov.exercise_selection_3 || '';
+  const exercises = [ex1,ex2,ex3].filter(Boolean);
 
   if(!exercises.length){
     grid.innerHTML='<div style="font-size:11px;color:var(--muted);font-style:italic">No primary exercises selected. Set them in Training Program Design (Tab 8).</div>';
@@ -3279,11 +3280,12 @@ function renderWkPerfGrid(){
 }
 
 function getWkPerfData(){
-  const exercises = [
-    document.getElementById('ov-exercise-selection-1')?.value,
-    document.getElementById('ov-exercise-selection-2')?.value,
-    document.getElementById('ov-exercise-selection-3')?.value,
-  ].filter(Boolean);
+  // Try DOM first, fall back to currentClient saved overview
+  const ov = currentClient?.client_overview?.[0] || currentClient?.client_overview || {};
+  const ex1 = document.getElementById('ov-exercise-selection-1')?.value || ov.exercise_selection || '';
+  const ex2 = document.getElementById('ov-exercise-selection-2')?.value || ov.exercise_selection_2 || '';
+  const ex3 = document.getElementById('ov-exercise-selection-3')?.value || ov.exercise_selection_3 || '';
+  const exercises = [ex1,ex2,ex3].filter(Boolean);
   return exercises.map((ex,i)=>({
     exercise: ex,
     reps: document.getElementById(`wk-perf-${i}-reps`)?.value||'',
