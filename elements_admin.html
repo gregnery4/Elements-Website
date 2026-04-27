@@ -585,6 +585,17 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
                 <option>Glute Focus</option>
               </select>
             </div>
+            <div class="edit-field"><label>Primary Exercise Selection</label>
+              <select id="ov-exercise-selection-1" style="margin-bottom:6px;width:100%">
+                <option value="">— Select —</option>
+              </select>
+              <select id="ov-exercise-selection-2" style="margin-bottom:6px;width:100%">
+                <option value="">— Select —</option>
+              </select>
+              <select id="ov-exercise-selection-3" style="width:100%">
+                <option value="">— Select —</option>
+              </select>
+            </div>
           </div>
         </div>
         <div class="dp-sec">
@@ -1808,6 +1819,9 @@ function openClient(id, skipWizardReset=false){
     if(ov.training_frequency) document.getElementById('ov-freq').value=ov.training_frequency;
     if(ov.training_method) document.getElementById('ov-method').value=ov.training_method;
     if(ov.training_focus) document.getElementById('ov-priority').value=ov.training_focus;
+    if(ov.exercise_selection) document.getElementById('ov-exercise-selection-1').value=ov.exercise_selection;
+    if(ov.exercise_selection_2) document.getElementById('ov-exercise-selection-2').value=ov.exercise_selection_2;
+    if(ov.exercise_selection_3) document.getElementById('ov-exercise-selection-3').value=ov.exercise_selection_3;
     if(ov.nutrition_approach) document.getElementById('ov-nut-approach').value=ov.nutrition_approach;
     if(ov.tracking_responsibility) document.getElementById('ov-tracking').value=ov.tracking_responsibility;
     if(ov.bw_recording_days) setBWDays(ov.bw_recording_days);
@@ -4601,6 +4615,9 @@ function gatherCurrentProtocol(){
     training_frequency:document.getElementById('ov-freq')?.value||null,
     training_method:document.getElementById('ov-method')?.value||null,
     training_focus:document.getElementById('ov-priority')?.value||null,
+    exercise_selection:document.getElementById('ov-exercise-selection-1')?.value||null,
+    exercise_selection_2:document.getElementById('ov-exercise-selection-2')?.value||null,
+    exercise_selection_3:document.getElementById('ov-exercise-selection-3')?.value||null,
     training_days:getTrainingDays()||null,
     training_time:document.getElementById('dp-training-time')?.value||null,
 
@@ -4827,6 +4844,9 @@ async function applyProtocol(id){
   if(p.training_frequency)     document.getElementById('ov-freq').value=p.training_frequency;
   if(p.training_method)        document.getElementById('ov-method').value=p.training_method;
   if(p.training_focus)         document.getElementById('ov-priority').value=p.training_focus;
+  if(p.exercise_selection)     document.getElementById('ov-exercise-selection-1').value=p.exercise_selection;
+  if(p.exercise_selection_2)   document.getElementById('ov-exercise-selection-2').value=p.exercise_selection_2;
+  if(p.exercise_selection_3)   document.getElementById('ov-exercise-selection-3').value=p.exercise_selection_3;
   if(p.training_days)          setTrainingDays(p.training_days);
   if(p.training_time)          document.getElementById('dp-training-time').value=p.training_time;
   if(p.bw_recording_days)      setBWDays(p.bw_recording_days);
