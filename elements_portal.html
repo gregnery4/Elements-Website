@@ -1160,16 +1160,23 @@ function renderPerfChart(){
   const isWeight = metric==='weight';
   if(yLabel) yLabel.textContent = isWeight?'Weight (lbs)':`Weight @ ${metric} Rep${metric==='1'?'':'s'} (lbs)`;
 
-  // Filter and sort data for selected exercise
-  const points = _perfReviewData
-    .filter(d=>{
-      if(d.exercise!==exSel) return false;
-      if(isWeight) return d.weight&&parseFloat(d.weight)>0;
-      if(!d.reps) return false;
-      const repNums=d.reps.toString().split(/[,\s\/\-x]+/).map(n=>parseInt(n.trim())).filter(n=>!isNaN(n));
-      return repNums.includes(parseInt(metric));
-    })
+  // All data points for selected exercise
+  const allPoints = _perfReviewData
+    .filter(d=>d.exercise===exSel)
     .sort((a,b)=>a.weekNum-b.weekNum);
+
+  console.log('perf chart — exercise:',exSel,'metric:',metric,'all points:',allPoints);
+
+  // Filter by metric
+  const points = isWeight
+    ? allPoints.filter(d=>d.weight&&parseFloat(d.weight)>0)
+    : allPoints.filter(d=>{
+        if(!d.reps) return false;
+        // Accept any format: "8", "8, 8, 6", "8x3", "8-10" — just check if target number appears
+        const str = d.reps.toString();
+        const nums = str.split(/[\s,\/\-x]+/).map(n=>parseInt(n)).filter(n=>!isNaN(n));
+        return nums.includes(parseInt(metric));
+      });
 
   const canvas = document.getElementById('perf-chart');
   if(!canvas) return;
@@ -1288,6 +1295,7 @@ async function loadReviews(){
     // Build perf data for chart
     _perfReviewData = [];
     reviews.forEach(r=>{
+      console.log('review week',r.week_number,'perf_data:',r.perf_data);
       if(!r.perf_data) return;
       try{
         const pd = typeof r.perf_data==='string'?JSON.parse(r.perf_data):r.perf_data;
@@ -1300,8 +1308,9 @@ async function loadReviews(){
             weight: p.weight||'',
           });
         });
-      }catch(e){}
+      }catch(e){ console.warn('perf_data parse error:',e); }
     });
+    console.log('_perfReviewData built:',_perfReviewData);
 
     // Reviews page
     document.getElementById('reviews-content').innerHTML=`
