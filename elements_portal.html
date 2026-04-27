@@ -319,9 +319,44 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
         </div>
 
       </div>
-    </div>
 
-    <!-- BODY COMPOSITION -->
+      <!-- Performance Chart -->
+      <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:16px">Performance Over Time</div>
+      <div style="background:var(--c2);border:1px solid var(--border);padding:24px;margin-bottom:28px">
+
+        <!-- Controls -->
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">Exercise</span>
+            <select id="perf-ex-select" onchange="renderPerfChart()" style="background:var(--c3);border:1px solid var(--borderw);color:var(--white);font-family:'Montserrat',sans-serif;font-size:10px;padding:6px 10px;outline:none;cursor:pointer;min-width:200px">
+              <option value="">— Select Exercise —</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">Metric</span>
+            <select id="perf-metric-select" onchange="renderPerfChart()" style="background:var(--c3);border:1px solid var(--borderw);color:var(--white);font-family:'Montserrat',sans-serif;font-size:10px;padding:6px 10px;outline:none;cursor:pointer">
+              <option value="weight">Weight (lbs)</option>
+              <option value="reps">Reps</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div style="position:relative;width:100%;height:300px;background:var(--c1);border:1px solid var(--borderw)">
+          <canvas id="perf-chart" style="width:100%;height:100%"></canvas>
+          <div id="perf-chart-empty" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+            <div style="font-size:11px;color:var(--muted);text-align:center">Select an exercise above to view performance over time</div>
+          </div>
+        </div>
+
+        <!-- Axis labels -->
+        <div style="display:flex;justify-content:space-between;margin-top:8px">
+          <div style="font-size:8px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase" id="perf-y-label">Weight (lbs)</div>
+          <div style="font-size:8px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase">Week / Date</div>
+        </div>
+      </div>
+
+    </div>
     <div class="page" id="page-bodycomp">
       <div class="pg-h"><h2>Body <span>Composition</span></h2><p>Your assessment history &amp; scheduled assessments</p></div>
       <div class="krow">
@@ -1058,6 +1093,111 @@ async function loadBodyComp(){
     <div style="font-size:10px;color:var(--muted);margin-top:12px;letter-spacing:1px">Last updated: ${new Date(latest.recorded_at).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})}</div>`;
 }
 
+let _perfReviewData = []; // [{week, date, exercise, reps, weight}]
+
+function populatePerfExerciseDropdown(exercises){
+  const sel = document.getElementById('perf-ex-select');
+  if(!sel) return;
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— Select Exercise —</option>';
+  exercises.forEach(ex=>{
+    const opt = document.createElement('option');
+    opt.value = ex; opt.textContent = ex;
+    sel.appendChild(opt);
+  });
+  if(current && exercises.includes(current)) sel.value = current;
+  else if(exercises.length) sel.value = exercises[0];
+  renderPerfChart();
+}
+
+function renderPerfChart(){
+  const exSel = document.getElementById('perf-ex-select')?.value;
+  const metric = document.getElementById('perf-metric-select')?.value || 'weight';
+  const empty = document.getElementById('perf-chart-empty');
+  const yLabel = document.getElementById('perf-y-label');
+
+  if(!exSel){ if(empty) empty.style.display='flex'; return; }
+  if(empty) empty.style.display='none';
+  if(yLabel) yLabel.textContent = metric==='weight'?'Weight (lbs)':'Reps';
+
+  // Filter and sort data for selected exercise
+  const points = _perfReviewData
+    .filter(d=>d.exercise===exSel && (metric==='weight'?d.weight:d.reps))
+    .sort((a,b)=>a.weekNum-b.weekNum);
+
+  const canvas = document.getElementById('perf-chart');
+  if(!canvas) return;
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width; const H = canvas.height;
+  const PAD = {top:24,right:20,bottom:48,left:48};
+  const cW = W-PAD.left-PAD.right;
+  const cH = H-PAD.top-PAD.bottom;
+
+  ctx.clearRect(0,0,W,H);
+
+  if(!points.length){
+    ctx.fillStyle='rgba(150,140,128,0.6)';
+    ctx.font='11px Montserrat,sans-serif';
+    ctx.textAlign='center';
+    ctx.fillText('No data yet for this exercise',W/2,H/2);
+    return;
+  }
+
+  const values = points.map(p=>metric==='weight'?parseFloat(p.weight)||0:parseFloat(p.reps)||0);
+  const labels = points.map(p=>p.date?new Date(p.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}): 'Wk '+p.weekNum);
+  const maxV = Math.max(...values,1);
+  const minV = Math.min(...values,0);
+  const range = maxV-minV||1;
+  const xStep = cW/Math.max(points.length-1,1);
+
+  // Grid lines
+  for(let i=0;i<=4;i++){
+    const y = PAD.top + cH - (i/4)*cH;
+    ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(PAD.left,y); ctx.lineTo(PAD.left+cW,y); ctx.stroke();
+    const val = minV + (i/4)*range;
+    ctx.fillStyle='rgba(150,140,128,0.7)'; ctx.font='9px Montserrat,sans-serif'; ctx.textAlign='right';
+    ctx.fillText(Math.round(val), PAD.left-6, y+3);
+  }
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0,PAD.top,0,PAD.top+cH);
+  grad.addColorStop(0,'rgba(168,129,58,0.25)');
+  grad.addColorStop(1,'rgba(168,129,58,0)');
+
+  // Line path
+  ctx.beginPath();
+  values.forEach((v,i)=>{
+    const x = PAD.left + i*xStep;
+    const y = PAD.top + cH - ((v-minV)/range)*cH;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle='rgba(168,129,58,0.9)'; ctx.lineWidth=2.5; ctx.stroke();
+
+  // Fill
+  ctx.lineTo(PAD.left+(values.length-1)*xStep, PAD.top+cH);
+  ctx.lineTo(PAD.left, PAD.top+cH);
+  ctx.closePath(); ctx.fillStyle=grad; ctx.fill();
+
+  // Dots + x labels
+  values.forEach((v,i)=>{
+    const x = PAD.left + i*xStep;
+    const y = PAD.top + cH - ((v-minV)/range)*cH;
+    // Dot
+    ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2);
+    ctx.fillStyle='rgba(168,129,58,1)'; ctx.fill();
+    ctx.strokeStyle='rgba(22,22,22,1)'; ctx.lineWidth=1.5; ctx.stroke();
+    // Value label above dot
+    ctx.fillStyle='rgba(201,168,108,0.95)'; ctx.font='bold 9px Montserrat,sans-serif'; ctx.textAlign='center';
+    ctx.fillText(v, x, y-10);
+    // X label
+    ctx.fillStyle='rgba(150,140,128,0.8)'; ctx.font='8px Montserrat,sans-serif';
+    ctx.fillText(labels[i]||'', x, PAD.top+cH+16);
+  });
+}
+
 async function loadReviews(){
   const{data:reviews}=await sb.from('weekly_reviews')
     .select('week_number,week_start_date,sessions_done,sessions_target,training_notes,compliance_score,meals_logged,perf_data')
@@ -1099,6 +1239,26 @@ async function loadReviews(){
   }
 
   if(reviews&&reviews.length){
+    // Build perf data for chart
+    _perfReviewData = [];
+    reviews.forEach(r=>{
+      if(!r.perf_data) return;
+      try{
+        const pd = typeof r.perf_data==='string'?JSON.parse(r.perf_data):r.perf_data;
+        (pd||[]).forEach(p=>{
+          if(p.exercise) _perfReviewData.push({
+            weekNum: r.week_number,
+            date: r.week_start_date,
+            exercise: p.exercise,
+            reps: p.reps||'',
+            weight: p.weight||'',
+          });
+        });
+      }catch(e){}
+    });
+    // Populate exercise dropdown with unique exercises
+    const uniqueEx = [...new Set(_perfReviewData.map(d=>d.exercise))];
+    populatePerfExerciseDropdown(uniqueEx);
 
     // Reviews page
     document.getElementById('reviews-content').innerHTML=`
