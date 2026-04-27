@@ -288,11 +288,12 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
       <div class="pg-h"><h2>Your <span>Training Performance</span></h2><p>Current training parameters set by your coach</p></div>
 
       <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Current Training Parameters</div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:28px">
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-bottom:28px">
         <div class="kcard"><div class="klbl">Training Frequency</div><div class="kval" style="font-size:22px" id="tp-freq">—</div></div>
         <div class="kcard"><div class="klbl">Training Method</div><div style="font-size:13px;font-weight:500;color:var(--white);margin-top:8px" id="tp-method">—</div></div>
         <div class="kcard"><div class="klbl">Training Focus</div><div style="font-size:13px;font-weight:500;color:var(--white);margin-top:8px" id="tp-focus">—</div></div>
         <div class="kcard"><div class="klbl">Training Days</div><div style="font-size:11px;font-weight:500;color:var(--white);margin-top:8px;line-height:1.7" id="tp-days">—</div></div>
+        <div class="kcard"><div class="klbl">Predictor Exercises</div><div id="tp-predictors" style="margin-top:8px"><span style="font-size:11px;color:var(--muted)">—</span></div></div>
       </div>
     </div>
 
@@ -1029,11 +1030,24 @@ async function loadBodyComp(){
 
 async function loadReviews(){
   const{data:reviews}=await sb.from('weekly_reviews')
-    .select('week_number,week_start_date,sessions_done,sessions_target,training_notes,compliance_score,meals_logged')
+    .select('week_number,week_start_date,sessions_done,sessions_target,training_notes,compliance_score,meals_logged,perf_data')
     .eq('client_id',uid)
     .order('week_number',{ascending:false});
 
-  // Training Performance — session history removed (chart-based)
+  // Populate Predictor Exercises from most recent review that has perf_data
+  const latestWithPerf = reviews?.find(r=>r.perf_data);
+  const predEl = document.getElementById('tp-predictors');
+  if(predEl && latestWithPerf?.perf_data){
+    try{
+      const pd = typeof latestWithPerf.perf_data==='string'
+        ? JSON.parse(latestWithPerf.perf_data)
+        : latestWithPerf.perf_data;
+      if(pd&&pd.length){
+        predEl.innerHTML = pd.map(p=>`
+          <div style="font-size:11px;font-weight:600;color:var(--white);margin-bottom:6px">${p.exercise}</div>`).join('');
+      }
+    }catch(e){}
+  }
 
   if(reviews&&reviews.length){
 
