@@ -1034,19 +1034,38 @@ async function loadReviews(){
     .eq('client_id',uid)
     .order('week_number',{ascending:false});
 
-  // Populate Predictor Exercises from most recent review that has perf_data
-  const latestWithPerf = reviews?.find(r=>r.perf_data);
+  // Populate Predictor Exercises — try perf_data first, fall back to client_overview
   const predEl = document.getElementById('tp-predictors');
-  if(predEl && latestWithPerf?.perf_data){
+  let exercises = [];
+
+  // Try perf_data from latest review
+  const latestWithPerf = reviews?.find(r=>r.perf_data);
+  if(latestWithPerf?.perf_data){
     try{
       const pd = typeof latestWithPerf.perf_data==='string'
         ? JSON.parse(latestWithPerf.perf_data)
         : latestWithPerf.perf_data;
-      if(pd&&pd.length){
-        predEl.innerHTML = pd.map(p=>`
-          <div style="font-size:11px;font-weight:600;color:var(--white);margin-bottom:6px">${p.exercise}</div>`).join('');
+      exercises = (pd||[]).map(p=>p.exercise).filter(Boolean);
+    }catch(e){ console.warn('perf_data parse error:',e); }
+  }
+
+  // Fallback — pull directly from client_overview
+  if(!exercises.length){
+    try{
+      const{data:ov}=await sb.from('client_overview')
+        .select('exercise_selection,exercise_selection_2,exercise_selection_3')
+        .eq('client_id',uid)
+        .maybeSingle();
+      if(ov){
+        exercises = [ov.exercise_selection,ov.exercise_selection_2,ov.exercise_selection_3].filter(Boolean);
       }
-    }catch(e){}
+    }catch(e){ console.warn('client_overview exercise fetch error:',e); }
+  }
+
+  if(predEl && exercises.length){
+    predEl.innerHTML = exercises.map(ex=>
+      `<div style="font-size:11px;font-weight:600;color:var(--white);margin-bottom:6px">${ex}</div>`
+    ).join('');
   }
 
   if(reviews&&reviews.length){
