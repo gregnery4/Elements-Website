@@ -3546,6 +3546,7 @@ async function addWeeklyEntry(){
     assessment_date:entry.assessment?.date||null,
     assessment_data:entry.assessment?JSON.stringify(entry.assessment):null,
     compliance_score:entry.score||null,
+    perf_data:entry.perf_data||null,
   },{onConflict:'client_id,week_number'});
   if(wkErr) console.warn('Weekly review save error:',wkErr.message);
 
