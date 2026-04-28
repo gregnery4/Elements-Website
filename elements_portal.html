@@ -632,21 +632,39 @@ async function loadMealPlan(){
     .eq('client_id',uid)
     .order('created_at',{ascending:false});
 
-  console.log('loadMealPlan — uid:',uid,'error:',error,'protocols:',protocols);
-  if(protocols?.length){
-    protocols.forEach((p,i)=>{
-      console.log(`Protocol ${i}: name=${p.name}, meals=${p.meals?.substring?.(0,100)}, supps=${p.supplements?.substring?.(0,80)}`);
+  console.log('loadMealPlan — uid:',uid,'error:',error,'count:',protocols?.length);
+
+  // If no protocols found by client_id, try matching via profile lookup
+  let finalProtocols = protocols;
+  if((!protocols||!protocols.length)&&!error){
+    // Get profile id for this user
+    const{data:profile}=await sb.from('profiles').select('id').eq('id',uid).maybeSingle();
+    console.log('Profile lookup:',profile);
+    if(profile){
+      const{data:p2}=await sb.from('protocols')
+        .select('id,name,notes,created_at,goal,calories,protein_g,carbs_g,fat_g,meal_count,meals,supplements')
+        .eq('client_id',profile.id)
+        .order('created_at',{ascending:false});
+      console.log('Fallback protocols:',p2?.length);
+      finalProtocols = p2;
+    }
+  }
+
+  if(finalProtocols?.length){
+    finalProtocols.forEach((p,i)=>{
+      console.log(`Protocol ${i}: name=${p.name}, meals_null=${p.meals==null}, supps_null=${p.supplements==null}`);
     });
   }
 
   const container=document.getElementById('mp-content');
+  const protocols2 = finalProtocols;
 
-  if(!protocols||!protocols.length){
+  if(!protocols2||!protocols2.length){
     container.innerHTML='<div class="empty">No plans assigned yet. Check back after your next session.</div>';
     return;
   }
 
-  container.innerHTML=protocols.map((p,i)=>{
+  container.innerHTML=protocols2.map((p,i)=>{
     const date=new Date(p.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
     const label=p.name||'Meal Plan';
     return `
@@ -674,7 +692,7 @@ async function loadMealPlan(){
   }).join('');
 
   // Store for PDF access
-  window._portalProtocols=protocols;
+  window._portalProtocols=protocols2;
 }
 
 const FOOD_DB = [
