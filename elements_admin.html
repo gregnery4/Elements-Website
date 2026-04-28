@@ -4909,6 +4909,24 @@ async function loadProtocols(){
             </div>`).join('')}
           </div>
         </div>
+        <!-- Assessment Log Entry -->
+        ${(p.body_weight||p.body_fat||p.lean_mass||p.bc_fat_mass)? `
+        <div style="margin-top:14px">
+          <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Assessment Log — ${new Date(p.created_at).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'})}</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px">
+            ${[
+              ['Body Weight', p.body_weight||p.bc_total_mass, 'lbs', 'var(--white)'],
+              ['Body Fat %',  p.body_fat||p.bc_bf_pct,        '%',   'var(--gold)'],
+              ['Lean Mass',   p.lean_mass||p.bc_lean_mass,    'lbs', '#5B8FD4'],
+              ['Fat Mass',    p.bc_fat_mass||(p.body_weight&&p.lean_mass?Math.round((parseFloat(p.body_weight)-parseFloat(p.lean_mass))*10)/10:null), 'lbs', '#CF6679'],
+            ].map(([lbl,val,unit,clr])=>`
+            <div style="background:var(--c3);border:1px solid var(--borderw);padding:12px;text-align:center">
+              <div style="font-size:7px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">${lbl}</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:${clr};line-height:1">${val||'—'}</div>
+              ${val?`<div style="font-size:8px;color:var(--muted);margin-top:2px">${unit}</div>`:''}
+            </div>`).join('')}
+          </div>
+        </div>` : ''}
         ${p.meals?(()=>{
           try{
             const meals=typeof p.meals==='string'?JSON.parse(p.meals):p.meals;
