@@ -6124,10 +6124,28 @@ function _buildMealPlanPDF(jsPDF,c,setMsg){
     // DAILY TOTALS BAR
     // ══════════════════════════════
     let totP=0,totC=0,totF=0;
+    // Pre-calculate totals using food portions (same as meal plan tab)
+    const mealData=[];
     for(let i=1;i<=mealCount;i++){
-      totP+=parseInt(document.getElementById(`m${i}-prot`)?.value)||0;
-      totC+=parseInt(document.getElementById(`m${i}-carb`)?.value)||0;
-      totF+=parseInt(document.getElementById(`m${i}-fat`)?.value)||0;
+      const mp=parseInt(document.getElementById(`m${i}-prot`)?.value)||0;
+      const mc=parseInt(document.getElementById(`m${i}-carb`)?.value)||0;
+      const mf=parseInt(document.getElementById(`m${i}-fat`)?.value)||0;
+      const mt=document.getElementById(`m${i}-time`)?.value||'';
+      const mtype=document.getElementById(`m${i}-type`)?.value||'Whole Food';
+      const mfood=document.getElementById(`m${i}-foods`)?.value||'';
+      const mealSupps=suppByMeal[i]||[];
+      const portions=mfood?_getFoodPortionsText(mfood,mp,mc,mf):[];
+      let dispP=mp, dispC=mc, dispF=mf;
+      if(portions.length){
+        let pSum=0,cSum=0,fSum=0;
+        portions.forEach(({macros})=>{
+          const pm=macros.match(/(\d+)P/); const cm=macros.match(/(\d+)C/); const fm=macros.match(/(\d+)F/);
+          if(pm) pSum+=parseInt(pm[1]); if(cm) cSum+=parseInt(cm[1]); if(fm) fSum+=parseInt(fm[1]);
+        });
+        if(pSum||cSum||fSum){dispP=pSum;dispC=cSum;dispF=fSum;}
+      }
+      totP+=dispP; totC+=dispC; totF+=dispF;
+      mealData.push({mp,mc,mf,mt,mtype,mfood,mealSupps,portions,dispP,dispC,dispF});
     }
     const totCals=(totP*4)+(totC*4)+(totF*9);
 
@@ -6149,19 +6167,10 @@ function _buildMealPlanPDF(jsPDF,c,setMsg){
     });
     y+=20;
 
-    // ══════════════════════════════
-    // MEALS
-    // ══════════════════════════════
-    for(let i=1;i<=mealCount;i++){
-      const mp=parseInt(document.getElementById(`m${i}-prot`)?.value)||0;
-      const mc=parseInt(document.getElementById(`m${i}-carb`)?.value)||0;
-      const mf=parseInt(document.getElementById(`m${i}-fat`)?.value)||0;
-      const mt=document.getElementById(`m${i}-time`)?.value||'';
-      const mtype=document.getElementById(`m${i}-type`)?.value||'Whole Food';
-      const mfood=document.getElementById(`m${i}-foods`)?.value||'';
-      const mkcal=(mp*4)+(mc*4)+(mf*9);
-      const mealSupps=suppByMeal[i]||[];
-      const portions=mfood?_getFoodPortionsText(mfood,mp,mc,mf):[];
+    // ── MEAL PAGES ──
+    for(let i=0;i<mealCount;i++){
+      const {mp,mc,mf,mt,mtype,mfood,mealSupps,portions,dispP,dispC,dispF}=mealData[i];
+      const mkcal=(dispP*4)+(dispC*4)+(dispF*9);
 
       // Estimate height
       const estH=14+12+(portions.length>0?5.5+portions.length*6.5+2:0)+(mealSupps.length>0?7:0)+6;
@@ -6174,7 +6183,7 @@ function _buildMealPlanPDF(jsPDF,c,setMsg){
 
       // Meal number — large
       doc.setFontSize(11);doc.setFont('helvetica','bold');
-      doc.setTextColor(...WHT);doc.text(`MEAL ${i}`,M+4,y+9);
+      doc.setTextColor(...WHT);doc.text(`MEAL ${i+1}`,M+4,y+9);
 
       // Type badge
       doc.setFontSize(7);doc.setFont('helvetica','normal');
@@ -6193,7 +6202,7 @@ function _buildMealPlanPDF(jsPDF,c,setMsg){
 
       // ── Macro Row ──
       const b3=col/3;
-      const macros3=[[mp+'g','PROTEIN',GOLD],[mc+'g','CARBS',BLUE],[mf+'g','FATS',RED]];
+      const macros3=[[dispP+'g','PROTEIN',GOLD],[dispC+'g','CARBS',BLUE],[dispF+'g','FATS',RED]];
       macros3.forEach(([v,l,clr],idx)=>{
         const x=M+idx*b3;
         const isLast=idx===2;
