@@ -441,8 +441,6 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
         </div>
       </div>
     </div>
-
-    <!-- WEEKLY REVIEWS -->
     <div class="page" id="page-reviews">
       <div class="pg-h"><h2>Weekly <span>Reviews</span></h2><p>Your compliance scores and weekly check-ins</p></div>
       <div id="reviews-content"><div class="empty">No weekly reviews yet.</div></div>
@@ -526,23 +524,32 @@ function showReset(){document.getElementById('login-view').style.display='none';
 function showLogin(){document.getElementById('reset-view').style.display='none';document.getElementById('login-view').style.display='block';}
 
 async function loadApp(user){
-  const{data:p}=await sb.from('profiles').select('*').eq('id',user.id).single();
-  if(p?.role==='admin'){alert('Please use the Coach Admin login.');await doLogout();return;}
-  const name=p?.full_name||user.email;
-  const ini=name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
-  document.getElementById('sb-av').textContent=ini;
-  document.getElementById('sb-name').textContent=name;
-  document.getElementById('sb-since').textContent=p?.start_date?'Since '+new Date(p.start_date).toLocaleDateString('en-US',{month:'short',year:'numeric'}):'Active Member';
-  document.getElementById('greet-name').textContent=name.split(' ')[0]+'.';
-  document.getElementById('greet-sub').textContent='Welcome to your Elements Health & Performance Dashboard.';
-  document.getElementById('s-name').value=p?.full_name||'';
-  document.getElementById('s-email').textContent=user.email;
-  document.getElementById('s-phone').value=p?.phone||'';
-  document.getElementById('s-occ').value=p?.occupation||'';
-  document.getElementById('s-coach').textContent=p?.coach||'Gavin Regnery';
-  document.getElementById('s-since').textContent=p?.start_date?new Date(p.start_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'—';
-  await Promise.allSettled([loadMetrics(),loadNutrition(),loadMealPlan(),loadBodyComp(),loadReviews(),loadOverview()]);
-  document.getElementById('app').classList.add('vis');
+  try{
+    const{data:p}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();
+    if(p?.role==='admin'){alert('Please use the Coach Admin login.');await doLogout();return;}
+    const name=p?.full_name||user.email;
+    const ini=name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    document.getElementById('sb-av').textContent=ini;
+    document.getElementById('sb-name').textContent=name;
+    document.getElementById('sb-since').textContent=p?.start_date?'Since '+new Date(p.start_date).toLocaleDateString('en-US',{month:'short',year:'numeric'}):'Active Member';
+    document.getElementById('greet-name').textContent=name.split(' ')[0]+'.';
+    document.getElementById('greet-sub').textContent='Welcome to your Elements Health & Performance Dashboard.';
+    document.getElementById('s-name').value=p?.full_name||'';
+    document.getElementById('s-email').textContent=user.email;
+    document.getElementById('s-phone').value=p?.phone||'';
+    document.getElementById('s-occ').value=p?.occupation||'';
+    document.getElementById('s-coach').textContent=p?.coach||'Gavin Regnery';
+    document.getElementById('s-since').textContent=p?.start_date?new Date(p.start_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'—';
+    // Hide login and show app first so any data load errors don't block access
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('app').classList.add('vis');
+    await Promise.allSettled([loadMetrics(),loadNutrition(),loadMealPlan(),loadBodyComp(),loadReviews(),loadOverview()]);
+  }catch(e){
+    console.error('loadApp error:',e);
+    // Still show the app even if something fails
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('app').classList.add('vis');
+  }
 }
 
 async function loadOverview(){
@@ -1173,6 +1180,36 @@ async function loadSupps(){
 }
 
 let _bcData = [];
+
+async function loadBodyComp(){
+  const{data}=await sb.from('client_metrics')
+    .select('body_weight,body_fat,lean_mass,recorded_at,notes')
+    .eq('client_id',uid)
+    .order('recorded_at',{ascending:true});
+  if(!data||!data.length) return;
+
+  _bcData = data.map(m=>{
+    let bw=m.body_weight, bf=m.body_fat, lm=m.lean_mass;
+    if(!bw&&!bf&&!lm&&m.notes){
+      try{
+        const n=typeof m.notes==='string'?JSON.parse(m.notes):m.notes;
+        bw=n.body_weight||n.total_mass||bw; bf=n.body_fat||bf; lm=n.lean_mass||lm;
+      }catch(e){}
+    }
+    const fm=(bw&&lm)?Math.round((parseFloat(bw)-parseFloat(lm))*10)/10:null;
+    return {date:m.recorded_at,body_weight:parseFloat(bw)||null,body_fat:parseFloat(bf)||null,lean_mass:parseFloat(lm)||null,fat_mass:fm};
+  }).filter(d=>d.body_weight||d.body_fat||d.lean_mass);
+
+  const latest=_bcData[_bcData.length-1];
+  if(latest){
+    document.getElementById('bc-mass').textContent=latest.body_weight||'—';
+    document.getElementById('bc-bf').textContent=latest.body_fat||'—';
+    document.getElementById('bc-lean').textContent=latest.lean_mass||'—';
+    document.getElementById('bc-fat').textContent=latest.fat_mass||'—';
+  }
+
+  renderBcChart();
+}
 
 async function loadBodyComp(){
   const{data}=await sb.from('client_metrics').select('body_weight,body_fat,lean_mass,recorded_at,notes').eq('client_id',uid).order('recorded_at',{ascending:true});
