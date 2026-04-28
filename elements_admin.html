@@ -161,7 +161,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
 .dp-tab.on{color:var(--gold);border-bottom-color:var(--gold-mid);}
 .dp-tab:hover{color:var(--white);}
 .dp-body{padding:28px;}
-.dp-sec{margin-bottom:24px;}
+.dp-sec{margin-bottom:24px;padding-top:4px;}
 .dp-sec-title{font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);}
 .edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .edit-field label{display:block;font-size:8.5px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
@@ -500,10 +500,10 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
         </div>
 
         <!-- Step panels use the existing dptab-* divs shown/hidden by goWizardStep() -->
-        <div id="wizard-content">
+        <div id="wizard-content" style="padding-top:24px">
 
       <!-- TAB 1: CLIENT INFORMATION -->
-      <div id="dptab-t1">
+      <div id="dptab-t1" style="padding:0 0 20px">
         <div class="dp-sec">
           <div class="dp-sec-title">Client Information</div>
           <div class="edit-grid">
@@ -532,7 +532,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       </div>
 
       <!-- TAB 12: HEALTH PROTOCOL SELECTION -->
-      <div id="dptab-t12" style="display:none">
+      <div id="dptab-t12" style="display:none;padding:0 0 20px">
         <div class="dp-sec">
           <div class="dp-sec-title">Protocol</div>
           <div class="edit-grid">
@@ -557,7 +557,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       </div>
 
       <!-- TAB 13: TRAINING PROGRAM DESIGN -->
-      <div id="dptab-t13" style="display:none">
+      <div id="dptab-t13" style="display:none;padding:0 0 20px">
         <div class="dp-sec">
           <div class="dp-sec-title">Training Program Design</div>
           <div class="edit-grid">
@@ -705,7 +705,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       </div>
 
       <!-- TAB 2: HEALTH SYSTEM OVERVIEW -->
-      <div id="dptab-t2" style="display:none">
+      <div id="dptab-t2" style="display:none;padding:0 0 20px">
         <div class="dp-sec">
           <div class="dp-sec-title">Elements Health System Summary</div>
           <!-- Row 1: Protocol cards -->
@@ -834,7 +834,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       </div>
 
       <!-- TAB 3: GOAL SETTING CALCULATOR -->
-      <div id="dptab-t3" style="display:none">
+      <div id="dptab-t3" style="display:none;padding:0 0 20px">
         <div class="dp-sec">
           <div class="dp-sec-title">Current Body Composition</div>
           <div class="edit-grid">
@@ -866,7 +866,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       </div>
 
       <!-- TAB 4: DAILY CALORIE CALCULATOR -->
-      <div id="dptab-t4" style="display:none">
+      <div id="dptab-t4" style="display:none;padding:0 0 20px">
         <div class="dp-sec">
           <div class="dp-sec-title">Nutrition Approach</div>
           <div class="edit-grid">
@@ -923,7 +923,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       </div>
 
       <!-- TAB 5: MEAL DESIGN -->
-      <div id="dptab-t5" style="display:none">
+      <div id="dptab-t5" style="display:none;padding:0 0 20px">
         <div class="dp-sec">
           <div class="dp-sec-title">Daily Totals <span style="font-size:9px;color:var(--muted);font-weight:400;letter-spacing:1px">(updates as you enter meals)</span></div>
           <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:8px">
@@ -973,7 +973,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       </div>
 
       <!-- TAB 11: MEAL PLAN PREVIEW -->
-      <div id="dptab-t11" style="display:none">
+      <div id="dptab-t11" style="display:none;padding:0 0 20px">
         <div class="dp-sec">
           <div class="dp-sec-title" style="display:flex;align-items:center;justify-content:space-between">
             Meal Plan
@@ -1207,7 +1207,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       </div>
 
       <!-- TAB 7: BODY COMPOSITION ASSESSMENT -->
-      <div id="dptab-t7" style="display:none">
+      <div id="dptab-t7" style="display:none;padding:0 0 20px">
 
         <!-- DEXA PDF DROP ZONE -->
         <div class="dp-sec">
@@ -1336,7 +1336,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           <button class="wz-next-btn" onclick="wzSaveAndNext(2,'saveBodyComp')">Save &amp; Continue →</button>
         </div>
       </div>
-      <div id="dptab-t8" style="display:none">
+      <div id="dptab-t8" style="display:none;padding:0 0 20px">
         <div class="dp-sec">
           <div class="dp-sec-title">Supplement Protocol</div>
           <div style="font-size:11px;color:var(--muted);margin-bottom:14px">Select supplements, save the protocol, then assign each one to meals below. Supplements will appear on the Meal Plan tab and in the PDF.</div>
