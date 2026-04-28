@@ -404,7 +404,42 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
         <div class="kcard"><div class="klbl">Lean Mass</div><div class="kval" id="bc-lean">—</div><div class="ksub">lbs</div></div>
         <div class="kcard"><div class="klbl">Fat Mass</div><div class="kval" id="bc-fat">—</div><div class="ksub">lbs</div></div>
       </div>
-      <div class="card"><div class="card-hd">Latest Metrics</div><div id="bc-latest"><div class="empty">No data yet.</div></div></div>
+      <div class="card" style="padding:20px">
+        <!-- Controls -->
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">Metric</span>
+            <select id="bc-y-axis" onchange="renderBcChart()" style="background:var(--c3);border:1px solid var(--borderw);color:var(--white);font-family:'Montserrat',sans-serif;font-size:10px;padding:6px 10px;outline:none;cursor:pointer">
+              <option value="body_weight">Total Mass (lbs)</option>
+              <option value="body_fat">Body Fat %</option>
+              <option value="lean_mass">Lean Mass (lbs)</option>
+              <option value="fat_mass">Fat Mass (lbs)</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">Time</span>
+            <select id="bc-x-axis" onchange="renderBcChart()" style="background:var(--c3);border:1px solid var(--borderw);color:var(--white);font-family:'Montserrat',sans-serif;font-size:10px;padding:6px 10px;outline:none;cursor:pointer">
+              <option value="3m">3 Months</option>
+              <option value="6m">6 Months</option>
+              <option value="1y">1 Year</option>
+              <option value="5y">5 Years</option>
+              <option value="all">All Time</option>
+            </select>
+          </div>
+        </div>
+        <!-- Chart -->
+        <div style="position:relative;width:100%;height:280px;background:var(--c1);border:1px solid var(--borderw)">
+          <canvas id="bc-chart" style="width:100%;height:100%"></canvas>
+          <div id="bc-chart-empty" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+            <div style="font-size:11px;color:var(--muted);text-align:center">No assessment data yet</div>
+          </div>
+        </div>
+        <!-- Axis labels -->
+        <div style="display:flex;justify-content:space-between;margin-top:8px">
+          <div style="font-size:8px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase" id="bc-y-label">Total Mass (lbs)</div>
+          <div style="font-size:8px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase">Time</div>
+        </div>
+      </div>
     </div>
 
     <!-- WEEKLY REVIEWS -->
@@ -1137,34 +1172,124 @@ async function loadSupps(){
     </div>`).join('');
 }
 
+let _bcData = [];
+
 async function loadBodyComp(){
-  const{data}=await sb.from('client_metrics').select('*').eq('client_id',uid).order('recorded_at',{ascending:false});
-  if(!data||!data.length)return;
-  const latest=data[0];
-  document.getElementById('bc-mass').textContent=latest.body_weight||'—';
-  document.getElementById('bc-bf').textContent=latest.body_fat||'—';
-  document.getElementById('bc-lean').textContent=latest.lean_mass||'—';
-  document.getElementById('bc-fat').textContent=latest.body_weight&&latest.lean_mass?Math.round((latest.body_weight-latest.lean_mass)*10)/10:'—';
-  // History
-  document.getElementById('bc-history').innerHTML=data.map(m=>`
-    <div style="display:flex;align-items:center;gap:16px;padding:10px 0;border-bottom:1px solid var(--borderw)">
-      <div style="font-size:10px;color:var(--muted);width:100px;flex-shrink:0">${new Date(m.recorded_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>
-      <div style="flex:1;display:flex;gap:16px;flex-wrap:wrap">
-        ${m.body_weight?`<span style="font-size:11px"><span style="color:var(--muted)">Weight</span> ${m.body_weight}lbs</span>`:''}
-        ${m.body_fat?`<span style="font-size:11px"><span style="color:var(--muted)">BF</span> ${m.body_fat}%</span>`:''}
-        ${m.lean_mass?`<span style="font-size:11px"><span style="color:var(--muted)">Lean</span> ${m.lean_mass}lbs</span>`:''}
-      </div>
-    </div>`).join('');
-  // Latest detail
-  document.getElementById('bc-latest').innerHTML=`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px">
-      ${[['Body Weight',latest.body_weight,'lbs'],['Body Fat %',latest.body_fat,'%'],['Lean Mass',latest.lean_mass,'lbs'],['Fat Mass',latest.body_weight&&latest.lean_mass?Math.round((latest.body_weight-latest.lean_mass)*10)/10:null,'lbs']].map(([lbl,val,unit])=>`
-        <div style="padding:14px;background:var(--c3)">
-          <div class="klbl">${lbl}</div>
-          <div class="kval" style="font-size:28px">${val||'—'}${val?'<span style="font-size:12px;color:var(--muted);font-family:Montserrat"> '+unit+'</span>':''}</div>
-        </div>`).join('')}
-    </div>
-    <div style="font-size:10px;color:var(--muted);margin-top:12px;letter-spacing:1px">Last updated: ${new Date(latest.recorded_at).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})}</div>`;
+  const{data}=await sb.from('client_metrics').select('body_weight,body_fat,lean_mass,recorded_at,notes').eq('client_id',uid).order('recorded_at',{ascending:true});
+  if(!data||!data.length) return;
+
+  // Parse each row — fall back to notes JSON if columns are null
+  _bcData = data.map(m=>{
+    let bw=m.body_weight, bf=m.body_fat, lm=m.lean_mass, fm=null;
+    if(!bw&&!bf&&!lm&&m.notes){
+      try{
+        const n=typeof m.notes==='string'?JSON.parse(m.notes):m.notes;
+        bw=n.body_weight||n.total_mass||bw;
+        bf=n.body_fat||bf;
+        lm=n.lean_mass||lm;
+      }catch(e){}
+    }
+    if(bw&&lm) fm=Math.round((parseFloat(bw)-parseFloat(lm))*10)/10;
+    return {date:m.recorded_at, body_weight:parseFloat(bw)||null, body_fat:parseFloat(bf)||null, lean_mass:parseFloat(lm)||null, fat_mass:fm};
+  }).filter(d=>d.body_weight||d.body_fat||d.lean_mass);
+
+  // Populate top KPI cards from latest
+  const latest = _bcData[_bcData.length-1];
+  if(latest){
+    document.getElementById('bc-mass').textContent=latest.body_weight||'—';
+    document.getElementById('bc-bf').textContent=latest.body_fat||'—';
+    document.getElementById('bc-lean').textContent=latest.lean_mass||'—';
+    document.getElementById('bc-fat').textContent=latest.fat_mass||'—';
+  }
+
+  renderBcChart();
+}
+
+function renderBcChart(){
+  const metric = document.getElementById('bc-y-axis')?.value || 'body_weight';
+  const range  = document.getElementById('bc-x-axis')?.value || '1y';
+  const yLabel = document.getElementById('bc-y-label');
+  const empty  = document.getElementById('bc-chart-empty');
+
+  const labels = {'body_weight':'Total Mass (lbs)','body_fat':'Body Fat %','lean_mass':'Lean Mass (lbs)','fat_mass':'Fat Mass (lbs)'};
+  if(yLabel) yLabel.textContent = labels[metric]||metric;
+
+  // Filter by time range
+  const now = new Date();
+  const cutoff = new Date(now);
+  if(range==='3m')  cutoff.setMonth(now.getMonth()-3);
+  else if(range==='6m')  cutoff.setMonth(now.getMonth()-6);
+  else if(range==='1y')  cutoff.setFullYear(now.getFullYear()-1);
+  else if(range==='5y')  cutoff.setFullYear(now.getFullYear()-5);
+  else cutoff.setFullYear(2000);
+
+  const points = _bcData.filter(d=>new Date(d.date)>=cutoff && d[metric]!=null);
+
+  const canvas = document.getElementById('bc-chart');
+  if(!canvas) return;
+  canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  const PAD={top:24,right:20,bottom:48,left:52};
+  const cW=W-PAD.left-PAD.right, cH=H-PAD.top-PAD.bottom;
+
+  ctx.clearRect(0,0,W,H);
+
+  if(!points.length){
+    if(empty) empty.style.display='flex';
+    return;
+  }
+  if(empty) empty.style.display='none';
+
+  const values = points.map(p=>p[metric]);
+  const dateLabels = points.map(p=>new Date(p.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  const maxV=Math.max(...values), minV=Math.min(...values);
+  const pad=(maxV-minV)*0.1||1;
+  const lo=minV-pad, hi=maxV+pad, range2=hi-lo;
+  const xStep=cW/Math.max(points.length-1,1);
+
+  // Grid
+  for(let i=0;i<=4;i++){
+    const y=PAD.top+cH-(i/4)*cH;
+    ctx.strokeStyle='rgba(255,255,255,0.05)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(PAD.left,y);ctx.lineTo(PAD.left+cW,y);ctx.stroke();
+    ctx.fillStyle='rgba(150,140,128,0.7)';ctx.font='9px Montserrat,sans-serif';ctx.textAlign='right';
+    ctx.fillText((lo+(i/4)*range2).toFixed(1),PAD.left-6,y+3);
+  }
+
+  // Gradient fill
+  const grad=ctx.createLinearGradient(0,PAD.top,0,PAD.top+cH);
+  grad.addColorStop(0,'rgba(168,129,58,0.25)');
+  grad.addColorStop(1,'rgba(168,129,58,0)');
+
+  // Line
+  ctx.beginPath();
+  values.forEach((v,i)=>{
+    const x=PAD.left+i*xStep;
+    const y=PAD.top+cH-((v-lo)/range2)*cH;
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle='rgba(168,129,58,0.9)';ctx.lineWidth=2.5;ctx.stroke();
+
+  // Fill under
+  ctx.lineTo(PAD.left+(values.length-1)*xStep,PAD.top+cH);
+  ctx.lineTo(PAD.left,PAD.top+cH);
+  ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+
+  // Dots + labels
+  values.forEach((v,i)=>{
+    const x=PAD.left+i*xStep;
+    const y=PAD.top+cH-((v-lo)/range2)*cH;
+    ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);
+    ctx.fillStyle='rgba(168,129,58,1)';ctx.fill();
+    ctx.strokeStyle='rgba(22,22,22,1)';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.fillStyle='rgba(201,168,108,0.95)';ctx.font='bold 9px Montserrat,sans-serif';ctx.textAlign='center';
+    ctx.fillText(v,x,y-10);
+    ctx.fillStyle='rgba(150,140,128,0.8)';ctx.font='8px Montserrat,sans-serif';
+    // Only show some x labels to avoid crowding
+    if(points.length<=8||i%Math.ceil(points.length/8)===0)
+      ctx.fillText(dateLabels[i],x,PAD.top+cH+16);
+  });
 }
 
 let _perfReviewData = []; // [{week, date, exercise, reps, weight}]
