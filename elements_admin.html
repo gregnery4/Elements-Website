@@ -994,10 +994,13 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       </div><!-- end dptab-t_wizard -->
 
       <!-- ASSESSMENT LOG TAB -->
-      <div id="dptab-t_assess" style="display:none">
+      <div id="dptab-t_assess" style="display:none;padding:0 0 20px">
         <div class="dp-sec">
-          <div class="dp-sec-title">Assessment Log</div>
-          <div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">Coming soon.</div>
+          <div class="dp-sec-title">Assessment Logs</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:20px">Body composition data pulled from saved protocols — most recent first.</div>
+          <div id="al-log-body">
+            <div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No assessment data yet. Save a protocol to populate this log.</div>
+          </div>
         </div>
       </div>
 
@@ -1822,6 +1825,7 @@ function openClient(id, skipWizardReset=false){
   loadSuppProtocol(c.supplements||[]);
   loadAlFromMetrics(c.client_metrics||[]);
   loadLabsFromMetrics(c.client_metrics||[]);
+  loadAssessmentLogs();
 
   // Weekly data — load from Supabase into local state
   const savedReviews=c.weekly_reviews||[];
@@ -2010,7 +2014,7 @@ function dpTab(name,el){
     goWizardStep(wzCurrentStep);
     return;
   }
-  if(name==='t_assess'){ renderAlLog(); return; }
+  if(name==='t_assess'){ loadAssessmentLogs(); return; }
   if(name==='t_labs'){ renderLabLog(); return; }
   if(name==='t5')syncMealTotals();
   if(name==='t11')generateMealPlan();
@@ -4809,6 +4813,7 @@ async function saveProtocol(){
   document.getElementById('proto-notes').value='';
   setTimeout(()=>msg.textContent='',3000);
   await loadProtocols();
+  loadAssessmentLogs();
 }
 
 async function loadProtocols(){
@@ -5692,6 +5697,153 @@ function loadLabsFromMetrics(metrics){
   });
   labEntries.sort((a,b)=>new Date(b.date)-new Date(a.date));
   renderLabLog();
+}
+
+// ── ASSESSMENT LOGS ──
+async function loadAssessmentLogs(){
+  if(!currentClient){ return; }
+  const container = document.getElementById('al-log-body');
+  if(!container) return;
+
+  // Fetch all protocols for this client ordered newest first
+  const{data:protocols, error} = await sb.from('protocols')
+    .select('id,name,created_at,body_weight,body_fat,lean_mass,bc_fat_mass,bc_total_mass,bc_bf_pct,bc_lean_mass,bc_bmc,bc_visc_fat,bc_rmr,sk_sites,sk_measurements,cm_sites,cm_measurements,goal_bf,goal_weight,phase_duration_weeks')
+    .eq('client_id', currentClient.id)
+    .order('created_at', {ascending:false});
+
+  if(error || !protocols?.length){
+    container.innerHTML='<div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No assessment data yet. Save a protocol to populate this log.</div>';
+    return;
+  }
+
+  // Filter to only protocols that have body comp data
+  const entries = protocols.filter(p => p.body_weight||p.body_fat||p.lean_mass||p.bc_total_mass||p.bc_bf_pct||p.bc_lean_mass);
+
+  if(!entries.length){
+    container.innerHTML='<div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No body composition data found in saved protocols.</div>';
+    return;
+  }
+
+  container.innerHTML = entries.map((p,idx)=>{
+    const date = new Date(p.created_at).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+    const bw   = p.body_weight||p.bc_total_mass;
+    const bf   = p.body_fat||p.bc_bf_pct;
+    const lm   = p.lean_mass||p.bc_lean_mass;
+    const fm   = p.bc_fat_mass||(bw&&lm?Math.round((parseFloat(bw)-parseFloat(lm))*10)/10:null);
+
+    // Parse skinfolds
+    let skHtml='';
+    if(p.sk_measurements){
+      try{
+        const skm = typeof p.sk_measurements==='string'?JSON.parse(p.sk_measurements):p.sk_measurements;
+        const skEntries = Object.entries(skm);
+        if(skEntries.length){
+          skHtml = `<div style="margin-top:14px">
+            <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Skinfolds (mm)</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px">
+              ${skEntries.map(([site,val])=>`
+              <div style="background:var(--c2);border:1px solid var(--borderw);padding:8px 12px;text-align:center;min-width:80px">
+                <div style="font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">${site}</div>
+                <div style="font-size:13px;font-weight:600;color:var(--white)">${val}<span style="font-size:9px;color:var(--muted)">mm</span></div>
+              </div>`).join('')}
+            </div>
+          </div>`;
+        }
+      }catch(e){}
+    }
+
+    // Parse circumferences
+    let cmHtml='';
+    if(p.cm_measurements){
+      try{
+        const cmm = typeof p.cm_measurements==='string'?JSON.parse(p.cm_measurements):p.cm_measurements;
+        const cmEntries = Object.entries(cmm);
+        if(cmEntries.length){
+          cmHtml = `<div style="margin-top:14px">
+            <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Circumference (inches)</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px">
+              ${cmEntries.map(([site,val])=>`
+              <div style="background:var(--c2);border:1px solid var(--borderw);padding:8px 12px;text-align:center;min-width:100px">
+                <div style="font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">${site}</div>
+                <div style="font-size:13px;font-weight:600;color:var(--white)">${val}<span style="font-size:9px;color:var(--muted)">"</span></div>
+              </div>`).join('')}
+            </div>
+          </div>`;
+        }
+      }catch(e){}
+    }
+
+    return `
+    <div style="border:1px solid var(--border);margin-bottom:3px;overflow:hidden">
+      <!-- Header row — date + dropdown -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--c2);cursor:pointer"
+        onclick="alToggleEntry('${p.id}')"
+        onmouseover="this.style.background='var(--c3)'"
+        onmouseout="this.style.background='var(--c2)'">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="width:3px;height:36px;background:linear-gradient(180deg,var(--gold-mid),var(--gold-dark));flex-shrink:0"></div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--white)">${date}</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:1px">${p.name||'Protocol'}
+              ${bw?` · ${bw} lbs`:''}
+              ${bf?` · ${bf}% BF`:''}
+            </div>
+          </div>
+        </div>
+        <span id="al-chev-${p.id}" style="font-size:13px;color:var(--muted);padding:0 6px">▼</span>
+      </div>
+
+      <!-- Expandable body comp data -->
+      <div id="al-entry-${p.id}" style="display:none;padding:18px;background:var(--c1);border-top:1px solid var(--borderw)">
+
+        <!-- DEXA / Body Comp boxes -->
+        <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Body Composition</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:2px;margin-bottom:4px">
+          ${[
+            ['Body Weight', bw, 'lbs', 'var(--white)'],
+            ['Body Fat %',  bf,  '%',  'var(--gold)'],
+            ['Lean Mass',   lm, 'lbs', '#5B8FD4'],
+            ['Fat Mass',    fm, 'lbs', '#CF6679'],
+            ['BMC',       p.bc_bmc,     'lbs', 'var(--muted)'],
+            ['Visceral Fat', p.bc_visc_fat, 'lbs', 'var(--muted)'],
+            ['RMR',       p.bc_rmr,     'cal', 'var(--muted)'],
+          ].filter(([,v])=>v).map(([lbl,val,unit,clr])=>`
+          <div style="background:var(--c2);border:1px solid var(--borderw);padding:12px;text-align:center">
+            <div style="font-size:7px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px">${lbl}</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:${clr};line-height:1">${val}</div>
+            <div style="font-size:8px;color:var(--muted);margin-top:2px">${unit}</div>
+          </div>`).join('')}
+        </div>
+
+        ${skHtml}
+        ${cmHtml}
+
+        ${(p.goal_bf||p.goal_weight)?`
+        <div style="margin-top:14px">
+          <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Goals</div>
+          <div style="display:flex;gap:4px">
+            ${p.goal_bf?`<div style="background:var(--c2);border:1px solid var(--borderw);padding:10px 16px;text-align:center">
+              <div style="font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Goal BF%</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold)">${p.goal_bf}%</div>
+            </div>`:''}
+            ${p.goal_weight?`<div style="background:var(--c2);border:1px solid var(--borderw);padding:10px 16px;text-align:center">
+              <div style="font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Goal Weight</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold)">${p.goal_weight} lbs</div>
+            </div>`:''}
+          </div>
+        </div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function alToggleEntry(id){
+  const body = document.getElementById(`al-entry-${id}`);
+  const chev = document.getElementById(`al-chev-${id}`);
+  if(!body) return;
+  const open = body.style.display==='block';
+  body.style.display = open?'none':'block';
+  if(chev) chev.textContent = open?'▼':'▲';
 }
 
 function syncSummaryHeader(){
