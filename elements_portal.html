@@ -584,12 +584,24 @@ async function loadOverview(){
 }
 
 async function loadMetrics(){
-  const{data,error}=await sb.from('client_metrics').select('body_weight,body_fat,lean_mass,recorded_at').eq('client_id',uid).order('recorded_at',{ascending:false}).limit(1);
+  const{data,error}=await sb.from('client_metrics').select('body_weight,body_fat,lean_mass,recorded_at,notes').eq('client_id',uid).order('recorded_at',{ascending:false}).limit(1);
   console.log('loadMetrics uid:',uid,'data:',data,'error:',error);
   const m=data?.[0];if(!m)return;
-  document.getElementById('k-weight').textContent=m.body_weight||'—';
-  document.getElementById('k-bf').textContent=m.body_fat||'—';
-  document.getElementById('k-lean').textContent=m.lean_mass||'—';
+
+  // Try direct columns first, fall back to notes JSON
+  let bw=m.body_weight, bf=m.body_fat, lm=m.lean_mass;
+  if(!bw&&!bf&&!lm&&m.notes){
+    try{
+      const n=typeof m.notes==='string'?JSON.parse(m.notes):m.notes;
+      bw=n.body_weight||n.total_mass||bw;
+      bf=n.body_fat||bf;
+      lm=n.lean_mass||lm;
+    }catch(e){}
+  }
+
+  document.getElementById('k-weight').textContent=bw||'—';
+  document.getElementById('k-bf').textContent=bf||'—';
+  document.getElementById('k-lean').textContent=lm||'—';
 }
 
 async function loadNutrition(){
