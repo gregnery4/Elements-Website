@@ -4500,6 +4500,16 @@ async function saveGoalData(){
     recorded_at:new Date().toISOString().split('T')[0]
   });
   if(error){msg.style.color='var(--red)';msg.textContent='Error: '+error.message;return;}
+  // Also save goal values to client_overview so portal can read them
+  const goalBf=parseFloat(document.getElementById('dp-goal-bf')?.value)||null;
+  const goalWt=parseFloat(document.getElementById('dp-goal-weight')?.value)||null;
+  if(goalBf||goalWt){
+    await sb.from('client_overview').upsert({
+      client_id:id,
+      goal_bf:goalBf,
+      goal_weight:goalWt,
+    },{onConflict:'client_id'});
+  }
   msg.textContent='✓ Goal data saved.';msg.style.color='var(--green)';
   setTimeout(()=>msg.textContent='',3000);
   await loadAll();
@@ -6301,6 +6311,8 @@ async function saveOverview(btn){
     protocol_start:document.getElementById('ov-start-1')?.value||null,
     protocol_end:document.getElementById('ov-end-1')?.value||null,
     phase_duration_weeks:parseInt(document.getElementById('ov-dur-1')?.value)||null,
+    goal_bf:parseFloat(document.getElementById('dp-goal-bf')?.value)||null,
+    goal_weight:parseFloat(document.getElementById('dp-goal-weight')?.value)||null,
     training_frequency:document.getElementById('ov-freq')?.value||null,
     training_method:document.getElementById('ov-method')?.value||null,
     training_focus:document.getElementById('ov-priority')?.value||null,
