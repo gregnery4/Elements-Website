@@ -3566,7 +3566,37 @@ async function addWeeklyEntry(){
     compliance_score:entry.score||null,
     perf_data:entry.perf_data||null,
   },{onConflict:'client_id,week_number'});
-  if(wkErr) console.warn('Weekly review save error:',wkErr.message);
+
+  if(wkErr){
+    msg.style.color='var(--red)';
+    msg.textContent='Error saving: '+wkErr.message;
+    console.error('Weekly review save error:',wkErr);
+    return;
+  }
+
+  // Reload from Supabase to confirm persistence and re-render log
+  await loadAll();
+  const refreshed = allClients.find(c=>c.id===currentClient.id);
+  if(refreshed){
+    currentClient = refreshed;
+    const savedReviews = refreshed.weekly_reviews||[];
+    weeklyData[currentClient.id] = savedReviews.map(r=>({
+      wk:String(r.week_number),
+      date:r.week_start_date,
+      sessions_done:r.sessions_done,
+      sessions_target:r.sessions_target,
+      training_notes:r.training_notes,
+      perf_data:r.perf_data||null,
+      bw_days:r.bw_days_completed,
+      bw_compliance:r.bw_compliance,
+      meals_compliance:r.meals_compliance,
+      meals_logged:r.meals_logged,
+      nut_notes:r.nutrition_notes,
+      assessment_type:r.assessment_type||'no',
+      assessment:r.assessment_data?JSON.parse(r.assessment_data):{},
+      score:r.compliance_score,
+    })).sort((a,b)=>parseInt(b.wk)-parseInt(a.wk));
+  }
 
   renderWeeklyLog();
 
