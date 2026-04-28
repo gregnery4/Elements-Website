@@ -627,10 +627,17 @@ async function loadNutrition(){
 }
 
 async function loadMealPlan(){
-  const{data:protocols}=await sb.from('protocols')
+  const{data:protocols, error}=await sb.from('protocols')
     .select('id,name,notes,created_at,goal,calories,protein_g,carbs_g,fat_g,meal_count,meals,supplements')
     .eq('client_id',uid)
     .order('created_at',{ascending:false});
+
+  console.log('loadMealPlan — uid:',uid,'error:',error,'protocols:',protocols);
+  if(protocols?.length){
+    protocols.forEach((p,i)=>{
+      console.log(`Protocol ${i}: name=${p.name}, meals=${p.meals?.substring?.(0,100)}, supps=${p.supplements?.substring?.(0,80)}`);
+    });
+  }
 
   const container=document.getElementById('mp-content');
 
