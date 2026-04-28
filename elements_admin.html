@@ -1721,7 +1721,7 @@ let allClients=[];
 async function loadAll(){
   const{data,error}=await sb.from('profiles').select(`
     id,full_name,email,coach,start_date,occupation,phone,age,
-    client_metrics(body_weight,body_fat,lean_mass,recorded_at),
+    client_metrics(id,body_weight,body_fat,lean_mass,recorded_at,notes),
     supplements(id,name,brand,dose,timing,active),
     nutrition_targets(calories,protein_g,carbs_g,fat_g,protein_pct,carb_pct,fat_pct,ref_weight,maintenance_multiplier,coach_notes),
     client_overview(goal,protocol_start,protocol_end,phase_duration_weeks,training_frequency,training_method,training_focus,training_days,exercise_selection,exercise_selection_2,exercise_selection_3,nutrition_approach,tracking_responsibility,bw_recording_days,circumference_frequency,skinfold_frequency,dexa_frequency),
