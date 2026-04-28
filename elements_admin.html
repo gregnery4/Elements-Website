@@ -5806,7 +5806,6 @@ async function loadAssessmentLogs(){
             ['Fat Mass',    fm, 'lbs', '#CF6679'],
             ['BMC',       p.bc_bmc,     'lbs', 'var(--muted)'],
             ['Visceral Fat', p.bc_visc_fat, 'lbs', 'var(--muted)'],
-            ['RMR',       p.bc_rmr,     'cal', 'var(--muted)'],
           ].filter(([,v])=>v).map(([lbl,val,unit,clr])=>`
           <div style="background:var(--c2);border:1px solid var(--borderw);padding:12px;text-align:center">
             <div style="font-size:7px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px">${lbl}</div>
@@ -5817,21 +5816,6 @@ async function loadAssessmentLogs(){
 
         ${skHtml}
         ${cmHtml}
-
-        ${(p.goal_bf||p.goal_weight)?`
-        <div style="margin-top:14px">
-          <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">Goals</div>
-          <div style="display:flex;gap:4px">
-            ${p.goal_bf?`<div style="background:var(--c2);border:1px solid var(--borderw);padding:10px 16px;text-align:center">
-              <div style="font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Goal BF%</div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold)">${p.goal_bf}%</div>
-            </div>`:''}
-            ${p.goal_weight?`<div style="background:var(--c2);border:1px solid var(--borderw);padding:10px 16px;text-align:center">
-              <div style="font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Goal Weight</div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold)">${p.goal_weight} lbs</div>
-            </div>`:''}
-          </div>
-        </div>`:''}
       </div>
     </div>`;
   }).join('');
