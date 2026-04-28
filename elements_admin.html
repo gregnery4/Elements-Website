@@ -449,9 +449,14 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           <div class="dp-meta" id="dp-meta">Active Client</div>
         </div>
       </div>
-      <button class="dp-close" onclick="closeDetail()">
-        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Close
-      </button>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="dp-close" onclick="refreshClient()" title="Refresh data">
+          <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Refresh
+        </button>
+        <button class="dp-close" onclick="closeDetail()">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Close
+        </button>
+      </div>
     </div>
     <div class="dp-tabs" style="overflow-x:auto;flex-wrap:nowrap;">
       <div class="dp-tab on" onclick="dpTab('t_wizard',this)">Health Plan</div>
@@ -1917,6 +1922,20 @@ function openClient(id, skipWizardReset=false){
   const wizTab = document.querySelector('.dp-tab');
   dpTab('t_wizard', wizTab);
   goWizardStep(wzCurrentStep);
+}
+
+async function refreshClient(){
+  if(!currentClient) return;
+  const btn = document.querySelector('.dp-close[onclick="refreshClient()"]');
+  if(btn){ btn.style.color='var(--gold)'; btn.textContent='↻ Loading...'; }
+  const id = currentClient.id;
+  const step = wzCurrentStep;
+  await loadAll();
+  openClient(id, true);
+  goWizardStep(step);
+  loadAssessmentLogs();
+  loadTrainingLogs();
+  if(btn){ btn.style.color=''; btn.innerHTML='<svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Refresh'; }
 }
 
 function closeDetail(){
