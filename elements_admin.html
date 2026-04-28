@@ -456,6 +456,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
     <div class="dp-tabs" style="overflow-x:auto;flex-wrap:nowrap;">
       <div class="dp-tab on" onclick="dpTab('t_wizard',this)">Health Plan</div>
       <div class="dp-tab" onclick="dpTab('t_assess',this)">Assessment Logs</div>
+      <div class="dp-tab" onclick="dpTab('t_training',this)">Training Logs</div>
       <div class="dp-tab" onclick="dpTab('t_labs',this)">Labs</div>
       <div class="dp-tab" onclick="dpTab('t9',this)">History</div>
       <div class="dp-tab" onclick="dpTab('t6',this)">Reviews</div>
@@ -1394,6 +1395,17 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       </div>
 
 
+      <!-- TRAINING LOGS TAB -->
+      <div id="dptab-t_training" style="display:none;padding:0 0 20px">
+        <div class="dp-sec">
+          <div class="dp-sec-title">Training Logs</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:20px">Training performance data pulled from weekly reviews — most recent first.</div>
+          <div id="tl-log-body">
+            <div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No training data yet. Save a weekly review with performance data to populate this log.</div>
+          </div>
+        </div>
+      </div>
+
       <!-- LABS TAB -->
       <div id="dptab-t_labs" style="display:none">
         <div class="dp-sec">
@@ -1826,6 +1838,7 @@ function openClient(id, skipWizardReset=false){
   loadAlFromMetrics(c.client_metrics||[]);
   loadLabsFromMetrics(c.client_metrics||[]);
   loadAssessmentLogs();
+  loadTrainingLogs();
 
   // Weekly data — load from Supabase into local state
   const savedReviews=c.weekly_reviews||[];
@@ -2015,6 +2028,7 @@ function dpTab(name,el){
     return;
   }
   if(name==='t_assess'){ loadAssessmentLogs(); return; }
+  if(name==='t_training'){ loadTrainingLogs(); return; }
   if(name==='t_labs'){ renderLabLog(); return; }
   if(name==='t5')syncMealTotals();
   if(name==='t11')generateMealPlan();
@@ -5824,6 +5838,102 @@ async function loadAssessmentLogs(){
 function alToggleEntry(id){
   const body = document.getElementById(`al-entry-${id}`);
   const chev = document.getElementById(`al-chev-${id}`);
+  if(!body) return;
+  const open = body.style.display==='block';
+  body.style.display = open?'none':'block';
+  if(chev) chev.textContent = open?'▼':'▲';
+}
+
+// ── TRAINING LOGS ──
+async function loadTrainingLogs(){
+  if(!currentClient) return;
+  const container = document.getElementById('tl-log-body');
+  if(!container) return;
+
+  const{data:reviews, error} = await sb.from('weekly_reviews')
+    .select('id,week_number,week_start_date,sessions_done,sessions_target,training_notes,perf_data,created_at')
+    .eq('client_id', currentClient.id)
+    .order('week_number', {ascending:false});
+
+  if(error || !reviews?.length){
+    container.innerHTML='<div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No training data yet. Save a weekly review with performance data to populate this log.</div>';
+    return;
+  }
+
+  // Filter to reviews that have perf_data
+  const entries = reviews.filter(r => r.perf_data);
+
+  if(!entries.length){
+    container.innerHTML='<div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No performance data found. Enter reps and weight in the Training Performance section when saving a weekly review.</div>';
+    return;
+  }
+
+  container.innerHTML = entries.map(r=>{
+    const dateStr = r.week_start_date
+      ? new Date(r.week_start_date).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})
+      : `Week ${r.week_number}`;
+
+    let pd = [];
+    try{ pd = typeof r.perf_data==='string'?JSON.parse(r.perf_data):r.perf_data; }catch(e){}
+    const validPd = (pd||[]).filter(p=>p.exercise&&(p.reps||p.weight));
+
+    const subtitle = `Week ${r.week_number}${r.sessions_done?` · ${r.sessions_done}/${r.sessions_target||'?'} sessions`:''}`;
+
+    // Exercise summary for collapsed view
+    const exSummary = validPd.map(p=>p.exercise).join(' · ');
+
+    return `
+    <div style="border:1px solid var(--border);margin-bottom:3px;overflow:hidden">
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--c2);cursor:pointer"
+        onclick="tlToggleEntry('${r.id}')"
+        onmouseover="this.style.background='var(--c3)'"
+        onmouseout="this.style.background='var(--c2)'">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="width:3px;height:36px;background:linear-gradient(180deg,var(--gold-mid),var(--gold-dark));flex-shrink:0"></div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--white)">${dateStr}</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:1px">${subtitle}</div>
+            ${exSummary?`<div style="font-size:9px;color:var(--gold);margin-top:3px">${exSummary}</div>`:''}
+          </div>
+        </div>
+        <span id="tl-chev-${r.id}" style="font-size:13px;color:var(--muted);padding:0 6px">▼</span>
+      </div>
+
+      <!-- Expandable body -->
+      <div id="tl-entry-${r.id}" style="display:none;padding:18px;background:var(--c1);border-top:1px solid var(--borderw)">
+
+        ${validPd.length ? `
+        <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Performance</div>
+        ${validPd.map(p=>`
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:2px;margin-bottom:2px">
+          <div style="background:var(--c2);border:1px solid var(--borderw);padding:12px 14px;display:flex;align-items:center">
+            <div style="font-size:11px;font-weight:600;color:var(--white)">${p.exercise}</div>
+          </div>
+          <div style="background:var(--c2);border:1px solid var(--borderw);padding:12px;text-align:center">
+            <div style="font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Reps</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--white)">${p.reps||'—'}</div>
+          </div>
+          <div style="background:var(--c2);border:1px solid var(--borderw);padding:12px;text-align:center">
+            <div style="font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Weight</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold)">${p.weight||'—'}</div>
+            ${p.weight?`<div style="font-size:8px;color:var(--muted)">lbs</div>`:''}
+          </div>
+        </div>`).join('')}
+        ` : '<div style="font-size:11px;color:var(--muted)">No performance data recorded for this week.</div>'}
+
+        ${r.training_notes?`
+        <div style="margin-top:12px;padding:10px 14px;background:var(--c2);border:1px solid var(--borderw);font-size:11px;color:var(--muted)">
+          <span style="font-size:8px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-right:8px">Notes</span>${r.training_notes}
+        </div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function tlToggleEntry(id){
+  const body = document.getElementById(`tl-entry-${id}`);
+  const chev = document.getElementById(`tl-chev-${id}`);
   if(!body) return;
   const open = body.style.display==='block';
   body.style.display = open?'none':'block';
