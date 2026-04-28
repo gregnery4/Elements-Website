@@ -995,54 +995,10 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
 
       <!-- ASSESSMENT LOG TAB -->
       <div id="dptab-t_assess" style="display:none">
-
-        <!-- ADD NEW ASSESSMENT -->
         <div class="dp-sec">
-          <div class="dp-sec-title" style="display:flex;align-items:center;justify-content:space-between">
-            Add New Assessment
-            <span style="font-size:10px;color:var(--muted);font-family:'Montserrat',sans-serif;font-weight:300;letter-spacing:1px">Saved entries appear below</span>
-          </div>
-
-          <!-- Type + Date selector -->
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">
-            <div class="edit-field">
-              <label>Assessment Type</label>
-              <select id="al-type" onchange="renderAlFields()" style="width:100%">
-                <option value="">— Select —</option>
-                <option value="dexa">DEXA Scan</option>
-                <option value="skinfold">Caliper Skinfolds</option>
-                <option value="circumference">Circumference</option>
-                <option value="skinfold+circumference">Skinfolds + Circumference</option>
-              </select>
-            </div>
-            <div class="edit-field">
-              <label>Assessment Date</label>
-              <input type="date" id="al-date">
-            </div>
-            <div class="edit-field">
-              <label>Phase / Label</label>
-              <input type="text" id="al-phase" placeholder="e.g. Fat Loss Phase 1">
-            </div>
-          </div>
-
-          <!-- Dynamic fields -->
-          <div id="al-fields"></div>
-
-          <!-- Save button -->
-          <div id="al-save-row" style="display:none;margin-top:16px">
-            <button class="save-btn" onclick="saveAssessmentLog()">Save Assessment →</button>
-            <div style="font-size:10px;color:var(--green);margin-top:8px;min-height:16px" id="al-msg"></div>
-          </div>
+          <div class="dp-sec-title">Assessment Log</div>
+          <div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">Coming soon.</div>
         </div>
-
-        <!-- ASSESSMENT LOG -->
-        <div class="dp-sec">
-          <div class="dp-sec-title">Assessment History</div>
-          <div id="al-log-body">
-            <div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No assessments logged yet.</div>
-          </div>
-        </div>
-
       </div>
 
       <!-- TAB 6: WEEKLY DATA ENTRY -->
