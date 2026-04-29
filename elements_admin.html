@@ -6009,58 +6009,108 @@ async function loadNutritionPlan(){
   const container = document.getElementById('np-log-body');
   if(!container) return;
 
-  const{data:protocols, error} = await sb.from('protocols')
+  // Fetch from protocols (has name/date/goal context)
+  const{data:protocols} = await sb.from('protocols')
     .select('id,name,created_at,goal,calories,protein_g,carbs_g,fat_g,meal_count,meals,supplements')
     .eq('client_id', currentClient.id)
     .order('created_at',{ascending:false});
 
-  if(error||!protocols?.length){
-    container.innerHTML='<div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No meal plan data yet. Save a protocol to populate this tab.</div>';
-    return;
-  }
+  // Also fetch from meal_plans (latest save from Tab 5/7)
+  const{data:mealPlans} = await sb.from('meal_plans')
+    .select('*')
+    .eq('client_id', currentClient.id)
+    .order('updated_at',{ascending:false});
 
-  const entries = protocols.filter(p=>p.meals);
+  // Build combined entries — protocols first, then meal_plans not already in protocols
+  let entries = [];
+
+  (protocols||[]).filter(p=>p.meals).forEach(p=>{
+    entries.push({
+      id: p.id,
+      label: p.name||'Protocol',
+      date: p.created_at,
+      goal: p.goal,
+      meals: p.meals,
+      supplements: p.supplements,
+      source: 'protocol'
+    });
+  });
+
+  // Add meal_plans as separate entries if they exist and have data
+  (mealPlans||[]).filter(m=>m.meals).forEach(m=>{
+    entries.push({
+      id: 'mp-'+m.id,
+      label: 'Meal Plan',
+      date: m.updated_at||m.created_at,
+      goal: null,
+      meals: m.meals,
+      supplements: null,
+      source: 'meal_plan'
+    });
+  });
+
   if(!entries.length){
-    container.innerHTML='<div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No meal data found in saved protocols.</div>';
+    container.innerHTML='<div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No meal plan data yet. Save a protocol or meal plan to populate this tab.</div>';
     return;
   }
 
-  container.innerHTML = entries.map(p=>{
-    const date = new Date(p.created_at).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  // Sort newest first
+  entries.sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  container.innerHTML = entries.map(e=>{
+    const date = new Date(e.date).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
 
     // Parse meals and supplements
     let meals=[], supps=[];
-    try{ meals=typeof p.meals==='string'?JSON.parse(p.meals):p.meals; }catch(e){}
-    try{ supps=typeof p.supplements==='string'?JSON.parse(p.supplements):p.supplements; }catch(e){}
+    try{ meals=typeof e.meals==='string'?JSON.parse(e.meals):e.meals; }catch(err){}
+    try{ supps=typeof e.supplements==='string'?JSON.parse(e.supplements):(e.supplements||[]); }catch(err){}
 
-    // Build supp-per-meal lookup
+    // Supplement per meal lookup
     const suppByMeal={};
     (supps||[]).forEach(s=>{
       if(!s.timing) return;
-      s.timing.split(',').map(m=>m.trim()).forEach(m=>{
-        const n=parseInt(m.replace(/M/i,''));
+      s.timing.split(',').map(t=>t.trim()).forEach(t=>{
+        const n=parseInt(t.replace(/M/i,''));
         if(!isNaN(n)){if(!suppByMeal[n])suppByMeal[n]=[];suppByMeal[n].push(s);}
       });
     });
 
-    // Daily totals
-    const totP=(meals||[]).reduce((s,m)=>s+(parseInt(m.protein)||0),0);
-    const totC=(meals||[]).reduce((s,m)=>s+(parseInt(m.carbs)||0),0);
-    const totF=(meals||[]).reduce((s,m)=>s+(parseInt(m.fats)||0),0);
+    // Daily totals using food portions for accuracy
+    let totP=0,totC=0,totF=0;
+    (meals||[]).forEach(m=>{
+      const mp=parseInt(m.protein)||0, mc=parseInt(m.carbs)||0, mf=parseInt(m.fats)||0;
+      const portions=m.foods?_getFoodPortionsText(m.foods,mp,mc,mf):[];
+      let dP=mp,dC=mc,dF=mf;
+      if(portions.length){
+        let pS=0,cS=0,fS=0;
+        portions.forEach(({macros})=>{
+          const pm=macros.match(/(\d+)P/),cm=macros.match(/(\d+)C/),fm=macros.match(/(\d+)F/);
+          if(pm)pS+=parseInt(pm[1]); if(cm)cS+=parseInt(cm[1]); if(fm)fS+=parseInt(fm[1]);
+        });
+        if(pS||cS||fS){dP=pS;dC=cS;dF=fS;}
+      }
+      totP+=dP; totC+=dC; totF+=dF;
+    });
     const totCal=(totP*4)+(totC*4)+(totF*9);
 
     // Meals HTML
-    const mealsHtml = (meals||[]).map((m,idx)=>{
+    const mealsHtml=(meals||[]).map((m,idx)=>{
       const mealN=idx+1;
-      const prot=parseInt(m.protein)||0;
-      const carb=parseInt(m.carbs)||0;
-      const fat=parseInt(m.fats)||0;
-      const kcal=(prot*4)+(carb*4)+(fat*9);
-      const mealSupps=suppByMeal[mealN]||[];
+      const prot=parseInt(m.protein)||0, carb=parseInt(m.carbs)||0, fat=parseInt(m.fats)||0;
       const portions=m.foods?_getFoodPortionsText(m.foods,prot,carb,fat):[];
+      let dP=prot,dC=carb,dF=fat;
+      if(portions.length){
+        let pS=0,cS=0,fS=0;
+        portions.forEach(({macros})=>{
+          const pm=macros.match(/(\d+)P/),cm=macros.match(/(\d+)C/),fm=macros.match(/(\d+)F/);
+          if(pm)pS+=parseInt(pm[1]); if(cm)cS+=parseInt(cm[1]); if(fm)fS+=parseInt(fm[1]);
+        });
+        if(pS||cS||fS){dP=pS;dC=cS;dF=fS;}
+      }
+      const kcal=(dP*4)+(dC*4)+(dF*9);
+      const mealSupps=suppByMeal[mealN]||[];
 
       return `<div style="background:var(--c2);border:1px solid var(--borderw);margin-bottom:2px;overflow:hidden">
-        <!-- Meal header -->
         <div style="background:var(--c1);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--borderw)">
           <div style="display:flex;align-items:center;gap:10px">
             <div style="width:3px;height:28px;background:linear-gradient(180deg,var(--gold-mid),var(--gold-dark))"></div>
@@ -6074,22 +6124,20 @@ async function loadNutritionPlan(){
             ${kcal?`<div style="font-size:9px;color:var(--muted)">${kcal} kcal</div>`:''}
           </div>
         </div>
-        <!-- Macro row -->
         <div style="display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--borderw)">
           <div style="padding:10px;text-align:center;border-right:1px solid var(--borderw)">
             <div style="font-size:7px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">Protein</div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold)">${prot}g</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold)">${dP}g</div>
           </div>
           <div style="padding:10px;text-align:center;border-right:1px solid var(--borderw)">
             <div style="font-size:7px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">Carbs</div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#5B8FD4">${carb}g</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#5B8FD4">${dC}g</div>
           </div>
           <div style="padding:10px;text-align:center">
             <div style="font-size:7px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">Fats</div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#CF6679">${fat}g</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#CF6679">${dF}g</div>
           </div>
         </div>
-        <!-- Food portions -->
         ${portions.length?`<div style="padding:10px 14px;border-bottom:1px solid var(--borderw)">
           ${portions.map(({name,portion,macros})=>`
           <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
@@ -6100,7 +6148,6 @@ async function loadNutritionPlan(){
             <div style="font-size:9px;color:var(--muted)">${macros}</div>
           </div>`).join('')}
         </div>`:''}
-        <!-- Supplements -->
         ${mealSupps.length?`<div style="padding:10px 14px;background:var(--c1);display:flex;flex-wrap:wrap;gap:6px;align-items:center">
           <span style="font-size:8px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-right:4px">With this meal</span>
           ${mealSupps.map(s=>`<span style="padding:3px 10px;background:var(--c2);border:1px solid var(--borderw);font-size:10px;color:var(--white)">${s.name}${s.dose?' · '+s.dose:''}</span>`).join('')}
@@ -6110,9 +6157,8 @@ async function loadNutritionPlan(){
 
     return `
     <div style="border:1px solid var(--border);margin-bottom:3px;overflow:hidden">
-      <!-- Header -->
       <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--c2);cursor:pointer"
-        onclick="npToggle('${p.id}')"
+        onclick="npToggle('${e.id}')"
         onmouseover="this.style.background='var(--c3)'"
         onmouseout="this.style.background='var(--c2)'">
         <div style="display:flex;align-items:center;gap:14px">
@@ -6120,7 +6166,7 @@ async function loadNutritionPlan(){
           <div>
             <div style="font-size:13px;font-weight:600;color:var(--white)">${date}</div>
             <div style="font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:1px">
-              ${p.name||'Meal Plan'}${p.goal?' · '+p.goal:''}${totCal?' · '+totCal+' cal':''}
+              ${e.label}${e.goal?' · '+e.goal:''}${totCal?' · '+totCal+' kcal':''}
             </div>
             <div style="display:flex;gap:10px;margin-top:4px">
               ${totP?`<span style="font-size:9px;color:var(--gold)">${totP}g P</span>`:''}
@@ -6129,11 +6175,9 @@ async function loadNutritionPlan(){
             </div>
           </div>
         </div>
-        <span id="np-chev-${p.id}" style="font-size:13px;color:var(--muted);padding:0 6px">▼</span>
+        <span id="np-chev-${e.id}" style="font-size:13px;color:var(--muted);padding:0 6px">▼</span>
       </div>
-      <!-- Expandable -->
-      <div id="np-entry-${p.id}" style="display:none;padding:16px;background:var(--c1);border-top:1px solid var(--borderw)">
-        <!-- Daily totals bar -->
+      <div id="np-entry-${e.id}" style="display:none;padding:16px;background:var(--c1);border-top:1px solid var(--borderw)">
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:14px">
           ${[['Calories',totCal,'var(--white)'],['Protein',totP+'g','var(--gold)'],['Carbs',totC+'g','#5B8FD4'],['Fats',totF+'g','#CF6679']].map(([l,v,c])=>`
           <div style="background:var(--c2);border:1px solid var(--borderw);padding:10px;text-align:center">
