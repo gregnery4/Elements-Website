@@ -1416,7 +1416,10 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       <div id="dptab-t_nutrition" style="display:none;padding:0 0 20px">
         <div class="dp-sec">
           <div class="dp-sec-title">Nutrition Plan</div>
-          <div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">Coming soon.</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:20px">Meal plans pulled from saved protocols — most recent first.</div>
+          <div id="np-log-body">
+            <div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No meal plan data yet. Save a protocol to populate this tab.</div>
+          </div>
         </div>
       </div>
 
@@ -1853,6 +1856,7 @@ function openClient(id, skipWizardReset=false){
   loadLabsFromMetrics(c.client_metrics||[]);
   loadAssessmentLogs();
   loadTrainingLogs();
+  loadNutritionPlan();
 
   // Weekly data — load from Supabase into local state
   const savedReviews=c.weekly_reviews||[];
@@ -2057,6 +2061,7 @@ function dpTab(name,el){
   }
   if(name==='t_assess'){ loadAssessmentLogs(); return; }
   if(name==='t_training'){ loadTrainingLogs(); return; }
+  if(name==='t_nutrition'){ loadNutritionPlan(); return; }
   if(name==='t_labs'){ renderLabLog(); return; }
   if(name==='t5')syncMealTotals();
   if(name==='t11')generateMealPlan();
@@ -5996,6 +6001,159 @@ function tlToggleEntry(id){
   const open = body.style.display==='block';
   body.style.display = open?'none':'block';
   if(chev) chev.textContent = open?'▼':'▲';
+}
+
+// ── NUTRITION PLAN ──
+async function loadNutritionPlan(){
+  if(!currentClient) return;
+  const container = document.getElementById('np-log-body');
+  if(!container) return;
+
+  const{data:protocols, error} = await sb.from('protocols')
+    .select('id,name,created_at,goal,calories,protein_g,carbs_g,fat_g,meal_count,meals,supplements')
+    .eq('client_id', currentClient.id)
+    .order('created_at',{ascending:false});
+
+  if(error||!protocols?.length){
+    container.innerHTML='<div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No meal plan data yet. Save a protocol to populate this tab.</div>';
+    return;
+  }
+
+  const entries = protocols.filter(p=>p.meals);
+  if(!entries.length){
+    container.innerHTML='<div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No meal data found in saved protocols.</div>';
+    return;
+  }
+
+  container.innerHTML = entries.map(p=>{
+    const date = new Date(p.created_at).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+
+    // Parse meals and supplements
+    let meals=[], supps=[];
+    try{ meals=typeof p.meals==='string'?JSON.parse(p.meals):p.meals; }catch(e){}
+    try{ supps=typeof p.supplements==='string'?JSON.parse(p.supplements):p.supplements; }catch(e){}
+
+    // Build supp-per-meal lookup
+    const suppByMeal={};
+    (supps||[]).forEach(s=>{
+      if(!s.timing) return;
+      s.timing.split(',').map(m=>m.trim()).forEach(m=>{
+        const n=parseInt(m.replace(/M/i,''));
+        if(!isNaN(n)){if(!suppByMeal[n])suppByMeal[n]=[];suppByMeal[n].push(s);}
+      });
+    });
+
+    // Daily totals
+    const totP=(meals||[]).reduce((s,m)=>s+(parseInt(m.protein)||0),0);
+    const totC=(meals||[]).reduce((s,m)=>s+(parseInt(m.carbs)||0),0);
+    const totF=(meals||[]).reduce((s,m)=>s+(parseInt(m.fats)||0),0);
+    const totCal=(totP*4)+(totC*4)+(totF*9);
+
+    // Meals HTML
+    const mealsHtml = (meals||[]).map((m,idx)=>{
+      const mealN=idx+1;
+      const prot=parseInt(m.protein)||0;
+      const carb=parseInt(m.carbs)||0;
+      const fat=parseInt(m.fats)||0;
+      const kcal=(prot*4)+(carb*4)+(fat*9);
+      const mealSupps=suppByMeal[mealN]||[];
+      const portions=m.foods?_getFoodPortionsText(m.foods,prot,carb,fat):[];
+
+      return `<div style="background:var(--c2);border:1px solid var(--borderw);margin-bottom:2px;overflow:hidden">
+        <!-- Meal header -->
+        <div style="background:var(--c1);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--borderw)">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:3px;height:28px;background:linear-gradient(180deg,var(--gold-mid),var(--gold-dark))"></div>
+            <div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px">MEAL ${mealN}</div>
+              <div style="font-size:8px;color:var(--gold);letter-spacing:2px;text-transform:uppercase">${m.type||'Whole Food'}</div>
+            </div>
+          </div>
+          <div style="text-align:right">
+            ${m.time?`<div style="font-size:11px;color:var(--white)">${m.time}</div>`:''}
+            ${kcal?`<div style="font-size:9px;color:var(--muted)">${kcal} kcal</div>`:''}
+          </div>
+        </div>
+        <!-- Macro row -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--borderw)">
+          <div style="padding:10px;text-align:center;border-right:1px solid var(--borderw)">
+            <div style="font-size:7px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">Protein</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold)">${prot}g</div>
+          </div>
+          <div style="padding:10px;text-align:center;border-right:1px solid var(--borderw)">
+            <div style="font-size:7px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">Carbs</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#5B8FD4">${carb}g</div>
+          </div>
+          <div style="padding:10px;text-align:center">
+            <div style="font-size:7px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px">Fats</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#CF6679">${fat}g</div>
+          </div>
+        </div>
+        <!-- Food portions -->
+        ${portions.length?`<div style="padding:10px 14px;border-bottom:1px solid var(--borderw)">
+          ${portions.map(({name,portion,macros})=>`
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+            <div>
+              <div style="font-size:11px;color:var(--white);font-weight:500;text-transform:capitalize">${name}</div>
+              <div style="font-size:9px;color:var(--muted)">${portion}</div>
+            </div>
+            <div style="font-size:9px;color:var(--muted)">${macros}</div>
+          </div>`).join('')}
+        </div>`:''}
+        <!-- Supplements -->
+        ${mealSupps.length?`<div style="padding:10px 14px;background:var(--c1);display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+          <span style="font-size:8px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-right:4px">With this meal</span>
+          ${mealSupps.map(s=>`<span style="padding:3px 10px;background:var(--c2);border:1px solid var(--borderw);font-size:10px;color:var(--white)">${s.name}${s.dose?' · '+s.dose:''}</span>`).join('')}
+        </div>`:''}
+      </div>`;
+    }).join('');
+
+    return `
+    <div style="border:1px solid var(--border);margin-bottom:3px;overflow:hidden">
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--c2);cursor:pointer"
+        onclick="npToggle('${p.id}')"
+        onmouseover="this.style.background='var(--c3)'"
+        onmouseout="this.style.background='var(--c2)'">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="width:3px;height:36px;background:linear-gradient(180deg,var(--gold-mid),var(--gold-dark));flex-shrink:0"></div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--white)">${date}</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:1px">
+              ${p.name||'Meal Plan'}${p.goal?' · '+p.goal:''}${totCal?' · '+totCal+' cal':''}
+            </div>
+            <div style="display:flex;gap:10px;margin-top:4px">
+              ${totP?`<span style="font-size:9px;color:var(--gold)">${totP}g P</span>`:''}
+              ${totC?`<span style="font-size:9px;color:#5B8FD4">${totC}g C</span>`:''}
+              ${totF?`<span style="font-size:9px;color:#CF6679">${totF}g F</span>`:''}
+            </div>
+          </div>
+        </div>
+        <span id="np-chev-${p.id}" style="font-size:13px;color:var(--muted);padding:0 6px">▼</span>
+      </div>
+      <!-- Expandable -->
+      <div id="np-entry-${p.id}" style="display:none;padding:16px;background:var(--c1);border-top:1px solid var(--borderw)">
+        <!-- Daily totals bar -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-bottom:14px">
+          ${[['Calories',totCal,'var(--white)'],['Protein',totP+'g','var(--gold)'],['Carbs',totC+'g','#5B8FD4'],['Fats',totF+'g','#CF6679']].map(([l,v,c])=>`
+          <div style="background:var(--c2);border:1px solid var(--borderw);padding:10px;text-align:center">
+            <div style="font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px">${l}</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:${c}">${v}</div>
+          </div>`).join('')}
+        </div>
+        ${mealsHtml}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function npToggle(id){
+  const body=document.getElementById(`np-entry-${id}`);
+  const chev=document.getElementById(`np-chev-${id}`);
+  if(!body) return;
+  const open=body.style.display==='block';
+  body.style.display=open?'none':'block';
+  if(chev) chev.textContent=open?'▼':'▲';
 }
 
 function syncSummaryHeader(){
