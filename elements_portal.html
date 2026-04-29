@@ -335,25 +335,7 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
                 <span id="perf-ex-label">— Select Exercises —</span>
                 <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--muted)">▼</span>
               </div>
-              <div id="perf-ex-dropdown" style="display:none;position:absolute;top:100%;left:0;z-index:100;background:var(--c2);border:1px solid var(--borderw);min-width:260px;max-height:260px;overflow-y:auto">
-                ${[
-                  'Flat Press - DB','Low Incline Press - DB','High Incline Press - DB',
-                  'Bench Press - Flat - Barbell','Bench Press - Incline - Barbell',
-                  'Shoulder Press - Seated - DB','Shoulder Press - Seated - Barbell',
-                  'Shoulder Press - Standing - Barbell','Push Press - Barbell',
-                  'Chin-Up - Neutral Grip','Chin-Up - Semi-Supinated Grip','Pull-Up',
-                  'Deadlift - Trap Bar','Deadlift - Barbell','Romanian Deadlift - Barbell',
-                  'Back Squat - Barbell','Front Squat - Barbell',
-                  'Split Squat - FFF','Split Squat - FFE','Split Squat - RFE',
-                  'Glute Bridge - Barbell','Incline Hip Extension - DB','Hack Squat - Machine',
-                  'Push-Up','Dips'
-                ].map(ex=>`
-                <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:10px;color:var(--white);border-bottom:1px solid rgba(255,255,255,0.04)"
-                  onmouseover="this.style.background='var(--c3)'" onmouseout="this.style.background=''">
-                  <input type="checkbox" value="${ex}" onchange="onPerfExChange()" style="accent-color:var(--gold);cursor:pointer">
-                  ${ex}
-                </label>`).join('')}
-              </div>
+              <div id="perf-ex-dropdown" style="display:none;position:absolute;top:100%;left:0;z-index:100;background:var(--c2);border:1px solid var(--borderw);min-width:260px;max-height:260px;overflow-y:auto"></div>
             </div>
           </div>
           <!-- Metric -->
@@ -1415,6 +1397,30 @@ function populatePerfExerciseDropdown(exercises){
   // no-op — dropdown is now static checkboxes
 }
 
+const PERF_EXERCISES = [
+  'Flat Press - DB','Low Incline Press - DB','High Incline Press - DB',
+  'Bench Press - Flat - Barbell','Bench Press - Incline - Barbell',
+  'Shoulder Press - Seated - DB','Shoulder Press - Seated - Barbell',
+  'Shoulder Press - Standing - Barbell','Push Press - Barbell',
+  'Chin-Up - Neutral Grip','Chin-Up - Semi-Supinated Grip','Pull-Up',
+  'Deadlift - Trap Bar','Deadlift - Barbell','Romanian Deadlift - Barbell',
+  'Back Squat - Barbell','Front Squat - Barbell',
+  'Split Squat - FFF','Split Squat - FFE','Split Squat - RFE',
+  'Glute Bridge - Barbell','Incline Hip Extension - DB','Hack Squat - Machine',
+  'Push-Up','Dips'
+];
+
+function buildPerfExDropdown(){
+  const dd = document.getElementById('perf-ex-dropdown');
+  if(!dd||dd.children.length) return;
+  dd.innerHTML = PERF_EXERCISES.map(ex=>`
+    <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:10px;color:var(--white);border-bottom:1px solid rgba(255,255,255,0.04)"
+      onmouseover="this.style.background='var(--c3)'" onmouseout="this.style.background=''">
+      <input type="checkbox" value="${ex}" onchange="onPerfExChange()" style="accent-color:var(--gold-mid);cursor:pointer">
+      ${ex}
+    </label>`).join('');
+}
+
 // Colours for multiple exercise lines
 const PERF_COLORS=[
   'rgba(201,168,108,1)',
@@ -1428,6 +1434,7 @@ const PERF_COLORS=[
 function togglePerfExDropdown(){
   const dd=document.getElementById('perf-ex-dropdown');
   if(!dd) return;
+  buildPerfExDropdown();
   dd.style.display=dd.style.display==='none'?'block':'none';
 }
 
