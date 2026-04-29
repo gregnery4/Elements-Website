@@ -6009,53 +6009,24 @@ async function loadNutritionPlan(){
   const container = document.getElementById('np-log-body');
   if(!container) return;
 
-  // Fetch from protocols (has name/date/goal context)
   const{data:protocols} = await sb.from('protocols')
     .select('id,name,created_at,goal,calories,protein_g,carbs_g,fat_g,meal_count,meals,supplements')
     .eq('client_id', currentClient.id)
     .order('created_at',{ascending:false});
 
-  // Also fetch from meal_plans (latest save from Tab 5/7)
-  const{data:mealPlans} = await sb.from('meal_plans')
-    .select('*')
-    .eq('client_id', currentClient.id)
-    .order('updated_at',{ascending:false});
-
-  // Build combined entries — protocols first, then meal_plans not already in protocols
-  let entries = [];
-
-  (protocols||[]).filter(p=>p.meals).forEach(p=>{
-    entries.push({
-      id: p.id,
-      label: p.name||'Protocol',
-      date: p.created_at,
-      goal: p.goal,
-      meals: p.meals,
-      supplements: p.supplements,
-      source: 'protocol'
-    });
-  });
-
-  // Add meal_plans as separate entries if they exist and have data
-  (mealPlans||[]).filter(m=>m.meals).forEach(m=>{
-    entries.push({
-      id: 'mp-'+m.id,
-      label: 'Meal Plan',
-      date: m.updated_at||m.created_at,
-      goal: null,
-      meals: m.meals,
-      supplements: null,
-      source: 'meal_plan'
-    });
-  });
+  const entries = (protocols||[]).filter(p=>p.meals).map(p=>({
+    id: p.id,
+    label: p.name||'Protocol',
+    date: p.created_at,
+    goal: p.goal,
+    meals: p.meals,
+    supplements: p.supplements,
+  }));
 
   if(!entries.length){
-    container.innerHTML='<div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No meal plan data yet. Save a protocol or meal plan to populate this tab.</div>';
+    container.innerHTML='<div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No meal plan data yet. Save a protocol to populate this tab.</div>';
     return;
   }
-
-  // Sort newest first
-  entries.sort((a,b)=>new Date(b.date)-new Date(a.date));
 
   container.innerHTML = entries.map(e=>{
     const date = new Date(e.date).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
