@@ -325,39 +325,39 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
       <div style="background:var(--c2);border:1px solid var(--border);padding:24px;margin-bottom:28px">
 
         <!-- Controls -->
-        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap">
-          <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">Exercise</span>
-            <select id="perf-ex-select" onchange="renderPerfChart()" style="background:var(--c3);border:1px solid var(--borderw);color:var(--white);font-family:'Montserrat',sans-serif;font-size:10px;padding:6px 10px;outline:none;cursor:pointer;min-width:220px">
-              <option value="">— Select Exercise —</option>
-              <option value="Flat Press - DB">Flat Press - DB</option>
-              <option value="Low Incline Press - DB">Low Incline Press - DB</option>
-              <option value="High Incline Press - DB">High Incline Press - DB</option>
-              <option value="Bench Press - Flat - Barbell">Bench Press - Flat - Barbell</option>
-              <option value="Bench Press - Incline - Barbell">Bench Press - Incline - Barbell</option>
-              <option value="Shoulder Press - Seated - DB">Shoulder Press - Seated - DB</option>
-              <option value="Shoulder Press - Seated - Barbell">Shoulder Press - Seated - Barbell</option>
-              <option value="Shoulder Press - Standing - Barbell">Shoulder Press - Standing - Barbell</option>
-              <option value="Push Press - Barbell">Push Press - Barbell</option>
-              <option value="Chin-Up - Neutral Grip">Chin-Up - Neutral Grip</option>
-              <option value="Chin-Up - Semi-Supinated Grip">Chin-Up - Semi-Supinated Grip</option>
-              <option value="Pull-Up">Pull-Up</option>
-              <option value="Deadlift - Trap Bar">Deadlift - Trap Bar</option>
-              <option value="Deadlift - Barbell">Deadlift - Barbell</option>
-              <option value="Romanian Deadlift - Barbell">Romanian Deadlift - Barbell</option>
-              <option value="Back Squat - Barbell">Back Squat - Barbell</option>
-              <option value="Front Squat - Barbell">Front Squat - Barbell</option>
-              <option value="Split Squat - FFF">Split Squat - FFF</option>
-              <option value="Split Squat - FFE">Split Squat - FFE</option>
-              <option value="Split Squat - RFE">Split Squat - RFE</option>
-              <option value="Glute Bridge - Barbell">Glute Bridge - Barbell</option>
-              <option value="Incline Hip Extension - DB">Incline Hip Extension - DB</option>
-              <option value="Hack Squat - Machine">Hack Squat - Machine</option>
-              <option value="Push-Up">Push-Up</option>
-              <option value="Dips">Dips</option>
-            </select>
+        <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:20px;flex-wrap:wrap">
+          <!-- Multi-select exercise dropdown -->
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">Exercises</span>
+            <div style="position:relative">
+              <div id="perf-ex-trigger" onclick="togglePerfExDropdown()"
+                style="background:var(--c3);border:1px solid var(--borderw);color:var(--white);font-family:'Montserrat',sans-serif;font-size:10px;padding:6px 28px 6px 10px;cursor:pointer;min-width:220px;position:relative;user-select:none">
+                <span id="perf-ex-label">— Select Exercises —</span>
+                <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--muted)">▼</span>
+              </div>
+              <div id="perf-ex-dropdown" style="display:none;position:absolute;top:100%;left:0;z-index:100;background:var(--c2);border:1px solid var(--borderw);min-width:260px;max-height:260px;overflow-y:auto">
+                ${[
+                  'Flat Press - DB','Low Incline Press - DB','High Incline Press - DB',
+                  'Bench Press - Flat - Barbell','Bench Press - Incline - Barbell',
+                  'Shoulder Press - Seated - DB','Shoulder Press - Seated - Barbell',
+                  'Shoulder Press - Standing - Barbell','Push Press - Barbell',
+                  'Chin-Up - Neutral Grip','Chin-Up - Semi-Supinated Grip','Pull-Up',
+                  'Deadlift - Trap Bar','Deadlift - Barbell','Romanian Deadlift - Barbell',
+                  'Back Squat - Barbell','Front Squat - Barbell',
+                  'Split Squat - FFF','Split Squat - FFE','Split Squat - RFE',
+                  'Glute Bridge - Barbell','Incline Hip Extension - DB','Hack Squat - Machine',
+                  'Push-Up','Dips'
+                ].map(ex=>`
+                <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:10px;color:var(--white);border-bottom:1px solid rgba(255,255,255,0.04)"
+                  onmouseover="this.style.background='var(--c3)'" onmouseout="this.style.background=''">
+                  <input type="checkbox" value="${ex}" onchange="onPerfExChange()" style="accent-color:var(--gold);cursor:pointer">
+                  ${ex}
+                </label>`).join('')}
+              </div>
+            </div>
           </div>
-          <div style="display:flex;align-items:center;gap:8px">
+          <!-- Metric -->
+          <div style="display:flex;flex-direction:column;gap:6px">
             <span style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">Metric - Reps</span>
             <select id="perf-metric-select" onchange="renderPerfChart()" style="background:var(--c3);border:1px solid var(--borderw);color:var(--white);font-family:'Montserrat',sans-serif;font-size:10px;padding:6px 10px;outline:none;cursor:pointer">
               <option value="weight">Weight (lbs)</option>
@@ -440,6 +440,11 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
           <div style="font-size:8px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase">Time</div>
         </div>
       </div>
+      <div class="card" style="margin-top:3px">
+        <div class="card-hd">Assessment Log</div>
+        <div id="bc-assessment-log"><div class="empty">No assessments recorded yet.</div></div>
+      </div>
+
     </div>
     <div class="page" id="page-reviews">
       <div class="pg-h"><h2>Weekly <span>Reviews</span></h2><p>Your compliance scores and weekly check-ins</p></div>
@@ -1198,24 +1203,24 @@ async function loadSupps(){
 let _bcData = [];
 
 async function loadBodyComp(){
-  const{data}=await sb.from('client_metrics')
-    .select('body_weight,body_fat,lean_mass,recorded_at,notes')
+  // Pull from protocols — same source as admin assessment log
+  const{data:protocols}=await sb.from('protocols')
+    .select('id,name,created_at,body_weight,body_fat,lean_mass,bc_fat_mass,bc_total_mass,bc_bf_pct,bc_lean_mass,bc_bmc,bc_visc_fat,sk_measurements,cm_measurements')
     .eq('client_id',uid)
-    .order('recorded_at',{ascending:true});
-  if(!data||!data.length) return;
+    .order('created_at',{ascending:true});
 
-  _bcData = data.map(m=>{
-    let bw=m.body_weight, bf=m.body_fat, lm=m.lean_mass;
-    if(!bw&&!bf&&!lm&&m.notes){
-      try{
-        const n=typeof m.notes==='string'?JSON.parse(m.notes):m.notes;
-        bw=n.body_weight||n.total_mass||bw; bf=n.body_fat||bf; lm=n.lean_mass||lm;
-      }catch(e){}
-    }
-    const fm=(bw&&lm)?Math.round((parseFloat(bw)-parseFloat(lm))*10)/10:null;
-    return {date:m.recorded_at,body_weight:parseFloat(bw)||null,body_fat:parseFloat(bf)||null,lean_mass:parseFloat(lm)||null,fat_mass:fm};
+  if(!protocols||!protocols.length) return;
+
+  // Build _bcData for chart
+  _bcData = protocols.map(p=>{
+    const bw=parseFloat(p.body_weight||p.bc_total_mass)||null;
+    const bf=parseFloat(p.body_fat||p.bc_bf_pct)||null;
+    const lm=parseFloat(p.lean_mass||p.bc_lean_mass)||null;
+    const fm=parseFloat(p.bc_fat_mass)||(bw&&lm?Math.round((bw-lm)*10)/10:null);
+    return{date:p.created_at,body_weight:bw,body_fat:bf,lean_mass:lm,fat_mass:fm};
   }).filter(d=>d.body_weight||d.body_fat||d.lean_mass);
 
+  // KPI cards from latest
   const latest=_bcData[_bcData.length-1];
   if(latest){
     document.getElementById('bc-mass').textContent=latest.body_weight||'—';
@@ -1224,35 +1229,94 @@ async function loadBodyComp(){
     document.getElementById('bc-fat').textContent=latest.fat_mass||'—';
   }
 
-  renderBcChart();
-}
+  // Build assessment log
+  const logEl=document.getElementById('bc-assessment-log');
+  if(logEl){
+    const entries=[...protocols].reverse().filter(p=>
+      p.body_weight||p.body_fat||p.lean_mass||p.bc_total_mass||p.bc_bf_pct
+    );
+    if(!entries.length){
+      logEl.innerHTML='<div class="empty">No assessments recorded yet.</div>';
+    } else {
+      logEl.innerHTML=entries.map(p=>{
+        const bw=parseFloat(p.body_weight||p.bc_total_mass)||null;
+        const bf=parseFloat(p.body_fat||p.bc_bf_pct)||null;
+        const lm=parseFloat(p.lean_mass||p.bc_lean_mass)||null;
+        const fm=parseFloat(p.bc_fat_mass)||(bw&&lm?Math.round((bw-lm)*10)/10:null);
+        const dateStr=new Date(p.created_at).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
 
-async function loadBodyComp(){
-  const{data}=await sb.from('client_metrics').select('body_weight,body_fat,lean_mass,recorded_at,notes').eq('client_id',uid).order('recorded_at',{ascending:true});
-  if(!data||!data.length) return;
+        // Skinfolds
+        let skHtml='';
+        if(p.sk_measurements){
+          try{
+            const skm=typeof p.sk_measurements==='string'?JSON.parse(p.sk_measurements):p.sk_measurements;
+            const skArr=Object.entries(skm);
+            if(skArr.length){
+              skHtml=`<div style="margin-top:12px">
+                <div style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Skinfolds (mm)</div>
+                <div style="display:flex;flex-wrap:wrap;gap:4px">
+                  ${skArr.map(([site,val])=>`<div style="background:var(--c1);border:1px solid var(--borderw);padding:6px 10px;text-align:center">
+                    <div style="font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">${site}</div>
+                    <div style="font-size:12px;font-weight:600;color:var(--white)">${val}<span style="font-size:8px;color:var(--muted)">mm</span></div>
+                  </div>`).join('')}
+                </div>
+              </div>`;
+            }
+          }catch(e){}
+        }
 
-  // Parse each row — fall back to notes JSON if columns are null
-  _bcData = data.map(m=>{
-    let bw=m.body_weight, bf=m.body_fat, lm=m.lean_mass, fm=null;
-    if(!bw&&!bf&&!lm&&m.notes){
-      try{
-        const n=typeof m.notes==='string'?JSON.parse(m.notes):m.notes;
-        bw=n.body_weight||n.total_mass||bw;
-        bf=n.body_fat||bf;
-        lm=n.lean_mass||lm;
-      }catch(e){}
+        // Circumferences
+        let cmHtml='';
+        if(p.cm_measurements){
+          try{
+            const cmm=typeof p.cm_measurements==='string'?JSON.parse(p.cm_measurements):p.cm_measurements;
+            const cmArr=Object.entries(cmm);
+            if(cmArr.length){
+              cmHtml=`<div style="margin-top:12px">
+                <div style="font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Circumference (inches)</div>
+                <div style="display:flex;flex-wrap:wrap;gap:4px">
+                  ${cmArr.map(([site,val])=>`<div style="background:var(--c1);border:1px solid var(--borderw);padding:6px 10px;text-align:center">
+                    <div style="font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">${site}</div>
+                    <div style="font-size:12px;font-weight:600;color:var(--white)">${val}<span style="font-size:8px;color:var(--muted)">"</span></div>
+                  </div>`).join('')}
+                </div>
+              </div>`;
+            }
+          }catch(e){}
+        }
+
+        return `<div style="border:1px solid var(--border);margin-bottom:3px;overflow:hidden">
+          <!-- Header -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--c2);cursor:pointer"
+            onclick="bcToggleEntry('${p.id}')"
+            onmouseover="this.style.background='var(--c3)'" onmouseout="this.style.background='var(--c2)'">
+            <div style="display:flex;align-items:center;gap:14px">
+              <div style="width:3px;height:36px;background:linear-gradient(180deg,var(--gold-mid),var(--gold-dark));flex-shrink:0"></div>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--white)">${dateStr}</div>
+                <div style="font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:1px">
+                  ${p.name||'Protocol'}${bw?' · '+bw+' lbs':''}${bf?' · '+bf+'% BF':''}
+                </div>
+              </div>
+            </div>
+            <span id="bc-chev-${p.id}" style="font-size:13px;color:var(--muted);padding:0 6px">▼</span>
+          </div>
+          <!-- Body -->
+          <div id="bc-entry-${p.id}" style="display:none;padding:16px;background:var(--c1);border-top:1px solid var(--borderw)">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:2px;margin-bottom:4px">
+              ${[[bw,'Body Weight','lbs','var(--white)'],[bf,'Body Fat %','%','var(--gold)'],[lm,'Lean Mass','lbs','#5B8FD4'],[fm,'Fat Mass','lbs','#CF6679']]
+                .filter(([v])=>v)
+                .map(([v,lbl,unit,clr])=>`<div style="background:var(--c2);border:1px solid var(--borderw);padding:10px;text-align:center">
+                  <div style="font-size:7px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">${lbl}</div>
+                  <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:${clr}">${v}</div>
+                  <div style="font-size:8px;color:var(--muted)">${unit}</div>
+                </div>`).join('')}
+            </div>
+            ${skHtml}${cmHtml}
+          </div>
+        </div>`;
+      }).join('');
     }
-    if(bw&&lm) fm=Math.round((parseFloat(bw)-parseFloat(lm))*10)/10;
-    return {date:m.recorded_at, body_weight:parseFloat(bw)||null, body_fat:parseFloat(bf)||null, lean_mass:parseFloat(lm)||null, fat_mass:fm};
-  }).filter(d=>d.body_weight||d.body_fat||d.lean_mass);
-
-  // Populate top KPI cards from latest
-  const latest = _bcData[_bcData.length-1];
-  if(latest){
-    document.getElementById('bc-mass').textContent=latest.body_weight||'—';
-    document.getElementById('bc-bf').textContent=latest.body_fat||'—';
-    document.getElementById('bc-lean').textContent=latest.lean_mass||'—';
-    document.getElementById('bc-fat').textContent=latest.fat_mass||'—';
   }
 
   renderBcChart();
@@ -1348,120 +1412,159 @@ function renderBcChart(){
 let _perfReviewData = []; // [{week, date, exercise, reps, weight}]
 
 function populatePerfExerciseDropdown(exercises){
-  const sel = document.getElementById('perf-ex-select');
-  if(!sel) return;
-  const current = sel.value;
-  sel.innerHTML = '<option value="">— Select Exercise —</option>';
-  exercises.forEach(ex=>{
-    const opt = document.createElement('option');
-    opt.value = ex; opt.textContent = ex;
-    sel.appendChild(opt);
-  });
-  if(current && exercises.includes(current)) sel.value = current;
-  else if(exercises.length) sel.value = exercises[0];
+  // no-op — dropdown is now static checkboxes
+}
+
+// Colours for multiple exercise lines
+const PERF_COLORS=[
+  'rgba(201,168,108,1)',
+  'rgba(91,143,212,1)',
+  'rgba(207,102,121,1)',
+  'rgba(100,200,140,1)',
+  'rgba(200,140,200,1)',
+  'rgba(240,180,80,1)',
+];
+
+function togglePerfExDropdown(){
+  const dd=document.getElementById('perf-ex-dropdown');
+  if(!dd) return;
+  dd.style.display=dd.style.display==='none'?'block':'none';
+}
+
+document.addEventListener('click',e=>{
+  const trigger=document.getElementById('perf-ex-trigger');
+  const dd=document.getElementById('perf-ex-dropdown');
+  if(dd&&trigger&&!trigger.contains(e.target)&&!dd.contains(e.target))
+    dd.style.display='none';
+});
+
+function getSelectedExercises(){
+  return [...document.querySelectorAll('#perf-ex-dropdown input[type=checkbox]:checked')].map(cb=>cb.value);
+}
+
+function onPerfExChange(){
+  const selected=getSelectedExercises();
+  const label=document.getElementById('perf-ex-label');
+  if(label){
+    if(!selected.length) label.textContent='— Select Exercises —';
+    else if(selected.length===1) label.textContent=selected[0];
+    else label.textContent=`${selected.length} exercises selected`;
+  }
   renderPerfChart();
 }
 
 function renderPerfChart(){
-  const exSel = document.getElementById('perf-ex-select')?.value;
-  const metric = document.getElementById('perf-metric-select')?.value || 'weight';
-  const empty = document.getElementById('perf-chart-empty');
-  const yLabel = document.getElementById('perf-y-label');
+  const selectedExercises=getSelectedExercises();
+  const metric=document.getElementById('perf-metric-select')?.value||'weight';
+  const isWeight=metric==='weight';
+  const empty=document.getElementById('perf-chart-empty');
+  const yLabel=document.getElementById('perf-y-label');
 
-  if(!exSel){ if(empty) empty.style.display='flex'; return; }
+  if(yLabel) yLabel.textContent=isWeight?'Weight (lbs)':`Weight @ ${metric} Rep${metric==='1'?'':'s'} (lbs)`;
+
+  if(!selectedExercises.length){if(empty)empty.style.display='flex';return;}
   if(empty) empty.style.display='none';
-  const isWeight = metric==='weight';
-  if(yLabel) yLabel.textContent = isWeight?'Weight (lbs)':`Weight @ ${metric} Rep${metric==='1'?'':'s'} (lbs)`;
 
-  // All data points for selected exercise
-  const allPoints = _perfReviewData
-    .filter(d=>d.exercise===exSel)
-    .sort((a,b)=>a.weekNum-b.weekNum);
-
-  console.log('perf chart — exercise:',exSel,'metric:',metric,'all points:',allPoints);
-
-  // Filter by metric
-  const points = isWeight
-    ? allPoints.filter(d=>d.weight&&parseFloat(d.weight)>0)
-    : allPoints.filter(d=>{
+  // Build dataset per exercise
+  const datasets=selectedExercises.map((ex,ci)=>{
+    const points=_perfReviewData
+      .filter(d=>{
+        if(d.exercise!==ex) return false;
+        if(isWeight) return d.weight&&parseFloat(d.weight)>0;
         if(!d.reps) return false;
-        // Accept any format: "8", "8, 8, 6", "8x3", "8-10" — just check if target number appears
-        const str = d.reps.toString();
-        const nums = str.split(/[\s,\/\-x]+/).map(n=>parseInt(n)).filter(n=>!isNaN(n));
+        const nums=d.reps.toString().split(/[\s,\/\-x]+/).map(n=>parseInt(n)).filter(n=>!isNaN(n));
         return nums.includes(parseInt(metric));
-      });
+      })
+      .sort((a,b)=>a.weekNum-b.weekNum);
+    return{ex,points,color:PERF_COLORS[ci%PERF_COLORS.length]};
+  }).filter(d=>d.points.length);
 
-  const canvas = document.getElementById('perf-chart');
+  const canvas=document.getElementById('perf-chart');
   if(!canvas) return;
-  canvas.width = canvas.offsetWidth;
-  canvas.height = canvas.offsetHeight;
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width; const H = canvas.height;
-  const PAD = {top:24,right:20,bottom:48,left:48};
-  const cW = W-PAD.left-PAD.right;
-  const cH = H-PAD.top-PAD.bottom;
+  canvas.width=canvas.offsetWidth; canvas.height=canvas.offsetHeight;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  const PAD={top:24,right:20,bottom:48,left:52};
+  const cW=W-PAD.left-PAD.right, cH=H-PAD.top-PAD.bottom;
 
   ctx.clearRect(0,0,W,H);
 
-  if(!points.length){
-    ctx.fillStyle='rgba(150,140,128,0.6)';
-    ctx.font='11px Montserrat,sans-serif';
-    ctx.textAlign='center';
-    ctx.fillText('No data yet for this selection',W/2,H/2);
+  if(!datasets.length){
+    ctx.fillStyle='rgba(150,140,128,0.6)';ctx.font='11px Montserrat,sans-serif';ctx.textAlign='center';
+    ctx.fillText('No data yet for selected exercises',W/2,H/2);
     return;
   }
 
-  const values = points.map(p=>parseFloat(p.weight)||0);
-  const labels = points.map(p=>p.date?new Date(p.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}): 'Wk '+p.weekNum);
-  const maxV = Math.max(...values,1);
-  const minV = Math.min(...values,0);
-  const range = maxV-minV||1;
-  const xStep = cW/Math.max(points.length-1,1);
+  // Shared axes across all datasets
+  const allValues=datasets.flatMap(d=>d.points.map(p=>parseFloat(p.weight)||0));
+  const allWeeks =datasets.flatMap(d=>d.points.map(p=>p.weekNum));
+  const maxV=Math.max(...allValues), minV=Math.min(...allValues);
+  const minW=Math.min(...allWeeks),  maxW=Math.max(...allWeeks);
+  const vPad=(maxV-minV)*0.12||5;
+  const lo=minV-vPad, hi=maxV+vPad, vRange=hi-lo||1;
+  const wRange=maxW-minW||1;
 
-  // Grid lines
+  const xPos=w=>PAD.left+((w-minW)/wRange)*cW;
+  const yPos=v=>PAD.top+cH-((v-lo)/vRange)*cH;
+
+  // Grid
   for(let i=0;i<=4;i++){
-    const y = PAD.top + cH - (i/4)*cH;
-    ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=1;
-    ctx.beginPath(); ctx.moveTo(PAD.left,y); ctx.lineTo(PAD.left+cW,y); ctx.stroke();
-    const val = minV + (i/4)*range;
-    ctx.fillStyle='rgba(150,140,128,0.7)'; ctx.font='9px Montserrat,sans-serif'; ctx.textAlign='right';
-    ctx.fillText(Math.round(val), PAD.left-6, y+3);
+    const y=PAD.top+cH-(i/4)*cH;
+    ctx.strokeStyle='rgba(255,255,255,0.05)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(PAD.left,y);ctx.lineTo(PAD.left+cW,y);ctx.stroke();
+    ctx.fillStyle='rgba(150,140,128,0.7)';ctx.font='9px Montserrat,sans-serif';ctx.textAlign='right';
+    ctx.fillText(Math.round(lo+(i/4)*vRange),PAD.left-6,y+3);
   }
 
-  // Gradient fill
-  const grad = ctx.createLinearGradient(0,PAD.top,0,PAD.top+cH);
-  grad.addColorStop(0,'rgba(168,129,58,0.25)');
-  grad.addColorStop(1,'rgba(168,129,58,0)');
+  // Draw each line
+  datasets.forEach(({ex,points,color},di)=>{
+    const values=points.map(p=>parseFloat(p.weight)||0);
 
-  // Line path
-  ctx.beginPath();
-  values.forEach((v,i)=>{
-    const x = PAD.left + i*xStep;
-    const y = PAD.top + cH - ((v-minV)/range)*cH;
-    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    ctx.beginPath();
+    points.forEach((p,i)=>{
+      const x=xPos(p.weekNum), y=yPos(values[i]);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.strokeStyle=color;ctx.lineWidth=2.5;ctx.stroke();
+
+    // Dots + labels
+    points.forEach((p,i)=>{
+      const x=xPos(p.weekNum), y=yPos(values[i]);
+      ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);
+      ctx.fillStyle=color;ctx.fill();
+      ctx.strokeStyle='rgba(22,22,22,1)';ctx.lineWidth=1.5;ctx.stroke();
+      // Value above dot
+      ctx.fillStyle=color;ctx.font='bold 9px Montserrat,sans-serif';ctx.textAlign='center';
+      ctx.fillText(values[i],x,y-10);
+      // Exercise name label next to FIRST dot only
+      if(i===0){
+        const shortName=ex.length>20?ex.substring(0,18)+'…':ex;
+        ctx.font='bold 8px Montserrat,sans-serif';ctx.textAlign='left';
+        ctx.fillStyle=color;
+        ctx.fillText(shortName,x+8,y+4);
+      }
+    });
+
+    // X date labels — first dataset only
+    if(di===0){
+      points.forEach((p,i)=>{
+        const lbl=p.date?new Date(p.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'Wk'+p.weekNum;
+        const x=xPos(p.weekNum);
+        ctx.fillStyle='rgba(150,140,128,0.8)';ctx.font='8px Montserrat,sans-serif';ctx.textAlign='center';
+        if(points.length<=8||i%Math.ceil(points.length/8)===0)
+          ctx.fillText(lbl,x,PAD.top+cH+16);
+      });
+    }
   });
-  ctx.strokeStyle='rgba(168,129,58,0.9)'; ctx.lineWidth=2.5; ctx.stroke();
+}
 
-  // Fill
-  ctx.lineTo(PAD.left+(values.length-1)*xStep, PAD.top+cH);
-  ctx.lineTo(PAD.left, PAD.top+cH);
-  ctx.closePath(); ctx.fillStyle=grad; ctx.fill();
-
-  // Dots + x labels
-  values.forEach((v,i)=>{
-    const x = PAD.left + i*xStep;
-    const y = PAD.top + cH - ((v-minV)/range)*cH;
-    // Dot
-    ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2);
-    ctx.fillStyle='rgba(168,129,58,1)'; ctx.fill();
-    ctx.strokeStyle='rgba(22,22,22,1)'; ctx.lineWidth=1.5; ctx.stroke();
-    // Value label above dot
-    ctx.fillStyle='rgba(201,168,108,0.95)'; ctx.font='bold 9px Montserrat,sans-serif'; ctx.textAlign='center';
-    ctx.fillText(v, x, y-10);
-    // X label
-    ctx.fillStyle='rgba(150,140,128,0.8)'; ctx.font='8px Montserrat,sans-serif';
-    ctx.fillText(labels[i]||'', x, PAD.top+cH+16);
-  });
+function bcToggleEntry(id){
+  const body=document.getElementById(`bc-entry-${id}`);
+  const chev=document.getElementById(`bc-chev-${id}`);
+  if(!body) return;
+  const open=body.style.display==='block';
+  body.style.display=open?'none':'block';
+  if(chev) chev.textContent=open?'▼':'▲';
 }
 
 async function loadReviews(){
