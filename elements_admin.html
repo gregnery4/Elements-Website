@@ -1713,7 +1713,7 @@ async function loadAll(){
     meal_plans(meals,meal_count,updated_at),
     weekly_reviews(id,week_number,week_start_date,sessions_done,sessions_target,training_notes,bw_days_completed,bw_compliance,meals_compliance,meals_logged,nutrition_adherence,nutrition_notes,assessment_type,assessment_date,assessment_data,compliance_score,perf_data,created_at),
     protocols(id,name,notes,goal,calories,protein_g,carbs_g,fat_g,phase_duration_weeks,body_weight,body_fat,meal_count,created_at)
-  `).neq('role','admin').order('created_at',{ascending:false});
+  `).order('created_at',{ascending:false});
 
   if(error) console.error('loadAll error:',error.message);
   allClients=data||[];
