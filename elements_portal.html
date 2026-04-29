@@ -919,10 +919,26 @@ function _renderPortalMealPlan(p){
 
     if(!meals||!meals.length) return '<div style="padding:20px;font-size:12px;color:var(--muted);text-align:center">No meal data in this plan.</div>';
 
-    // Daily totals
-    const totP=meals.reduce((s,m)=>s+(m.protein||0),0);
-    const totC=meals.reduce((s,m)=>s+(m.carbs||0),0);
-    const totF=meals.reduce((s,m)=>s+(m.fats||0),0);
+    // Calculate display macros from food portions for accuracy (same as admin)
+    const mealCalcs = meals.map(m=>{
+      const mp=parseInt(m.protein)||0, mc=parseInt(m.carbs)||0, mf=parseInt(m.fats)||0;
+      const portions=m.foods?_getFoodPortionsText(m.foods,mp,mc,mf):[];
+      let dP=mp,dC=mc,dF=mf;
+      if(portions.length){
+        let pS=0,cS=0,fS=0;
+        portions.forEach(({macros})=>{
+          const pm=macros.match(/(\d+)P/),cm=macros.match(/(\d+)C/),fm=macros.match(/(\d+)F/);
+          if(pm)pS+=parseInt(pm[1]); if(cm)cS+=parseInt(cm[1]); if(fm)fS+=parseInt(fm[1]);
+        });
+        if(pS||cS||fS){dP=pS;dC=cS;dF=fS;}
+      }
+      return {portions,dP,dC,dF};
+    });
+
+    // Daily totals from food portions
+    const totP=mealCalcs.reduce((s,m)=>s+m.dP,0);
+    const totC=mealCalcs.reduce((s,m)=>s+m.dC,0);
+    const totF=mealCalcs.reduce((s,m)=>s+m.dF,0);
     const totCal=(totP*4)+(totC*4)+(totF*9);
 
     let html=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;padding:0">
@@ -936,8 +952,8 @@ function _renderPortalMealPlan(p){
     html+=meals.map((m,idx)=>{
       const mealN=idx+1;
       const mealSupps=suppByMeal[mealN]||[];
-      const kcal=((m.protein||0)*4)+((m.carbs||0)*4)+((m.fats||0)*9);
-      const portions=m.foods?_getFoodPortionsText(m.foods,m.protein||0,m.carbs||0,m.fats||0):[];
+      const {portions,dP,dC,dF}=mealCalcs[idx];
+      const kcal=(dP*4)+(dC*4)+(dF*9);
       return `
       <div style="background:var(--c2);border:1px solid var(--border);margin-bottom:3px;overflow:hidden">
 
@@ -960,15 +976,15 @@ function _renderPortalMealPlan(p){
         <div style="display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--borderw)">
           <div style="padding:14px 16px;text-align:center;border-right:1px solid var(--borderw)">
             <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px">Protein</div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold);line-height:1">${m.protein||0}g</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold);line-height:1">${dP}g</div>
           </div>
           <div style="padding:14px 16px;text-align:center;border-right:1px solid var(--borderw)">
             <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px">Carbohydrates</div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#5B8FD4;line-height:1">${m.carbs||0}g</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#5B8FD4;line-height:1">${dC}g</div>
           </div>
           <div style="padding:14px 16px;text-align:center">
             <div style="font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px">Additional Fats</div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#CF6679;line-height:1">${m.fats||0}g</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#CF6679;line-height:1">${dF}g</div>
           </div>
         </div>
 
