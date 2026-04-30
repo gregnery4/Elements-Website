@@ -67,25 +67,25 @@
   .logo {
     display: flex;
     align-items: center;
-    gap: 0;
+    gap: 12px;
     text-decoration: none;
   }
 
   .logo-icon {
-    width: 48px;
-    height: 48px;
-    border: 2px solid var(--white);
+    width: 54px;
+    height: 54px;
+    border: 2.5px solid var(--white);
+    background: #0a0a0a;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
     flex-shrink: 0;
   }
 
   .logo-icon span {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 30px;
-    background: linear-gradient(145deg, #D4A853 0%, #8B6020 50%, #C9893A 100%);
+    font-size: 38px;
+    background: linear-gradient(160deg, #D4A85A 0%, #A07828 45%, #C9893A 75%, #D4A85A 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -96,27 +96,28 @@
     display: flex;
     flex-direction: column;
     line-height: 1;
-    margin-left: 2px;
+    gap: 3px;
   }
 
   .logo-name {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    letter-spacing: 3px;
-    background: linear-gradient(90deg, #D4A853 0%, #8B6020 40%, #C9893A 70%, #D4A853 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: 32px;
+    letter-spacing: 2px;
+    color: var(--white);
+    -webkit-text-fill-color: var(--white);
     line-height: 1;
   }
 
   .logo-sub {
     font-family: 'Montserrat', sans-serif;
-    font-size: 7.5px;
-    letter-spacing: 3.5px;
-    color: var(--white-dim);
+    font-size: 9px;
+    letter-spacing: 4px;
+    background: linear-gradient(90deg, #D4A85A 0%, #A07828 50%, #D4A85A 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     text-transform: uppercase;
-    margin-top: 3px;
+    font-weight: 500;
   }
 
   .nav-links {
@@ -499,6 +500,11 @@
     padding: 40px 36px;
     border: 1px solid var(--border);
     transition: border-color 0.3s;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 
   .stat-box:hover { border-color: rgba(201,168,108,0.4); }
@@ -515,10 +521,12 @@
 
   .stat-label {
     font-size: 10px;
-    letter-spacing: 2.5px;
+    letter-spacing: 1.5px;
     color: var(--white-dim);
     text-transform: uppercase;
-    margin-top: 8px;
+    margin-top: 10px;
+    line-height: 1.8;
+    text-align: center;
   }
 
   /* ─── PILLARS ─── */
@@ -1078,7 +1086,7 @@
     </div>
   </a>
   <ul class="nav-links">
-    <li><a href="#philosophy">Philosophy</a></li>
+    <li><a href="#philosophy">Mission</a></li>
     <li><a href="#pillars">Program</a></li>
     <li><a href="#team">Team</a></li>
     <li>
@@ -1130,12 +1138,12 @@
       For Health
     </h1>
     <p class="hero-subtitle">
-      Elite 1-on-1 personal training for high-performing professionals. Science-driven programming that optimizes strength, nutrition, recovery, and longevity.
+      For those who want to look and perform their very best — no matter how full life gets. Elements delivers a health and performance plan that's fully individualized, scientifically optimized, and strategically integrated into your unique lifestyle. Whether you're a driven executive or a dedicated parent, your best is built here.
     </p>
     <div class="hero-actions">
       <a href="#contact" class="btn-primary"><span>Begin Your Journey</span></a>
       <a href="#philosophy" class="btn-secondary">
-        Our Philosophy
+        Our Mission
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <line x1="2" y1="8" x2="14" y2="8"/><polyline points="9,3 14,8 9,13"/>
         </svg>
@@ -1152,26 +1160,26 @@
 <section class="philosophy" id="philosophy">
   <div class="philosophy-inner">
     <div class="philosophy-text">
-      <div class="section-label">Our Philosophy</div>
+      <div class="section-label">Our Mission</div>
       <h2 class="section-title">Health Is Built<br><span class="gold-text">On Fundamentals</span></h2>
       <p>Most people chase fitness trends. But true health is built on mastering the fundamentals — strength, movement, recovery, nutrition, and consistency.</p>
       <p>At ELEMENTS, we believe optimal performance is not a destination but a foundation. When these elements are precisely optimized, everything improves: energy, productivity, longevity, mental clarity, and resilience.</p>
-      <p>We exist to help ambitious people build those foundations — through science-driven training, personalized programming, and long-term accountability.</p>
+      <p>We exist to help people build those foundations — through science-driven training, personalized programming, and long-term accountability.</p>
     </div>
     <div class="philosophy-stats">
-      <div class="stat-box">
+      <div class="stat-box" style="text-align:center">
         <div class="stat-number">1:1</div>
-        <div class="stat-label">Fully Private Training</div>
+        <div class="stat-label">Solely Dedicated To You</div>
       </div>
-      <div class="stat-box">
+      <div class="stat-box" style="text-align:center">
         <div class="stat-number">100%</div>
         <div class="stat-label">Data Informed</div>
       </div>
-      <div class="stat-box">
+      <div class="stat-box" style="text-align:center">
         <div class="stat-number">10+</div>
         <div class="stat-label">Years of Expertise</div>
       </div>
-      <div class="stat-box">
+      <div class="stat-box" style="text-align:center">
         <div class="stat-number">5</div>
         <div class="stat-label">Pillars of Performance</div>
       </div>
@@ -1184,17 +1192,17 @@
   <div class="pillars-header">
     <div>
       <div class="section-label">The Program</div>
-      <h2 class="section-title">Precision<br><span class="gold-text">Programming</span></h2>
+      <h2 class="section-title">Comprehensively Built.<br><span class="gold-text">Simply Delivered.</span></h2>
     </div>
     <p style="max-width:360px; font-size:13px; line-height:1.9; color:var(--white-dim);">
-      Every client receives a fully individualized system built across all essential pillars of high-performance living.
+      Every client receives a fully individualized health and performance plan built across all essential pillars of a long, healthy, and fully functional life.
     </p>
   </div>
   <div class="pillars-grid">
     <div class="pillar-card">
       <div class="pillar-number">01</div>
-      <div class="pillar-name">Strength Training</div>
-      <p class="pillar-desc">Individualized resistance programming built around your movement profile, injury history, and performance goals.</p>
+      <div class="pillar-name">Training Optimization</div>
+      <p class="pillar-desc">Individualized resistance programming built around your movement profile, injury history, body composition, and performance goals.</p>
       <ul class="pillar-items">
         <li>Progressive overload systems</li>
         <li>Mobility & injury prevention</li>
@@ -1259,8 +1267,8 @@
     </div>
     <div class="who-text">
       <div class="section-label">Who We Serve</div>
-      <h2 class="section-title">Built For<br><span class="gold-text">High Performers</span></h2>
-      <p>ELEMENTS was designed for individuals who hold themselves to the highest standard in every area of life — and expect the same from their health system.</p>
+      <h2 class="section-title">For Those Who Want<br><span class="gold-text">To Look & Perform Their Best</span></h2>
+      <p>ELEMENTS was designed for individuals who hold themselves to the highest standard in every area of life — and expect the same from their health and performance plan.</p>
       <p>You're time-constrained, results-oriented, and unwilling to settle for generic. You want a partner who understands that your body is the foundation of everything else you build.</p>
       <div class="client-types">
         <span class="client-tag">Entrepreneurs</span>
