@@ -8,16 +8,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Bebas+Neue&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --gold-light: #C9A86C;
-    --gold-mid: #A8813A;
+    --gold-light: #B8922A;
+    --gold-mid: #9A7520;
     --gold-dark: #7D5C20;
-    --black: #0A0A0A;
-    --charcoal: #141414;
-    --charcoal-2: #1C1C1C;
-    --charcoal-3: #242424;
-    --white: #F5F2EE;
-    --white-dim: #B8B0A5;
-    --border: rgba(201,168,108,0.15);
+    --black: #F0EDE8;
+    --charcoal: #E8E4DE;
+    --charcoal-1: #E8E4DE;
+    --charcoal-2: #EDEAE5;
+    --charcoal-3: #F5F2EE;
+    --white: #1A1714;
+    --white-dim: #5A5248;
+    --border: rgba(160,130,80,0.2);
+    --border-light: rgba(160,130,80,0.12);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -59,7 +61,7 @@
   }
 
   nav.scrolled {
-    background: rgba(10,10,10,0.97);
+    background: rgba(240,237,232,0.97);
     border-bottom: 1px solid var(--border);
     padding: 16px 60px;
   }
@@ -74,8 +76,8 @@
   .logo-icon {
     width: 54px;
     height: 54px;
-    border: 2.5px solid var(--white);
-    background: #0a0a0a;
+    border: 2.5px solid #1A1714;
+    background: #1A1714;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -103,8 +105,8 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 32px;
     letter-spacing: 2px;
-    color: var(--white);
-    -webkit-text-fill-color: var(--white);
+    color: #1A1714;
+    -webkit-text-fill-color: #1A1714;
     line-height: 1;
   }
 
@@ -153,7 +155,7 @@
 
   .nav-login {
     padding: 10px 24px;
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 1px solid rgba(26,23,20,0.2);
     color: var(--white-dim) !important;
     transition: all 0.3s !important;
     display: flex !important;
@@ -166,7 +168,7 @@
     flex-shrink: 0; transition: none;
   }
   .nav-login:hover {
-    border-color: rgba(255,255,255,0.4) !important;
+    border-color: rgba(26,23,20,0.5) !important;
     color: var(--white) !important;
   }
 
@@ -206,7 +208,7 @@
     background: #101010;
     border: 1px solid rgba(201,168,108,0.18);
     position: relative;
-    box-shadow: 0 40px 120px rgba(0,0,0,0.85);
+    box-shadow: 0 40px 120px rgba(0,0,0,0.3);
     transform: translateY(28px) scale(0.97);
     transition: transform 0.45s cubic-bezier(0.16,1,0.3,1);
     overflow: hidden;
@@ -221,7 +223,7 @@
     display: flex; align-items: center; gap: 8px;
     transition: color 0.2s; padding: 6px;
   }
-  #portal-close:hover { color: #F5F2EE; }
+  #portal-close:hover { color: var(--white); }
   #portal-close svg { width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:1.8; }
   #portal-iframe { width:100%; height:100%; border:none; display:block; }
 
@@ -274,7 +276,7 @@
     position: absolute;
     inset: 0;
     background:
-      linear-gradient(105deg, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.6) 50%, rgba(10,10,10,0.85) 100%),
+      linear-gradient(105deg, rgba(20,16,12,0.88) 0%, rgba(20,16,12,0.55) 50%, rgba(20,16,12,0.80) 100%),
       url('https://images.squarespace-cdn.com/content/v1/67f522a5f1bb3e0f265d1a65/f029196e-49bd-458e-808a-4efbc1f9d1db/DSC01284+2.JPG') center/cover no-repeat;
   }
 
@@ -1094,10 +1096,10 @@
     </div>
   </a>
   <ul class="nav-links">
-    <li><a href="#philosophy">Mission</a></li>
-    <li><a href="#pillars">Program</a></li>
-    <li><a href="#proof">Proof</a></li>
-    <li><a href="#team">Team</a></li>
+    <li><a href="#philosophy">The Mission</a></li>
+    <li><a href="#pillars">Your Plan</a></li>
+    <li><a href="#proof">The Proof</a></li>
+    <li><a href="#team">Your Support</a></li>
     <li>
       <a href="#" class="nav-login" onclick="openPortal(event)">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
