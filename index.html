@@ -1073,6 +1073,14 @@
     .philosophy-stats { grid-template-columns: 1fr 1fr; }
   }
 </style>
+  <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+  <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
+  <script>
+    function openCalendly(e){
+      if(e) e.preventDefault();
+      Calendly.initPopupWidget({url:'https://calendly.com/YOUR_LINK_HERE'});
+    }
+  </script>
 </head>
 <body>
 
@@ -1088,6 +1096,7 @@
   <ul class="nav-links">
     <li><a href="#philosophy">Mission</a></li>
     <li><a href="#pillars">Program</a></li>
+    <li><a href="#proof">Proof</a></li>
     <li><a href="#team">Team</a></li>
     <li>
       <a href="#" class="nav-login" onclick="openPortal(event)">
@@ -1253,10 +1262,79 @@
       <p style="font-size:13px; line-height:1.9; color:var(--white-dim); margin-bottom: 32px;">
         True health is a long-term partnership, not a 12-week program. ELEMENTS clients don't just train — they build foundations for life.
       </p>
-      <a href="#contact" class="btn-primary"><span>Start Your Assessment</span></a>
+      <a href="#" onclick="openCalendly(event)" class="btn-primary"><span>Book Your Assessment</span></a>
     </div>
   </div>
 </div>
+
+<!-- PROOF -->
+<section id="proof" style="background:var(--charcoal-1);padding:120px 80px;">
+  <div style="max-width:1200px;margin:0 auto">
+
+    <!-- Header -->
+    <div style="text-align:center;margin-bottom:72px">
+      <div class="section-label" style="justify-content:center">Client Results</div>
+      <h2 class="section-title" style="text-align:center">Real People.<br><span class="gold-text">Real Results.</span></h2>
+      <p style="max-width:500px;margin:20px auto 0;font-size:13px;line-height:1.9;color:var(--white-dim)">
+        Every transformation is built on the same foundation — individualized programming, precise nutrition, and unwavering accountability.
+      </p>
+    </div>
+
+    <!-- Testimonial Cards -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-bottom:80px" id="testimonial-grid">
+
+      <!-- Testimonial 1 -->
+      <div style="background:var(--charcoal-2);border:1px solid var(--border);padding:40px 36px;display:flex;flex-direction:column;gap:20px;transition:border-color 0.3s" onmouseover="this.style.borderColor='rgba(201,168,108,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="display:flex;gap:4px">
+          ${[1,2,3,4,5].map(()=>`<span style="color:#D4A853;font-size:14px">★</span>`).join('')}
+        </div>
+        <p style="font-size:14px;line-height:1.9;color:var(--white-dim);font-style:italic;flex:1">"Add your client testimonial here."</p>
+        <div style="border-top:1px solid var(--border);padding-top:20px">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--white)">Client Name</div>
+          <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-light);margin-top:4px">Occupation / Title</div>
+        </div>
+      </div>
+
+      <!-- Testimonial 2 -->
+      <div style="background:var(--charcoal-2);border:1px solid var(--border);padding:40px 36px;display:flex;flex-direction:column;gap:20px;transition:border-color 0.3s" onmouseover="this.style.borderColor='rgba(201,168,108,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="display:flex;gap:4px">
+          ${[1,2,3,4,5].map(()=>`<span style="color:#D4A853;font-size:14px">★</span>`).join('')}
+        </div>
+        <p style="font-size:14px;line-height:1.9;color:var(--white-dim);font-style:italic;flex:1">"Add your client testimonial here."</p>
+        <div style="border-top:1px solid var(--border);padding-top:20px">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--white)">Client Name</div>
+          <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-light);margin-top:4px">Occupation / Title</div>
+        </div>
+      </div>
+
+      <!-- Testimonial 3 -->
+      <div style="background:var(--charcoal-2);border:1px solid var(--border);padding:40px 36px;display:flex;flex-direction:column;gap:20px;transition:border-color 0.3s" onmouseover="this.style.borderColor='rgba(201,168,108,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="display:flex;gap:4px">
+          ${[1,2,3,4,5].map(()=>`<span style="color:#D4A853;font-size:14px">★</span>`).join('')}
+        </div>
+        <p style="font-size:14px;line-height:1.9;color:var(--white-dim);font-style:italic;flex:1">"Add your client testimonial here."</p>
+        <div style="border-top:1px solid var(--border);padding-top:20px">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--white)">Client Name</div>
+          <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-light);margin-top:4px">Occupation / Title</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Before/After Results placeholder -->
+    <div style="text-align:center;margin-bottom:48px">
+      <div class="section-label" style="justify-content:center;margin-bottom:16px">Transformations</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px">
+      ${[1,2,3].map(i=>`
+      <div style="background:var(--charcoal-2);border:1px solid var(--border);aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px">
+        <div style="font-size:32px;opacity:0.2">+</div>
+        <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--white-dim);opacity:0.4">Add Client Photo</div>
+      </div>`).join('')}
+    </div>
+
+  </div>
+</section>
 
 <!-- WHO WE SERVE -->
 <section class="who" id="who">
@@ -1382,7 +1460,7 @@
       </div>
     </div>
     <div class="contact-form">
-      <div class="form-title">Request Your Assessment</div>
+      <div class="form-title">Book Your Assessment</div>
       <div class="form-row">
         <div class="form-group">
           <label>First Name</label>
@@ -1418,7 +1496,7 @@
         <label>Primary Goal</label>
         <textarea placeholder="Tell us about your health goals and what's brought you to ELEMENTS..."></textarea>
       </div>
-      <button class="form-submit" onclick="alert('Thank you! Our team will reach out within 24 hours.')">Request Assessment →</button>
+      <button class="form-submit" onclick="openCalendly(event)">Book Your Assessment →</button>
     </div>
   </div>
 </div>
