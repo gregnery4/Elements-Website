@@ -56,7 +56,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: linear-gradient(to bottom, rgba(10,10,10,0.95) 0%, transparent 100%);
+    background: linear-gradient(to bottom, rgba(10,10,10,0.7) 0%, transparent 100%);
     transition: background 0.4s;
   }
 
@@ -65,6 +65,24 @@
     border-bottom: 1px solid var(--border);
     padding: 16px 60px;
   }
+
+  /* Hero nav — white everything */
+  nav:not(.scrolled) .logo-name { color: #F5F2EE !important; -webkit-text-fill-color: #F5F2EE !important; }
+  nav:not(.scrolled) .logo-icon { border-color: #F5F2EE !important; background: rgba(0,0,0,0.3) !important; }
+  nav:not(.scrolled) .nav-links a { color: rgba(245,242,238,0.85) !important; }
+  nav:not(.scrolled) .nav-links a:hover { color: #D4A85A !important; }
+  nav:not(.scrolled) .nav-cta { border-color: rgba(245,242,238,0.6) !important; color: #F5F2EE !important; }
+  nav:not(.scrolled) .nav-login { border-color: rgba(245,242,238,0.25) !important; color: rgba(245,242,238,0.8) !important; }
+  nav:not(.scrolled) .nav-login:hover { border-color: rgba(245,242,238,0.6) !important; color: #F5F2EE !important; }
+
+  /* Scrolled nav — dark everything */
+  nav.scrolled .logo-name { color: #1A1714 !important; -webkit-text-fill-color: #1A1714 !important; }
+  nav.scrolled .logo-icon { border-color: #1A1714 !important; background: #1A1714 !important; }
+  nav.scrolled .nav-links a { color: var(--white-dim) !important; }
+  nav.scrolled .nav-links a:hover { color: var(--gold-light) !important; }
+  nav.scrolled .nav-cta { border-color: var(--gold-mid) !important; color: var(--gold-light) !important; }
+  nav.scrolled .nav-login { border-color: rgba(26,23,20,0.2) !important; color: var(--white-dim) !important; }
+  nav.scrolled .nav-login:hover { border-color: rgba(26,23,20,0.5) !important; color: var(--white) !important; }
 
   .logo {
     display: flex;
