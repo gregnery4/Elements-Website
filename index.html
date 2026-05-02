@@ -190,6 +190,37 @@
     color: var(--white) !important;
   }
 
+  /* ─── LOGIN DROPDOWN ─── */
+  .login-dropdown { position: relative; }
+
+  .login-trigger {
+    display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;
+    padding: 10px 20px; border: 1px solid rgba(245,242,238,0.25);
+    color: rgba(245,242,238,0.85); font-size: 11px; letter-spacing: 2px;
+    text-transform: uppercase; font-weight: 400; transition: all 0.3s;
+  }
+  .login-trigger svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 1.8; flex-shrink:0; }
+  .login-trigger:hover { border-color: rgba(245,242,238,0.6); color: #F5F2EE; }
+  nav.scrolled .login-trigger { border-color: rgba(26,23,20,0.2); color: var(--white-dim); }
+  nav.scrolled .login-trigger:hover { border-color: rgba(26,23,20,0.5); color: var(--white); }
+
+  .login-menu {
+    display: none; position: absolute; top: calc(100% + 8px); right: 0;
+    background: #F0EDE8; border: 1px solid var(--border); min-width: 180px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12); z-index: 200;
+  }
+  .login-dropdown:hover .login-menu { display: block; }
+
+  .login-menu-item {
+    display: flex !important; align-items: center; gap: 10px;
+    padding: 14px 18px; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: #1A1714 !important; text-decoration: none; transition: background 0.2s;
+    border-bottom: 1px solid var(--border); -webkit-text-fill-color: #1A1714 !important;
+  }
+  .login-menu-item:last-child { border-bottom: none; }
+  .login-menu-item:hover { background: #E8E4DE; }
+  .login-menu-item svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.8; flex-shrink: 0; }
+
   .nav-admin {
     padding: 10px 24px;
     border: 1px solid rgba(207,102,121,0.3);
@@ -345,6 +376,7 @@
     line-height: 0.92;
     letter-spacing: 2px;
     margin-bottom: 32px;
+    color: #F5F2EE;
   }
 
   .hero-title .gold {
@@ -357,7 +389,7 @@
   .hero-subtitle {
     font-size: 14px;
     line-height: 1.9;
-    color: var(--white-dim);
+    color: rgba(245,242,238,0.88);
     max-width: 520px;
     margin-bottom: 52px;
     font-weight: 300;
@@ -1118,17 +1150,22 @@
     <li><a href="#pillars">Your Plan</a></li>
     <li><a href="#proof">The Proof</a></li>
     <li><a href="#team">Your Support</a></li>
-    <li>
-      <a href="#" class="nav-login" onclick="openPortal(event)">
+    <li class="login-dropdown">
+      <div class="nav-login login-trigger">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-        Client Login
-      </a>
-    </li>
-    <li>
-      <a href="#" class="nav-admin" onclick="openAdmin(event)">
-        <svg viewBox="0 0 24 24"><path d="M12 2L3 7l9 5 9-5-9-5z"/><path d="M3 17l9 5 9-5M3 12l9 5 9-5"/></svg>
-        Coach Admin
-      </a>
+        Login
+        <svg viewBox="0 0 24 24" style="width:9px;height:9px;margin-left:3px"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="login-menu">
+        <a href="#" onclick="openPortal(event)" class="login-menu-item">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          Client Portal
+        </a>
+        <a href="#" onclick="openAdmin(event)" class="login-menu-item">
+          <svg viewBox="0 0 24 24"><path d="M12 2L3 7l9 5 9-5-9-5z"/><path d="M3 17l9 5 9-5M3 12l9 5 9-5"/></svg>
+          Trainer Login
+        </a>
+      </div>
     </li>
     <li><a href="#contact" class="nav-cta">Begin Your Journey</a></li>
   </ul>
