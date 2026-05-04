@@ -190,7 +190,6 @@
     color: var(--white) !important;
   }
 
-  /* ─── LOGIN DROPDOWN ─── */
   .login-dropdown { position: relative; }
 
   .login-trigger {
@@ -205,9 +204,13 @@
   nav.scrolled .login-trigger:hover { border-color: rgba(26,23,20,0.5); color: var(--white); }
 
   .login-menu {
-    display: none; position: absolute; top: calc(100% + 8px); right: 0;
-    background: #F0EDE8; border: 1px solid var(--border); min-width: 180px;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.12); z-index: 200;
+    display: none; position: absolute; top: 100%; right: 0;
+    padding-top: 8px; /* invisible bridge so mouse doesn't lose hover */
+    min-width: 180px; z-index: 200;
+  }
+  .login-menu-inner {
+    background: #F0EDE8; border: 1px solid var(--border);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12);
   }
   .login-dropdown:hover .login-menu { display: block; }
 
@@ -433,7 +436,7 @@
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    color: var(--white-dim);
+    color: rgba(245,242,238,0.9);
     text-decoration: none;
     font-size: 10px;
     letter-spacing: 3px;
@@ -442,7 +445,7 @@
   }
 
   .btn-secondary svg { transition: transform 0.3s; }
-  .btn-secondary:hover { color: var(--white); }
+  .btn-secondary:hover { color: #F5F2EE; }
   .btn-secondary:hover svg { transform: translateX(4px); }
 
   .hero-scroll {
@@ -1157,14 +1160,16 @@
         <svg viewBox="0 0 24 24" style="width:9px;height:9px;margin-left:3px"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
       <div class="login-menu">
-        <a href="#" onclick="openPortal(event)" class="login-menu-item">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-          Client Portal
-        </a>
-        <a href="#" onclick="openAdmin(event)" class="login-menu-item">
-          <svg viewBox="0 0 24 24"><path d="M12 2L3 7l9 5 9-5-9-5z"/><path d="M3 17l9 5 9-5M3 12l9 5 9-5"/></svg>
-          Trainer Login
-        </a>
+        <div class="login-menu-inner">
+          <a href="#" onclick="openPortal(event)" class="login-menu-item">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            Client Portal
+          </a>
+          <a href="#" onclick="openAdmin(event)" class="login-menu-item">
+            <svg viewBox="0 0 24 24"><path d="M12 2L3 7l9 5 9-5-9-5z"/><path d="M3 17l9 5 9-5M3 12l9 5 9-5"/></svg>
+            Trainer Login
+          </a>
+        </div>
       </div>
     </li>
     <li><a href="#contact" class="nav-cta">Begin Your Journey</a></li>
