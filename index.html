@@ -1660,25 +1660,43 @@
 <script>
 (function(){
   const vids = Array.from(document.querySelectorAll('.hero-vid'));
+  if(!vids.length) return;
   let current = 0;
+  let timer = null;
+
   function advance(){
+    clearTimeout(timer);
     const prev = current;
     current = (current + 1) % vids.length;
     vids[prev].classList.remove('active');
+    vids[prev].pause();
     vids[current].classList.add('active');
     vids[current].currentTime = 0;
     vids[current].play().catch(()=>{});
+    startFallbackTimer();
   }
+
+  function startFallbackTimer(){
+    clearTimeout(timer);
+    // Fallback: advance after 8 seconds regardless
+    timer = setTimeout(advance, 8000);
+  }
+
+  // Primary trigger — video ended
   vids.forEach((v,i)=>{
     v.addEventListener('ended', ()=>{ if(i===current) advance(); });
     v.addEventListener('error', ()=>{ if(i===current) setTimeout(advance,500); });
-  });
-  vids[0].play().catch(()=>{});
-  vids.forEach((v,i)=>{
-    v.addEventListener('playing',()=>{
-      const next=(i+1)%vids.length;
-      vids[next].preload='auto';
+    // Also trigger on timeupdate as a safety net for .mov files
+    v.addEventListener('timeupdate', ()=>{
+      if(i===current && v.duration && v.currentTime >= v.duration - 0.3) advance();
     });
   });
+
+  // Preload all videos
+  vids.forEach(v=>{ v.preload='auto'; v.load(); });
+
+  // Start
+  vids[0].play().catch(()=>{});
+  startFallbackTimer();
 })();
 </script>
