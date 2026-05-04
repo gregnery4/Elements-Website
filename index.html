@@ -314,6 +314,19 @@
   #admin-close svg { width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:1.8; }
   #admin-iframe { width:100%; height:100%; border:none; display:block; }
 
+  /* ─── VIDEO HERO ─── */
+  .hero-vid {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1.2s ease-in-out;
+    z-index: 1;
+  }
+  .hero-vid.active { opacity: 1; }
+
   /* ─── HERO ─── */
   .hero {
     height: 100vh;
@@ -1200,7 +1213,15 @@
 
 <!-- HERO -->
 <section class="hero" id="hero">
-  <div class="hero-bg"></div>
+  <!-- Video Background -->
+  <div id="hero-video-wrap" style="position:absolute;inset:0;z-index:0;overflow:hidden">
+    <div id="hero-overlay" style="position:absolute;inset:0;z-index:2;background:linear-gradient(105deg,rgba(10,8,6,0.82) 0%,rgba(10,8,6,0.45) 55%,rgba(10,8,6,0.70) 100%)"></div>
+    <video id="hv-0" class="hero-vid active" src="https://raw.githubusercontent.com/gregnery4/Elements-Website/main/edit%201.mov" autoplay muted playsinline loop="false"></video>
+    <video id="hv-1" class="hero-vid" src="https://raw.githubusercontent.com/gregnery4/Elements-Website/main/edit%202.mov" muted playsinline loop="false"></video>
+    <video id="hv-2" class="hero-vid" src="https://raw.githubusercontent.com/gregnery4/Elements-Website/main/edit%203.mov" muted playsinline loop="false"></video>
+    <video id="hv-3" class="hero-vid" src="https://raw.githubusercontent.com/gregnery4/Elements-Website/main/edit%204.mov" muted playsinline loop="false"></video>
+    <video id="hv-4" class="hero-vid" src="https://raw.githubusercontent.com/gregnery4/Elements-Website/main/edit%205.mov" muted playsinline loop="false"></video>
+  </div>
   <div class="hero-lines"></div>
   <div class="hero-content">
     <div class="hero-eyebrow">Santa Monica, California</div>
@@ -1636,3 +1657,28 @@
 </script>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudfl
+<script>
+(function(){
+  const vids = Array.from(document.querySelectorAll('.hero-vid'));
+  let current = 0;
+  function advance(){
+    const prev = current;
+    current = (current + 1) % vids.length;
+    vids[prev].classList.remove('active');
+    vids[current].classList.add('active');
+    vids[current].currentTime = 0;
+    vids[current].play().catch(()=>{});
+  }
+  vids.forEach((v,i)=>{
+    v.addEventListener('ended', ()=>{ if(i===current) advance(); });
+    v.addEventListener('error', ()=>{ if(i===current) setTimeout(advance,500); });
+  });
+  vids[0].play().catch(()=>{});
+  vids.forEach((v,i)=>{
+    v.addEventListener('playing',()=>{
+      const next=(i+1)%vids.length;
+      vids[next].preload='auto';
+    });
+  });
+})();
+</script>
