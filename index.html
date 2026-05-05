@@ -323,7 +323,6 @@
     transition: opacity 1.5s ease-in-out;
     pointer-events: none;
   }
-  .vslide.active { opacity: 1; }
   .vslide iframe {
     position: absolute;
     top: 50%;
@@ -1676,19 +1675,18 @@
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudfl
 <script>
-// Simple time-based video crossfader — no API needed
-(function(){
-  const slides = document.querySelectorAll('.vslide');
+window.addEventListener('load', function(){
+  var slides = document.querySelectorAll('.vslide');
   if(!slides.length) return;
-  let cur = 0;
-  const INTERVAL = 8000; // show each video for 8 seconds
-
-  function next(){
-    slides[cur].classList.remove('active');
+  var cur = 0;
+  function showNext(){
+    slides[cur].style.opacity = '0';
     cur = (cur + 1) % slides.length;
-    slides[cur].classList.add('active');
+    slides[cur].style.opacity = '1';
   }
-
-  setInterval(next, INTERVAL);
-})();
+  // Force inline styles — bypass any CSS issues
+  slides[0].style.opacity = '1';
+  for(var i=1;i<slides.length;i++) slides[i].style.opacity='0';
+  setInterval(showNext, 8000);
+});
 </script>
