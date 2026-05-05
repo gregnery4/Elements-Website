@@ -1401,75 +1401,92 @@
       </p>
     </div>
 
-    <!-- Transformation Carousel -->
-    <div style="text-align:center;margin-bottom:32px">
-      <div class="section-label" style="justify-content:center;margin-bottom:16px">Transformations</div>
-    </div>
+    <!-- Client Transformations Grid -->
+    <div style="margin-bottom:60px">
+      <div style="text-align:center;margin-bottom:40px">
+        <div class="section-label" style="justify-content:center;margin-bottom:16px">Transformations</div>
+      </div>
 
-    <div style="position:relative;max-width:480px;margin:0 auto">
-      <!-- Carousel track -->
-      <div id="carousel-track" style="position:relative;aspect-ratio:3/4;overflow:hidden;background:var(--charcoal-2);border:1px solid var(--border)">
+      <!-- Column Headers -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:2px;margin-bottom:2px">
+        <div style="border:1px solid rgba(201,168,108,0.3);padding:14px 20px;text-align:center;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold-light);font-family:'Montserrat',sans-serif">Meet Elements Clients</div>
+        <div style="border:1px solid rgba(201,168,108,0.3);padding:14px 20px;text-align:center;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold-light);font-family:'Montserrat',sans-serif">Before</div>
+        <div style="border:1px solid rgba(201,168,108,0.3);padding:14px 20px;text-align:center;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold-light);font-family:'Montserrat',sans-serif">After</div>
+        <div style="border:1px solid rgba(201,168,108,0.3);padding:14px 20px;text-align:center;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold-light);font-family:'Montserrat',sans-serif">The Proof</div>
+      </div>
 
-        <!-- Placeholder slides — replace src with real client photos -->
-        <div class="carousel-slide active" style="position:absolute;inset:0;opacity:1;transition:opacity 0.6s ease-in-out;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px">
-          <div style="font-size:32px;opacity:0.15">+</div>
-          <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--white-dim);opacity:0.3">Client Photo 1</div>
+      <!-- Client Rows -->
+      <div id="client-grid">
+
+        <!-- Row 1 -->
+        <div class="client-row" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:2px;margin-bottom:2px">
+          <div class="ct-cell" style="background:var(--charcoal-2);border:1px solid var(--border);aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;padding:20px;text-align:center">
+            <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);opacity:0.4">Client Cover Photo</div>
+          </div>
+          <div class="ct-cell" onclick="ctToggle(this)" style="background:var(--charcoal-2);border:1px solid var(--border);aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer;transition:border-color 0.3s" onmouseover="this.style.borderColor='rgba(201,168,108,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);opacity:0.4">Click to see client stats</div>
+          </div>
+          <div class="ct-cell" onclick="ctToggle(this)" style="background:var(--charcoal-2);border:1px solid var(--border);aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer;transition:border-color 0.3s" onmouseover="this.style.borderColor='rgba(201,168,108,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);opacity:0.4">Click to see client stats</div>
+          </div>
+          <div class="ct-cell" onclick="ctToggle(this)" style="background:var(--charcoal-2);border:1px solid var(--border);aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer;transition:border-color 0.3s" onmouseover="this.style.borderColor='rgba(201,168,108,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);opacity:0.4">Click to see before &amp; afters</div>
+          </div>
         </div>
-        <div class="carousel-slide" style="position:absolute;inset:0;opacity:0;transition:opacity 0.6s ease-in-out;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px">
-          <div style="font-size:32px;opacity:0.15">+</div>
-          <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--white-dim);opacity:0.3">Client Photo 2</div>
+
+        <!-- Row 2 -->
+        <div class="client-row" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:2px;margin-bottom:2px">
+          <div class="ct-cell" style="background:var(--charcoal-2);border:1px solid var(--border);aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;padding:20px;text-align:center">
+            <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);opacity:0.4">Client Cover Photo</div>
+          </div>
+          <div class="ct-cell" onclick="ctToggle(this)" style="background:var(--charcoal-2);border:1px solid var(--border);aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer;transition:border-color 0.3s" onmouseover="this.style.borderColor='rgba(201,168,108,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);opacity:0.4">Click to see client stats</div>
+          </div>
+          <div class="ct-cell" onclick="ctToggle(this)" style="background:var(--charcoal-2);border:1px solid var(--border);aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer;transition:border-color 0.3s" onmouseover="this.style.borderColor='rgba(201,168,108,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);opacity:0.4">Click to see client stats</div>
+          </div>
+          <div class="ct-cell" onclick="ctToggle(this)" style="background:var(--charcoal-2);border:1px solid var(--border);aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer;transition:border-color 0.3s" onmouseover="this.style.borderColor='rgba(201,168,108,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);opacity:0.4">Click to see before &amp; afters</div>
+          </div>
         </div>
-        <div class="carousel-slide" style="position:absolute;inset:0;opacity:0;transition:opacity 0.6s ease-in-out;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px">
-          <div style="font-size:32px;opacity:0.15">+</div>
-          <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--white-dim);opacity:0.3">Client Photo 3</div>
-        </div>
-        <div class="carousel-slide" style="position:absolute;inset:0;opacity:0;transition:opacity 0.6s ease-in-out;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px">
-          <div style="font-size:32px;opacity:0.15">+</div>
-          <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--white-dim);opacity:0.3">Client Photo 4</div>
-        </div>
-        <div class="carousel-slide" style="position:absolute;inset:0;opacity:0;transition:opacity 0.6s ease-in-out;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px">
-          <div style="font-size:32px;opacity:0.15">+</div>
-          <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--white-dim);opacity:0.3">Client Photo 5</div>
+
+        <!-- Row 3 -->
+        <div class="client-row" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:2px;margin-bottom:2px">
+          <div class="ct-cell" style="background:var(--charcoal-2);border:1px solid var(--border);aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;padding:20px;text-align:center">
+            <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);opacity:0.4">Client Cover Photo</div>
+          </div>
+          <div class="ct-cell" onclick="ctToggle(this)" style="background:var(--charcoal-2);border:1px solid var(--border);aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer;transition:border-color 0.3s" onmouseover="this.style.borderColor='rgba(201,168,108,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);opacity:0.4">Click to see client stats</div>
+          </div>
+          <div class="ct-cell" onclick="ctToggle(this)" style="background:var(--charcoal-2);border:1px solid var(--border);aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer;transition:border-color 0.3s" onmouseover="this.style.borderColor='rgba(201,168,108,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);opacity:0.4">Click to see client stats</div>
+          </div>
+          <div class="ct-cell" onclick="ctToggle(this)" style="background:var(--charcoal-2);border:1px solid var(--border);aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer;transition:border-color 0.3s" onmouseover="this.style.borderColor='rgba(201,168,108,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);opacity:0.4">Click to see before &amp; afters</div>
+          </div>
         </div>
 
       </div>
 
-      <!-- Left arrow -->
-      <button onclick="carouselPrev()" style="position:absolute;left:-56px;top:50%;transform:translateY(-50%);background:none;border:1px solid rgba(201,168,108,0.3);color:var(--gold-light);width:44px;height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.3s;font-size:16px" onmouseover="this.style.borderColor='rgba(201,168,108,0.8)';this.style.color='#D4A853'" onmouseout="this.style.borderColor='rgba(201,168,108,0.3)';this.style.color='var(--gold-light)'">
-        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-
-      <!-- Right arrow -->
-      <button onclick="carouselNext()" style="position:absolute;right:-56px;top:50%;transform:translateY(-50%);background:none;border:1px solid rgba(201,168,108,0.3);color:var(--gold-light);width:44px;height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.3s;font-size:16px" onmouseover="this.style.borderColor='rgba(201,168,108,0.8)';this.style.color='#D4A853'" onmouseout="this.style.borderColor='rgba(201,168,108,0.3)';this.style.color='var(--gold-light)'">
-        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
-
-      <!-- Dots -->
-      <div id="carousel-dots" style="display:flex;justify-content:center;gap:8px;margin-top:20px">
-        <div class="cdot active" onclick="carouselGoTo(0)" style="width:6px;height:6px;border-radius:50%;background:var(--gold-mid);cursor:pointer;transition:all 0.3s"></div>
-        <div class="cdot" onclick="carouselGoTo(1)" style="width:6px;height:6px;border-radius:50%;background:rgba(201,168,108,0.25);cursor:pointer;transition:all 0.3s"></div>
-        <div class="cdot" onclick="carouselGoTo(2)" style="width:6px;height:6px;border-radius:50%;background:rgba(201,168,108,0.25);cursor:pointer;transition:all 0.3s"></div>
-        <div class="cdot" onclick="carouselGoTo(3)" style="width:6px;height:6px;border-radius:50%;background:rgba(201,168,108,0.25);cursor:pointer;transition:all 0.3s"></div>
-        <div class="cdot" onclick="carouselGoTo(4)" style="width:6px;height:6px;border-radius:50%;background:rgba(201,168,108,0.25);cursor:pointer;transition:all 0.3s"></div>
-      </div>
-    </div>
-
-    <script>
-      var cc = 0;
-      var cslides = document.querySelectorAll('.carousel-slide');
-      var cdots = document.querySelectorAll('.cdot');
-
-      function carouselGoTo(n){
-        cslides[cc].style.opacity='0';
-        cdots[cc].style.background='rgba(201,168,108,0.25)';
-        cc = (n + cslides.length) % cslides.length;
-        cslides[cc].style.opacity='1';
-        cdots[cc].style.background='var(--gold-mid)';
+      <script>
+      function ctToggle(el){
+        var isOpen = el.getAttribute('data-open')==='1';
+        if(isOpen){
+          el.setAttribute('data-open','0');
+          el.style.borderColor='var(--border)';
+          var inner = el.querySelector('.ct-content');
+          if(inner) inner.style.opacity='0';
+          setTimeout(function(){ el.innerHTML = el.getAttribute('data-placeholder'); },300);
+        } else {
+          el.setAttribute('data-open','1');
+          el.style.borderColor='rgba(201,168,108,0.6)';
+          var ph = el.innerHTML;
+          if(!el.getAttribute('data-placeholder')) el.setAttribute('data-placeholder', ph);
+          el.innerHTML = '<div class="ct-content" style="padding:24px;opacity:1;transition:opacity 0.3s;width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px"><div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-light)">Add content here</div></div>';
+        }
       }
-      function carouselNext(){ carouselGoTo(cc+1); }
-      function carouselPrev(){ carouselGoTo(cc-1); }
-    </script>
-
+      </script>
+    </div>
 
     <!-- Google Reviews -->
     <div style="margin-top:80px">
