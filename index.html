@@ -322,14 +322,17 @@
     opacity: 0;
     transition: opacity 1.5s ease-in-out;
     pointer-events: none;
+    overflow: hidden;
   }
   .vslide iframe {
     position: absolute;
     top: 50%;
     left: 50%;
+    /* For vertical (9:16) videos — scale up to fill width */
+    width: 100vw;
+    height: 177.78vw; /* 9:16 = width * 16/9 */
+    min-height: 100vh;
     transform: translate(-50%, -50%);
-    width: max(100vw, 177.78vh);
-    height: max(100vh, 56.25vw);
     pointer-events: none;
     border: 0;
   }
