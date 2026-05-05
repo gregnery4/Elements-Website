@@ -1442,17 +1442,74 @@
 
     </div>
 
-    <!-- Before/After Results placeholder -->
-    <div style="text-align:center;margin-bottom:48px">
+    <!-- Transformation Carousel -->
+    <div style="text-align:center;margin-bottom:32px">
       <div class="section-label" style="justify-content:center;margin-bottom:16px">Transformations</div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px">
-      ${[1,2,3].map(i=>`
-      <div style="background:var(--charcoal-2);border:1px solid var(--border);aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px">
-        <div style="font-size:32px;opacity:0.2">+</div>
-        <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--white-dim);opacity:0.4">Add Client Photo</div>
-      </div>`).join('')}
+
+    <div style="position:relative;max-width:480px;margin:0 auto">
+      <!-- Carousel track -->
+      <div id="carousel-track" style="position:relative;aspect-ratio:3/4;overflow:hidden;background:var(--charcoal-2);border:1px solid var(--border)">
+
+        <!-- Placeholder slides — replace src with real client photos -->
+        <div class="carousel-slide active" style="position:absolute;inset:0;opacity:1;transition:opacity 0.6s ease-in-out;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px">
+          <div style="font-size:32px;opacity:0.15">+</div>
+          <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--white-dim);opacity:0.3">Client Photo 1</div>
+        </div>
+        <div class="carousel-slide" style="position:absolute;inset:0;opacity:0;transition:opacity 0.6s ease-in-out;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px">
+          <div style="font-size:32px;opacity:0.15">+</div>
+          <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--white-dim);opacity:0.3">Client Photo 2</div>
+        </div>
+        <div class="carousel-slide" style="position:absolute;inset:0;opacity:0;transition:opacity 0.6s ease-in-out;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px">
+          <div style="font-size:32px;opacity:0.15">+</div>
+          <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--white-dim);opacity:0.3">Client Photo 3</div>
+        </div>
+        <div class="carousel-slide" style="position:absolute;inset:0;opacity:0;transition:opacity 0.6s ease-in-out;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px">
+          <div style="font-size:32px;opacity:0.15">+</div>
+          <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--white-dim);opacity:0.3">Client Photo 4</div>
+        </div>
+        <div class="carousel-slide" style="position:absolute;inset:0;opacity:0;transition:opacity 0.6s ease-in-out;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px">
+          <div style="font-size:32px;opacity:0.15">+</div>
+          <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--white-dim);opacity:0.3">Client Photo 5</div>
+        </div>
+
+      </div>
+
+      <!-- Left arrow -->
+      <button onclick="carouselPrev()" style="position:absolute;left:-56px;top:50%;transform:translateY(-50%);background:none;border:1px solid rgba(201,168,108,0.3);color:var(--gold-light);width:44px;height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.3s;font-size:16px" onmouseover="this.style.borderColor='rgba(201,168,108,0.8)';this.style.color='#D4A853'" onmouseout="this.style.borderColor='rgba(201,168,108,0.3)';this.style.color='var(--gold-light)'">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+
+      <!-- Right arrow -->
+      <button onclick="carouselNext()" style="position:absolute;right:-56px;top:50%;transform:translateY(-50%);background:none;border:1px solid rgba(201,168,108,0.3);color:var(--gold-light);width:44px;height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.3s;font-size:16px" onmouseover="this.style.borderColor='rgba(201,168,108,0.8)';this.style.color='#D4A853'" onmouseout="this.style.borderColor='rgba(201,168,108,0.3)';this.style.color='var(--gold-light)'">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+
+      <!-- Dots -->
+      <div id="carousel-dots" style="display:flex;justify-content:center;gap:8px;margin-top:20px">
+        <div class="cdot active" onclick="carouselGoTo(0)" style="width:6px;height:6px;border-radius:50%;background:var(--gold-mid);cursor:pointer;transition:all 0.3s"></div>
+        <div class="cdot" onclick="carouselGoTo(1)" style="width:6px;height:6px;border-radius:50%;background:rgba(201,168,108,0.25);cursor:pointer;transition:all 0.3s"></div>
+        <div class="cdot" onclick="carouselGoTo(2)" style="width:6px;height:6px;border-radius:50%;background:rgba(201,168,108,0.25);cursor:pointer;transition:all 0.3s"></div>
+        <div class="cdot" onclick="carouselGoTo(3)" style="width:6px;height:6px;border-radius:50%;background:rgba(201,168,108,0.25);cursor:pointer;transition:all 0.3s"></div>
+        <div class="cdot" onclick="carouselGoTo(4)" style="width:6px;height:6px;border-radius:50%;background:rgba(201,168,108,0.25);cursor:pointer;transition:all 0.3s"></div>
+      </div>
     </div>
+
+    <script>
+      var cc = 0;
+      var cslides = document.querySelectorAll('.carousel-slide');
+      var cdots = document.querySelectorAll('.cdot');
+
+      function carouselGoTo(n){
+        cslides[cc].style.opacity='0';
+        cdots[cc].style.background='rgba(201,168,108,0.25)';
+        cc = (n + cslides.length) % cslides.length;
+        cslides[cc].style.opacity='1';
+        cdots[cc].style.background='var(--gold-mid)';
+      }
+      function carouselNext(){ carouselGoTo(cc+1); }
+      function carouselPrev(){ carouselGoTo(cc-1); }
+    </script>
 
   </div>
 </section>
