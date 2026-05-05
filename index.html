@@ -328,11 +328,10 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 177.78vh;
-    height: 56.25vw;
-    min-width: 100vw;
-    min-height: 100vh;
+    width: max(100vw, 177.78vh);
+    height: max(100vh, 56.25vw);
     pointer-events: none;
+    border: 0;
   }
 
   /* ─── HERO ─── */
@@ -1221,7 +1220,7 @@
 
 <!-- HERO -->
 <section class="hero" id="hero">
-  <div id="hero-video-wrap" style="position:absolute;inset:0;z-index:0;overflow:hidden;background:#0a0806">
+  <div id="hero-video-wrap" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;overflow:hidden;background:#0a0806">
     <div style="position:absolute;inset:0;z-index:2;background:linear-gradient(105deg,rgba(10,8,6,0.82) 0%,rgba(10,8,6,0.45) 55%,rgba(10,8,6,0.70) 100%)"></div>
     <div id="vimeo-0" class="vslide" style="opacity:1">
       <iframe src="https://player.vimeo.com/video/1189220718?background=1&autoplay=1&muted=1&loop=1&byline=0&title=0" frameborder="0" allow="autoplay;fullscreen" allowfullscreen></iframe>
