@@ -1239,6 +1239,15 @@
       <iframe src="https://player.vimeo.com/video/1189220703?background=1&autoplay=1&muted=1&loop=1&byline=0&title=0" frameborder="0" allow="autoplay;fullscreen" allowfullscreen></iframe>
     </div>
   </div>
+  <script>
+    var vc=0;
+    var vs=document.querySelectorAll('.vslide');
+    setInterval(function(){
+      vs[vc].style.opacity='0';
+      vc=(vc+1)%vs.length;
+      vs[vc].style.opacity='1';
+    },8000);
+  </script>
   <div class="hero-lines"></div>
   <div class="hero-content">
     <div class="hero-eyebrow">Santa Monica, California</div>
@@ -1674,16 +1683,3 @@
 </script>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudfl
-<script>
-var _vslideCur = 0;
-var _vslides = null;
-
-function _vsNext(){
-  if(!_vslides) _vslides = document.querySelectorAll('.vslide');
-  _vslides[_vslideCur].style.opacity = '0';
-  _vslideCur = (_vslideCur + 1) % _vslides.length;
-  _vslides[_vslideCur].style.opacity = '1';
-}
-
-setInterval(_vsNext, 8000);
-</script>
