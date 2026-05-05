@@ -315,23 +315,24 @@
   #admin-iframe { width:100%; height:100%; border:none; display:block; }
 
   /* ─── VIDEO HERO ─── */
-  .vimeo-slide {
+  .vslide {
     position: absolute;
     inset: 0;
     z-index: 1;
     opacity: 0;
-    transition: opacity 1.2s ease-in-out;
+    transition: opacity 1.5s ease-in-out;
+    pointer-events: none;
   }
-  .vimeo-slide.active { opacity: 1; }
-  .vimeo-slide iframe {
+  .vslide.active { opacity: 1; }
+  .vslide iframe {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%,-50%);
-    width: 177.78vh; /* 16:9 aspect ratio */
-    height: 100vh;
-    min-width: 100%;
-    min-height: 56.25vw;
+    transform: translate(-50%, -50%);
+    width: 177.78vh;
+    height: 56.25vw;
+    min-width: 100vw;
+    min-height: 100vh;
     pointer-events: none;
   }
 
@@ -1221,14 +1222,23 @@
 
 <!-- HERO -->
 <section class="hero" id="hero">
-  <!-- Vimeo Video Background -->
-  <div id="hero-video-wrap" style="position:absolute;inset:0;z-index:0;overflow:hidden">
-    <div id="hero-overlay" style="position:absolute;inset:0;z-index:2;background:linear-gradient(105deg,rgba(10,8,6,0.82) 0%,rgba(10,8,6,0.45) 55%,rgba(10,8,6,0.70) 100%)"></div>
-    <div id="vimeo-slide-0" class="vimeo-slide active"><iframe src="https://player.vimeo.com/video/1189220718?background=1&autoplay=1&muted=1&loop=0&byline=0&title=0&portrait=0" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe></div>
-    <div id="vimeo-slide-1" class="vimeo-slide"><iframe src="https://player.vimeo.com/video/1189220717?background=1&autoplay=0&muted=1&loop=0&byline=0&title=0&portrait=0" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe></div>
-    <div id="vimeo-slide-2" class="vimeo-slide"><iframe src="https://player.vimeo.com/video/1189220704?background=1&autoplay=0&muted=1&loop=0&byline=0&title=0&portrait=0" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe></div>
-    <div id="vimeo-slide-3" class="vimeo-slide"><iframe src="https://player.vimeo.com/video/1189220706?background=1&autoplay=0&muted=1&loop=0&byline=0&title=0&portrait=0" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe></div>
-    <div id="vimeo-slide-4" class="vimeo-slide"><iframe src="https://player.vimeo.com/video/1189220703?background=1&autoplay=0&muted=1&loop=0&byline=0&title=0&portrait=0" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe></div>
+  <div id="hero-video-wrap" style="position:absolute;inset:0;z-index:0;overflow:hidden;background:#0a0806">
+    <div style="position:absolute;inset:0;z-index:2;background:linear-gradient(105deg,rgba(10,8,6,0.82) 0%,rgba(10,8,6,0.45) 55%,rgba(10,8,6,0.70) 100%)"></div>
+    <div id="vimeo-0" class="vslide active">
+      <iframe src="https://player.vimeo.com/video/1189220718?background=1&autoplay=1&muted=1&loop=1&byline=0&title=0" frameborder="0" allow="autoplay;fullscreen" allowfullscreen></iframe>
+    </div>
+    <div id="vimeo-1" class="vslide">
+      <iframe src="https://player.vimeo.com/video/1189220717?background=1&autoplay=1&muted=1&loop=1&byline=0&title=0" frameborder="0" allow="autoplay;fullscreen" allowfullscreen></iframe>
+    </div>
+    <div id="vimeo-2" class="vslide">
+      <iframe src="https://player.vimeo.com/video/1189220704?background=1&autoplay=1&muted=1&loop=1&byline=0&title=0" frameborder="0" allow="autoplay;fullscreen" allowfullscreen></iframe>
+    </div>
+    <div id="vimeo-3" class="vslide">
+      <iframe src="https://player.vimeo.com/video/1189220706?background=1&autoplay=1&muted=1&loop=1&byline=0&title=0" frameborder="0" allow="autoplay;fullscreen" allowfullscreen></iframe>
+    </div>
+    <div id="vimeo-4" class="vslide">
+      <iframe src="https://player.vimeo.com/video/1189220703?background=1&autoplay=1&muted=1&loop=1&byline=0&title=0" frameborder="0" allow="autoplay;fullscreen" allowfullscreen></iframe>
+    </div>
   </div>
   <div class="hero-lines"></div>
   <div class="hero-content">
@@ -1665,51 +1675,20 @@
 </script>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudfl
-<script src="https://player.vimeo.com/api/player.js"></script>
 <script>
+// Simple time-based video crossfader — no API needed
 (function(){
-  const VIDEO_IDS = [1189220718,1189220717,1189220704,1189220706,1189220703];
-  const DURATION = 8000; // fallback ms per video if ended event doesn't fire
-  const slides = document.querySelectorAll('.vimeo-slide');
-  let current = 0;
-  let timer = null;
-  let players = [];
+  const slides = document.querySelectorAll('.vslide');
+  if(!slides.length) return;
+  let cur = 0;
+  const INTERVAL = 8000; // show each video for 8 seconds
 
-  function advance(){
-    clearTimeout(timer);
-    const prev = current;
-    current = (current + 1) % slides.length;
-    slides[prev].classList.remove('active');
-    slides[current].classList.add('active');
-    // Play next video via API
-    if(players[current]) players[current].play().catch(()=>{});
-    // Pause previous
-    if(players[prev]) players[prev].pause().catch(()=>{});
-    startFallback();
+  function next(){
+    slides[cur].classList.remove('active');
+    cur = (cur + 1) % slides.length;
+    slides[cur].classList.add('active');
   }
 
-  function startFallback(){
-    clearTimeout(timer);
-    timer = setTimeout(advance, DURATION);
-  }
-
-  // Init Vimeo players
-  slides.forEach((slide, i) => {
-    const iframe = slide.querySelector('iframe');
-    if(!iframe) return;
-    const player = new Vimeo.Player(iframe);
-    players[i] = player;
-    player.on('ended', () => { if(i === current) advance(); });
-    // On timeupdate near end
-    player.on('timeupdate', data => {
-      if(i === current && data.duration > 0 && data.seconds >= data.duration - 0.5) advance();
-    });
-  });
-
-  // Start first video
-  setTimeout(()=>{
-    if(players[0]) players[0].play().catch(()=>{});
-    startFallback();
-  }, 1000);
+  setInterval(next, INTERVAL);
 })();
 </script>
