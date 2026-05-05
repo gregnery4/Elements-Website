@@ -326,13 +326,12 @@
   }
   .vslide iframe {
     position: absolute;
-    top: 50%;
+    top: 58%;
     left: 50%;
-    /* For vertical (9:16) videos — scale up to fill width */
+    transform: translate(-50%, -50%) scale(0.85);
     width: 100vw;
-    height: 177.78vw; /* 9:16 = width * 16/9 */
+    height: 177.78vw;
     min-height: 100vh;
-    transform: translate(-50%, -50%);
     pointer-events: none;
     border: 0;
   }
