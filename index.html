@@ -1223,7 +1223,7 @@
 <section class="hero" id="hero">
   <div id="hero-video-wrap" style="position:absolute;inset:0;z-index:0;overflow:hidden;background:#0a0806">
     <div style="position:absolute;inset:0;z-index:2;background:linear-gradient(105deg,rgba(10,8,6,0.82) 0%,rgba(10,8,6,0.45) 55%,rgba(10,8,6,0.70) 100%)"></div>
-    <div id="vimeo-0" class="vslide active">
+    <div id="vimeo-0" class="vslide">
       <iframe src="https://player.vimeo.com/video/1189220718?background=1&autoplay=1&muted=1&loop=1&byline=0&title=0" frameborder="0" allow="autoplay;fullscreen" allowfullscreen></iframe>
     </div>
     <div id="vimeo-1" class="vslide">
@@ -1675,18 +1675,30 @@
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudfl
 <script>
-window.addEventListener('load', function(){
-  var slides = document.querySelectorAll('.vslide');
-  if(!slides.length) return;
+(function(){
   var cur = 0;
-  function showNext(){
-    slides[cur].style.opacity = '0';
-    cur = (cur + 1) % slides.length;
-    slides[cur].style.opacity = '1';
+  var slides;
+
+  function init(){
+    slides = document.querySelectorAll('.vslide');
+    if(!slides.length) return;
+    // Set all to 0, first to 1 immediately
+    for(var i=0;i<slides.length;i++) slides[i].style.opacity='0';
+    slides[0].style.opacity='1';
+    setInterval(advance, 8000);
   }
-  // Force inline styles — bypass any CSS issues
-  slides[0].style.opacity = '1';
-  for(var i=1;i<slides.length;i++) slides[i].style.opacity='0';
-  setInterval(showNext, 8000);
-});
+
+  function advance(){
+    slides[cur].style.opacity='0';
+    cur = (cur+1) % slides.length;
+    slides[cur].style.opacity='1';
+  }
+
+  // Fire as soon as DOM is ready
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
 </script>
