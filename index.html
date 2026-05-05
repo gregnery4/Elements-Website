@@ -1401,46 +1401,67 @@
       </p>
     </div>
 
-    <!-- Testimonial Cards -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-bottom:80px" id="testimonial-grid">
+    <!-- Testimonial Marquee -->
+    <div style="position:relative;overflow:hidden;margin-bottom:80px" id="review-marquee-wrap">
+      <!-- Fade edges -->
+      <div style="position:absolute;left:0;top:0;bottom:0;width:120px;background:linear-gradient(to right,var(--charcoal-1),transparent);z-index:2;pointer-events:none"></div>
+      <div style="position:absolute;right:0;top:0;bottom:0;width:120px;background:linear-gradient(to left,var(--charcoal-1),transparent);z-index:2;pointer-events:none"></div>
 
-      <!-- Testimonial 1 -->
-      <div style="background:var(--charcoal-2);border:1px solid var(--border);padding:40px 36px;display:flex;flex-direction:column;gap:20px;transition:border-color 0.3s" onmouseover="this.style.borderColor='rgba(201,168,108,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
-        <div style="display:flex;gap:4px">
-          ${[1,2,3,4,5].map(()=>`<span style="color:#D4A853;font-size:14px">★</span>`).join('')}
-        </div>
-        <p style="font-size:14px;line-height:1.9;color:var(--white-dim);font-style:italic;flex:1">"Add your client testimonial here."</p>
-        <div style="border-top:1px solid var(--border);padding-top:20px">
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--white)">Client Name</div>
-          <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-light);margin-top:4px">Occupation / Title</div>
-        </div>
+      <div id="review-marquee" style="display:flex;gap:16px;width:max-content;animation:marquee 60s linear infinite" onmouseover="this.style.animationPlayState='paused'" onmouseout="this.style.animationPlayState='running'">
+        <!-- Reviews duplicated for seamless loop -->
       </div>
-
-      <!-- Testimonial 2 -->
-      <div style="background:var(--charcoal-2);border:1px solid var(--border);padding:40px 36px;display:flex;flex-direction:column;gap:20px;transition:border-color 0.3s" onmouseover="this.style.borderColor='rgba(201,168,108,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
-        <div style="display:flex;gap:4px">
-          ${[1,2,3,4,5].map(()=>`<span style="color:#D4A853;font-size:14px">★</span>`).join('')}
-        </div>
-        <p style="font-size:14px;line-height:1.9;color:var(--white-dim);font-style:italic;flex:1">"Add your client testimonial here."</p>
-        <div style="border-top:1px solid var(--border);padding-top:20px">
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--white)">Client Name</div>
-          <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-light);margin-top:4px">Occupation / Title</div>
-        </div>
-      </div>
-
-      <!-- Testimonial 3 -->
-      <div style="background:var(--charcoal-2);border:1px solid var(--border);padding:40px 36px;display:flex;flex-direction:column;gap:20px;transition:border-color 0.3s" onmouseover="this.style.borderColor='rgba(201,168,108,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
-        <div style="display:flex;gap:4px">
-          ${[1,2,3,4,5].map(()=>`<span style="color:#D4A853;font-size:14px">★</span>`).join('')}
-        </div>
-        <p style="font-size:14px;line-height:1.9;color:var(--white-dim);font-style:italic;flex:1">"Add your client testimonial here."</p>
-        <div style="border-top:1px solid var(--border);padding-top:20px">
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--white)">Client Name</div>
-          <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-light);margin-top:4px">Occupation / Title</div>
-        </div>
-      </div>
-
     </div>
+
+    <style>
+      @keyframes marquee {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+      }
+    </style>
+
+    <script>
+    (function(){
+      var reviews = [
+        { name:'Sui Min Wong', text:'I\'ve been training with Gavin at One PT for almost a year and a half, and the experience has been nothing short of life-changing. After years of trying every diet, app, and fitness program under the sun, I was frustrated and stuck. I\'m now down 25 lbs and have gone from 28% body fat to 16%. Every session is strategic, targeted, and efficient.' },
+        { name:'Irene Cast', text:'Training with Gavin at ONEPT has genuinely changed my life. His scientific, highly personalized approach didn\'t just reshape my body — it completely shifted how I feel about fitness and myself. I\'m stronger, leaner, and more confident than I\'ve ever been. What used to feel like a chore is now the highlight of my week.' },
+        { name:'Austin Chen', text:'I\'ve had several personal trainers over the years, but Mark at onePT is genuinely in a different league. Going on three years now — his approach is measured and holistic: steady, sustainable drops in body fat and weight through real lifestyle change. I make the 30–40 minute drive each way every day because the accountability and results are worth every minute.' },
+        { name:'Dharshini Mahadevan', text:'I started training with Gerard at One PT and it has been a game changer. This program is all encompassing. Family and friends have noticed my progress, my labs are great, I\'m stronger than I\'ve ever been and I look forward to my workouts. I highly recommend the team at One PT.' },
+        { name:'Jennifer Pransky', text:'I\'ve been training with Gerard since 2023 and my life has been better because of it. I am stronger and healthier than ever. One PT provides a 360 approach that doesn\'t stop when you leave the gym. Any time I wear a sleeveless shirt, I get asked what I do to workout. I give all credit to One PT.' },
+        { name:'Mindy Ann', text:'Gavin and his team at One PT are top notch! They are devoted and incredibly knowledgeable across every aspect of training. I have to credit them with getting the strongest and leanest I\'ve ever been!' },
+        { name:'Francois de Lame', text:'I\'ve been training with Gavin, founder of One PT, and couldn\'t be happier with the experience and results. What really sets him apart is how metric-driven and results-focused he is. If you want a trainer who is both thoughtful and effective, Gavin and 1PT are top-tier.' },
+        { name:'Kevin Greeley', text:'I can\'t say enough great things about OnePT. Their dedication, knowledge, and motivation have completely transformed my approach to fitness. Thanks to Gavin and his team, I feel stronger, more confident, and more disciplined both in and out of the gym.' },
+        { name:'Annie Wasserman', text:'ONE PT is the best in the game. Bar none. I\'ve trained with Mark for just over 2 years now and cannot speak more highly of the experience and results.' },
+        { name:'Daniel Vasquez', text:'EXCEPTIONAL. After a year out of the gym from a rotator cuff injury, Allison made my sessions feel more like a collaboration to build muscle that made me more functional and confident. I can\'t say enough good things about her!' },
+        { name:'Pegah Shahian', text:'I\'ve been training with ONE PT for a very long time and they are amazing! The trainers are very knowledgeable, detail oriented and caring. Everyone I\'ve referred is very happy with their results!' },
+        { name:'Shelby Hance', text:'I can\'t recommend the ONEPT training team enough! They completely invigorated my approach to nutrition and supplements. If you want results, this is the place to be!' },
+        { name:'Jennifer Fitzgerald', text:'I\'ve been working out with Gavin and his team at One PT for several months now and am thrilled with my progress. They hold you accountable to improving week after week in terms of strength and body comp. Best team to work with if you\'re serious about getting results.' },
+        { name:'Maria Roig-Gironella', text:'Training with Felix has been a total game changer. He somehow manages to push you hard and make it fun at the same time. Super knowledgeable, always positive, and genuinely cares about helping you hit your goals.' },
+        { name:'R G', text:'I\'ve personally been working with Gavin for over a year and my progress has been life changing. I highly recommend OnePT to anyone serious about making a life change for the better.' },
+        { name:'Jay Brubaker', text:'Changed my life. Best program that I have found after many years of searching.' },
+        { name:'Drew Knight', text:'Allison was fantastic — knowledgeable, supportive, and genuinely invested in my success. She helped me make a plan that was realistic and aligned with my fitness goals. I always left in a great mood.' },
+        { name:'Victor Diaz-Roig', text:'ONE PT is top-notch — hands down the best personal training in LA.' },
+        { name:'Brendan Barker', text:'OnePT really stands out for how personal the training feels. The coaches care, the programming makes sense, and the results feel sustainable. Can\'t recommend them enough!' },
+        { name:'daniel gestetner', text:'Gavin is an excellent trainer! I highly recommend him and have been working with him for almost 2 years now!' },
+      ];
+
+      var marquee = document.getElementById('review-marquee');
+      if(!marquee) return;
+
+      function makeCard(r){
+        var d = document.createElement('div');
+        d.style.cssText = 'background:var(--charcoal-2);border:1px solid rgba(201,168,108,0.15);padding:32px 28px;width:340px;flex-shrink:0;display:flex;flex-direction:column;gap:16px;';
+        d.innerHTML = '<div style="display:flex;gap:3px">' + '★★★★★'.split('').map(function(s){ return '<span style="color:#D4A853;font-size:13px">'+s+'</span>'; }).join('') + '</div>'
+          + '<p style="font-size:13px;line-height:1.8;color:var(--white-dim);font-style:italic;flex:1">&ldquo;' + r.text + '&rdquo;</p>'
+          + '<div style="border-top:1px solid rgba(201,168,108,0.1);padding-top:14px;font-family:\'Bebas Neue\',sans-serif;font-size:15px;letter-spacing:2px;color:var(--white)">' + r.name + '</div>';
+        return d;
+      }
+
+      // Add all reviews twice for seamless infinite loop
+      reviews.concat(reviews).forEach(function(r){
+        marquee.appendChild(makeCard(r));
+      });
+    })();
+    </script>
 
     <!-- Transformation Carousel -->
     <div style="text-align:center;margin-bottom:32px">
