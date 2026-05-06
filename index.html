@@ -104,12 +104,15 @@
 
   .logo-icon span {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 38px;
+    font-size: 46px;
     background: linear-gradient(160deg, #D4A85A 0%, #A07828 45%, #C9893A 75%, #D4A85A 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .logo-text {
@@ -320,7 +323,7 @@
     inset: 0;
     z-index: 1;
     opacity: 0;
-    transition: opacity 1.5s ease-in-out;
+    transition: opacity 2.5s ease-in-out;
     pointer-events: none;
     overflow: hidden;
   }
@@ -1235,9 +1238,6 @@
     <div id="vimeo-0" class="vslide" style="opacity:1">
       <iframe src="https://player.vimeo.com/video/1189220718?background=1&autoplay=1&muted=1&loop=1&byline=0&title=0&portrait=0" frameborder="0" allow="autoplay;fullscreen;picture-in-picture" allowfullscreen></iframe>
     </div>
-    <div id="vimeo-1" class="vslide">
-      <iframe src="https://player.vimeo.com/video/1189220717?background=1&autoplay=1&muted=1&loop=1&byline=0&title=0&portrait=0" frameborder="0" allow="autoplay;fullscreen;picture-in-picture" allowfullscreen></iframe>
-    </div>
     <div id="vimeo-2" class="vslide">
       <iframe src="https://player.vimeo.com/video/1189220704?background=1&autoplay=1&muted=1&loop=1&byline=0&title=0&portrait=0" frameborder="0" allow="autoplay;fullscreen;picture-in-picture" allowfullscreen></iframe>
     </div>
@@ -1255,7 +1255,7 @@
       vs[vc].style.opacity='0';
       vc=(vc+1)%vs.length;
       vs[vc].style.opacity='1';
-    },8000);
+    },10000);
   </script>
   <div class="hero-lines"></div>
   <div class="hero-content">
