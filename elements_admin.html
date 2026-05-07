@@ -3921,6 +3921,7 @@ function renderWeeklyLog(){
         <div style="display:flex;align-items:center;gap:10px">
           ${e.score!==null&&e.score!==undefined?`<span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:${e.score>=80?'var(--green)':e.score>=50?'var(--gold)':'var(--red)'}">${e.score}%</span>`:'<span style="font-size:10px;color:var(--muted)">No score</span>'}
           <button onclick="event.stopPropagation();generateWeeklyReviewPDF(${i})" style="padding:5px 12px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:7px;letter-spacing:2px;text-transform:uppercase;font-weight:600;white-space:nowrap">PDF →</button>
+          <button onclick="event.stopPropagation();deleteWeeklyReview('${e.wk}')" style="padding:5px 10px;background:none;color:var(--muted);border:1px solid rgba(255,255,255,0.08);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:1px;transition:all 0.2s" onmouseover="this.style.borderColor='rgba(207,102,121,0.6)';this.style.color='#CF6679'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.color='var(--muted)'">✕</button>
           <span onclick="toggleWeekExpand(${i})" style="font-size:12px;color:var(--muted);cursor:pointer" id="wk-chevron-${i}">▼</span>
         </div>
       </div>
@@ -4008,6 +4009,26 @@ function renderWeeklyLog(){
 
 function checkMonthlySummary(){
   // placeholder — monthly summary logic can be added here
+}
+
+async function deleteWeeklyReview(weekNum){
+  if(!currentClient) return;
+  if(!confirm(`Delete Week ${weekNum} review? This cannot be undone.`)) return;
+
+  const{error} = await sb.from('weekly_reviews')
+    .delete()
+    .eq('client_id', currentClient.id)
+    .eq('week_number', parseInt(weekNum));
+
+  if(error){
+    alert('Error deleting review: ' + error.message);
+    return;
+  }
+
+  // Remove from local weeklyData and re-render
+  weeklyData[currentClient.id] = (weeklyData[currentClient.id]||[]).filter(e=>String(e.wk)!==String(weekNum));
+  renderWeeklyLog();
+  loadTrainingLogs();
 }
 
 function toggleWeekExpand(i){
