@@ -1779,10 +1779,9 @@ function renderClientTable(){
 let currentClient=null;
 
 function openClient(id, skipWizardReset=false){
-  console.log('openClient called with id:', id);
   currentClient=allClients.find(c=>c.id===id);
-  console.log('currentClient found:', currentClient?.full_name, '| id:', currentClient?.id);
-  if(!currentClient)return;
+  if(!currentClient){ console.warn('openClient: no client found for id', id); return; }
+  try{
   const c=currentClient;
   const name=c.full_name||c.email;
   const ini=name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
@@ -1933,6 +1932,8 @@ function openClient(id, skipWizardReset=false){
 
   console.log('Opening detail overlay');
   document.getElementById('detail-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  }catch(e){ console.error('openClient error:', e); }
   document.body.style.overflow='hidden';
   // Show the wizard tab and start at step 0
   const wizTab = document.querySelector('.dp-tab');
