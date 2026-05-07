@@ -1038,6 +1038,21 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             <!-- DEXA Fields -->
             <div id="al-dexa-section" style="display:none;margin-bottom:14px">
               <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--borderw)">DEXA Scan Data</div>
+
+              <!-- PDF Drop Zone -->
+              <div id="al-dexa-dropzone"
+                style="border:1px dashed rgba(201,168,108,0.4);padding:20px;text-align:center;cursor:pointer;margin-bottom:12px;transition:all 0.2s;background:var(--c1)"
+                onclick="document.getElementById('al-dexa-file').click()"
+                ondragover="event.preventDefault();this.classList.add('drag-over')"
+                ondragleave="this.classList.remove('drag-over')"
+                ondrop="alHandleDexaDrop(event)">
+                <div style="font-size:20px;margin-bottom:6px">📄</div>
+                <div style="font-size:11px;color:var(--white-dim)">Drop DEXA PDF here or click to upload</div>
+                <div style="font-size:9px;color:var(--muted);margin-top:4px;letter-spacing:1px">Auto-fills fields below</div>
+                <input type="file" id="al-dexa-file" accept=".pdf" style="display:none" onchange="alHandleDexaFile(this.files[0])">
+              </div>
+              <div id="al-dexa-status" style="font-size:11px;margin-bottom:10px;min-height:16px"></div>
+
               <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
                 <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Total Mass (lbs)</div><input type="number" id="al-bw" placeholder="185.2" step="0.1" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none"></div>
                 <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Body Fat %</div><input type="number" id="al-bf" placeholder="18.5" step="0.01" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none"></div>
@@ -5992,6 +6007,68 @@ async function loadAssessmentLogs(){
       </div>
     </div>`;
   }).join('');
+}
+
+
+function alHandleDexaDrop(event){
+  event.preventDefault();
+  document.getElementById('al-dexa-dropzone').classList.remove('drag-over');
+  const file = event.dataTransfer.files[0];
+  if(file && file.type==='application/pdf') alHandleDexaFile(file);
+  else alDexaStatus('error','Please drop a PDF file.');
+}
+
+async function alHandleDexaFile(file){
+  if(!file) return;
+  alDexaStatus('loading','📄 Reading PDF — extracting DEXA metrics...');
+  try{
+    if(!window.pdfjsLib){
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+        s.onload=res; s.onerror=rej;
+        document.head.appendChild(s);
+      });
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc=
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data:arrayBuffer}).promise;
+    let fullText='';
+    for(let p=1;p<=pdf.numPages;p++){
+      const page=await pdf.getPage(p);
+      const content=await page.getTextContent();
+      fullText+=content.items.map(i=>i.str).join(' ')+'\n';
+    }
+    const metrics = parseDexaText(fullText);
+    alFillDexaFields(metrics, file.name);
+  }catch(e){
+    alDexaStatus('error','Could not read PDF: '+e.message);
+  }
+}
+
+function alDexaStatus(type, msg){
+  const el = document.getElementById('al-dexa-status');
+  if(!el) return;
+  const colors = {loading:'var(--muted)', success:'var(--gold)', error:'#CF6679'};
+  el.style.color = colors[type]||'var(--muted)';
+  el.textContent = msg;
+}
+
+function alFillDexaFields(metrics, filename){
+  const filled = [];
+  if(metrics.scan_date){ document.getElementById('al-date').value=metrics.scan_date; filled.push('Date'); }
+  if(metrics.total_mass_lbs){ document.getElementById('al-bw').value=metrics.total_mass_lbs; filled.push('Total Mass'); }
+  if(metrics.body_fat_percent){ document.getElementById('al-bf').value=metrics.body_fat_percent; filled.push('Body Fat %'); }
+  if(metrics.lean_mass_lbs){ document.getElementById('al-lm').value=metrics.lean_mass_lbs; filled.push('Lean Mass'); }
+  if(metrics.fat_mass_lbs){ document.getElementById('al-fm').value=metrics.fat_mass_lbs; filled.push('Fat Mass'); }
+  if(metrics.bmc){ document.getElementById('al-bmc').value=metrics.bmc; filled.push('BMC'); }
+  if(metrics.visceral_fat_lbs){ document.getElementById('al-vf').value=metrics.visceral_fat_lbs; filled.push('Visceral Fat'); }
+  if(metrics.resting_metabolic_rate){ document.getElementById('al-rmr').value=metrics.resting_metabolic_rate; filled.push('RMR'); }
+  if(!filled.length){ alDexaStatus('error','No metrics found in PDF. Please fill in manually.'); return; }
+  alDexaStatus('success', '✓ '+filled.length+' metrics extracted: '+filled.join(', '));
+  const dz = document.getElementById('al-dexa-dropzone');
+  if(dz) dz.style.borderColor='rgba(201,168,108,0.8)';
 }
 
 function alUpdateTypes(){
