@@ -633,84 +633,104 @@
 
   .pillars-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 2px;
   }
 
   .pillar-card {
-    background: var(--charcoal);
-    padding: 52px 44px;
-    border: 1px solid var(--border);
-    transition: all 0.4s;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--charcoal-2);
     overflow: hidden;
+    cursor: pointer;
+    min-height: 580px;
   }
 
-  .pillar-card::before {
+  .pillar-img-placeholder {
+    position: absolute;
+    inset: 0;
+    background: var(--charcoal-3);
+    transition: transform 0.6s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pillar-img-placeholder::after {
+    content: '+ Add Image';
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(245,242,238,0.15);
+  }
+
+  .pillar-card:hover .pillar-img-placeholder { transform: scale(1.04); }
+
+  .pillar-card::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--gold-mid), transparent);
-    transform: scaleX(0);
-    transition: transform 0.4s;
+    bottom: 0; left: 0; right: 0;
+    height: 70%;
+    background: linear-gradient(to top, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.5) 50%, transparent 100%);
+    pointer-events: none;
+    z-index: 1;
   }
 
-  .pillar-card:hover { background: var(--charcoal-2); }
-  .pillar-card:hover::before { transform: scaleX(1); }
+  .pillar-content {
+    position: relative;
+    z-index: 2;
+    margin-top: auto;
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
 
   .pillar-number {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 72px;
+    font-size: 48px;
     font-weight: 300;
     font-style: italic;
-    color: rgba(160,120,40,0.55);
+    color: rgba(201,168,108,0.55);
     line-height: 1;
-    margin-bottom: -8px;
   }
 
   .pillar-name {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
+    font-size: 24px;
     letter-spacing: 2px;
     color: var(--white);
-    margin-bottom: 20px;
+    line-height: 1.1;
   }
 
   .pillar-desc {
-    font-size: 13px;
-    line-height: 1.9;
-    color: var(--white-dim);
-  }
-
-  .pillar-items {
-    margin-top: 24px;
-    list-style: none;
-  }
-
-  .pillar-items li {
     font-size: 11px;
-    letter-spacing: 1.5px;
-    color: var(--gold-light);
-    text-transform: uppercase;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(201,168,108,0.1);
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    line-height: 1.8;
+    color: var(--white-dim);
+    margin: 0;
   }
 
-  .pillar-items li::before {
-    content: '';
-    display: block;
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: var(--gold-mid);
-    flex-shrink: 0;
+  .pillar-cta {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 8px;
+    color: var(--gold-light);
+    text-decoration: none;
+    transition: color 0.3s;
   }
+
+  .pillar-cta svg {
+    width: 30px;
+    height: 30px;
+    transition: transform 0.3s;
+  }
+
+  .pillar-card:hover .pillar-cta { color: #D4A85A; }
+  .pillar-card:hover .pillar-cta svg { transform: translateX(4px); }
+
+  .pillar-items { display: none; }
 
   /* ─── WHO WE SERVE ─── */
   .who {
@@ -1151,7 +1171,7 @@
     section, .pillars, .experience, .contact { padding: 80px 24px; }
     .hero-content { padding: 0 24px; }
     .hero-scroll { right: 24px; }
-    .pillars-grid, .team-grid { grid-template-columns: 1fr; }
+    .pillars-grid { grid-template-columns: 1fr 1fr; } .team-grid { grid-template-columns: 1fr; }
     .experience-grid { grid-template-columns: 1fr 1fr; }
     .form-row { grid-template-columns: 1fr; }
     footer { flex-direction: column; gap: 16px; text-align: center; }
@@ -1360,62 +1380,55 @@
     </div>
   </div>
   <div class="pillars-grid">
+
     <div class="pillar-card">
-      <div class="pillar-number">01</div>
-      <div class="pillar-name">Training Optimization</div>
-      <p class="pillar-desc">Individualized resistance programming built around your movement profile, injury history, body composition, and performance goals.</p>
-      <ul class="pillar-items">
-        <li>Progressive overload systems</li>
-        <li>Mobility & injury prevention</li>
-        <li>Functional strength development</li>
-      </ul>
+      <div class="pillar-img-placeholder"></div>
+      <div class="pillar-content">
+        <div class="pillar-number">01</div>
+        <div class="pillar-name">Training Optimization</div>
+        <p class="pillar-desc">Individualized resistance programming built around your movement profile, injury history, body composition, and performance goals.</p>
+        <a href="#contact" onclick="openCalendly(event)" class="pillar-cta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 16 12 12 16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        </a>
+      </div>
     </div>
+
     <div class="pillar-card">
-      <div class="pillar-number">02</div>
-      <div class="pillar-name">Nutrition Strategy</div>
-      <p class="pillar-desc">Personalized nutrition coaching that fits your lifestyle — no fad diets, just precision-built fueling for performance.</p>
-      <ul class="pillar-items">
-        <li>Macro & micronutrient planning</li>
-        <li>Body composition optimization</li>
-        <li>Sustainable habit formation</li>
-      </ul>
+      <div class="pillar-img-placeholder"></div>
+      <div class="pillar-content">
+        <div class="pillar-number">02</div>
+        <div class="pillar-name">Nutrition Strategy</div>
+        <p class="pillar-desc">Personalized nutrition coaching that fits your lifestyle — precision-built fueling for performance and body composition.</p>
+        <a href="#contact" onclick="openCalendly(event)" class="pillar-cta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 16 12 12 16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        </a>
+      </div>
     </div>
+
     <div class="pillar-card">
-      <div class="pillar-number">03</div>
-      <div class="pillar-name">Body Composition & Biomarkers</div>
-      <p class="pillar-desc">Progress is measured, not assumed. Regular body composition assessments and health biomarker tracking give us the data to make precise, evidence-based adjustments to your plan — ensuring every decision is driven by your biology, not guesswork.</p>
-      <ul class="pillar-items">
-        <li>Body composition assessments</li>
-        <li>Health biomarker analysis</li>
-        <li>Progress tracking & adjustments</li>
-      </ul>
+      <div class="pillar-img-placeholder"></div>
+      <div class="pillar-content">
+        <div class="pillar-number">03</div>
+        <div class="pillar-name">Body Composition & Biomarkers</div>
+        <p class="pillar-desc">Progress is measured, not assumed. Regular assessments and biomarker tracking ensure every decision is driven by your biology.</p>
+        <a href="#contact" onclick="openCalendly(event)" class="pillar-cta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 16 12 12 16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        </a>
+      </div>
     </div>
+
     <div class="pillar-card">
-      <div class="pillar-number">04</div>
-      <div class="pillar-name">Lifestyle Architecture</div>
-      <p class="pillar-desc">Your health system integrates seamlessly with your professional demands, schedule, and life outside the gym.</p>
-      <ul class="pillar-items">
-        <li>Habit & routine design</li>
-        <li>Accountability systems</li>
-        <li>Long-term health planning</li>
-      </ul>
+      <div class="pillar-img-placeholder"></div>
+      <div class="pillar-content">
+        <div class="pillar-number">04</div>
+        <div class="pillar-name">Lifestyle Architecture</div>
+        <p class="pillar-desc">Your health and performance plan integrates seamlessly with your professional demands, schedule, and life outside the gym.</p>
+        <a href="#contact" onclick="openCalendly(event)" class="pillar-cta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 16 12 12 16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        </a>
+      </div>
     </div>
-    <div class="pillar-card">
-      <div class="pillar-number">05</div>
-      <div class="pillar-name">Performance Metrics</div>
-      <p class="pillar-desc">Every variable is tracked, measured, and optimized. Data removes guesswork and accelerates your progress.</p>
-      <ul class="pillar-items">
-        <li>Strength & body composition</li>
-        <li>Energy & output tracking</li>
-        <li>Quarterly progress reviews</li>
-      </ul>
-    </div>
-    <div class="pillar-card" style="background: var(--charcoal-3); display: flex; flex-direction: column; justify-content: center; align-items: flex-start;">
-      <p style="font-size:13px; line-height:1.9; color:var(--white-dim); margin-bottom: 32px;">
-        True health is a long-term partnership, not a 12-week program. ELEMENTS clients don't just train — they build foundations for life.
-      </p>
-      <a href="#" onclick="openCalendly(event)" class="btn-primary"><span>Book Your Assessment</span></a>
-    </div>
+
   </div>
 </div>
 
