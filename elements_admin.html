@@ -1003,8 +1003,48 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       <!-- ASSESSMENT LOG TAB -->
       <div id="dptab-t_assess" style="display:none;padding:0 0 20px">
         <div class="dp-sec">
-          <div class="dp-sec-title">Assessment Logs</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div class="dp-sec-title">Assessment Logs</div>
+            <button onclick="alToggleForm()" id="al-add-btn" style="padding:6px 14px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;font-weight:600">+ Add Assessment</button>
+          </div>
           <div style="font-size:11px;color:var(--muted);margin-bottom:20px">Body composition data pulled from saved protocols — most recent first.</div>
+
+          <!-- Manual Entry Form -->
+          <div id="al-form" style="display:none;background:var(--c2);border:1px solid var(--borderw);padding:20px;margin-bottom:16px">
+            <div style="font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:16px">New Assessment Entry</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px">
+              <div>
+                <div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Date</div>
+                <input type="date" id="al-date" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none">
+              </div>
+              <div>
+                <div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Body Weight (lbs)</div>
+                <input type="number" id="al-bw" placeholder="e.g. 185.2" step="0.1" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none">
+              </div>
+              <div>
+                <div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Body Fat %</div>
+                <input type="number" id="al-bf" placeholder="e.g. 18.5" step="0.01" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none">
+              </div>
+              <div>
+                <div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Lean Mass (lbs)</div>
+                <input type="number" id="al-lm" placeholder="e.g. 151.0" step="0.1" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none">
+              </div>
+              <div>
+                <div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Fat Mass (lbs)</div>
+                <input type="number" id="al-fm" placeholder="e.g. 34.2" step="0.1" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none">
+              </div>
+              <div>
+                <div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Visceral Fat</div>
+                <input type="number" id="al-vf" placeholder="e.g. 8" step="0.1" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none">
+              </div>
+            </div>
+            <div id="al-form-msg" style="font-size:11px;margin-bottom:10px"></div>
+            <div style="display:flex;gap:8px">
+              <button onclick="alSaveManual()" style="padding:8px 20px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;font-weight:600">Save Assessment</button>
+              <button onclick="alToggleForm()" style="padding:8px 16px;background:none;color:var(--muted);border:1px solid var(--borderw);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase">Cancel</button>
+            </div>
+          </div>
+
           <div id="al-log-body">
             <div style="font-size:12px;color:var(--muted);padding:30px;text-align:center">No assessment data yet. Save a protocol to populate this log.</div>
           </div>
@@ -5925,6 +5965,59 @@ async function loadAssessmentLogs(){
       </div>
     </div>`;
   }).join('');
+}
+
+function alToggleForm(){
+  const form = document.getElementById('al-form');
+  if(!form) return;
+  const open = form.style.display === 'block';
+  form.style.display = open ? 'none' : 'block';
+  if(!open){
+    // Set today's date as default
+    document.getElementById('al-date').value = new Date().toISOString().split('T')[0];
+  }
+}
+
+async function alSaveManual(){
+  if(!currentClient) return;
+  const msg = document.getElementById('al-form-msg');
+  const date = document.getElementById('al-date').value;
+  const bw = parseFloat(document.getElementById('al-bw').value)||null;
+  const bf = parseFloat(document.getElementById('al-bf').value)||null;
+  const lm = parseFloat(document.getElementById('al-lm').value)||null;
+  const fm = parseFloat(document.getElementById('al-fm').value)||null;
+  const vf = parseFloat(document.getElementById('al-vf').value)||null;
+
+  if(!date){ msg.style.color='var(--red)'; msg.textContent='Please enter a date.'; return; }
+  if(!bw && !bf){ msg.style.color='var(--red)'; msg.textContent='Please enter at least body weight or body fat.'; return; }
+
+  msg.style.color='var(--muted)'; msg.textContent='Saving...';
+
+  // Save as a protocol entry
+  const{error} = await sb.from('protocols').insert({
+    client_id: currentClient.id,
+    name: 'Manual Assessment',
+    created_at: date,
+    assessment_date: date,
+    body_weight: bw,
+    bc_total_mass: bw,
+    body_fat: bf,
+    bc_bf_pct: bf,
+    lean_mass: lm,
+    bc_lean_mass: lm,
+    bc_fat_mass: fm,
+    bc_visc_fat: vf,
+  });
+
+  if(error){
+    msg.style.color='#CF6679'; msg.textContent='Error: '+error.message;
+    return;
+  }
+
+  msg.style.color='var(--gold)'; msg.textContent='✓ Saved';
+  // Clear fields
+  ['al-bw','al-bf','al-lm','al-fm','al-vf'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  setTimeout(()=>{ alToggleForm(); loadAssessmentLogs(); }, 800);
 }
 
 function alToggleEntry(id){
