@@ -1012,32 +1012,59 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
           <!-- Manual Entry Form -->
           <div id="al-form" style="display:none;background:var(--c2);border:1px solid var(--borderw);padding:20px;margin-bottom:16px">
             <div style="font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:16px">New Assessment Entry</div>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px">
+
+            <!-- Date + Type Selector -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
               <div>
-                <div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Date</div>
+                <div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Assessment Date</div>
                 <input type="date" id="al-date" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none">
               </div>
               <div>
-                <div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Body Weight (lbs)</div>
-                <input type="number" id="al-bw" placeholder="e.g. 185.2" step="0.1" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none">
-              </div>
-              <div>
-                <div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Body Fat %</div>
-                <input type="number" id="al-bf" placeholder="e.g. 18.5" step="0.01" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none">
-              </div>
-              <div>
-                <div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Lean Mass (lbs)</div>
-                <input type="number" id="al-lm" placeholder="e.g. 151.0" step="0.1" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none">
-              </div>
-              <div>
-                <div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Fat Mass (lbs)</div>
-                <input type="number" id="al-fm" placeholder="e.g. 34.2" step="0.1" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none">
-              </div>
-              <div>
-                <div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Visceral Fat</div>
-                <input type="number" id="al-vf" placeholder="e.g. 8" step="0.1" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none">
+                <div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Assessment Type</div>
+                <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+                  <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--white);cursor:pointer">
+                    <input type="checkbox" id="al-type-dexa" onchange="alUpdateTypes()" style="accent-color:var(--gold-mid)"> DEXA
+                  </label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--white);cursor:pointer">
+                    <input type="checkbox" id="al-type-calipers" onchange="alUpdateTypes()" style="accent-color:var(--gold-mid)"> Calipers
+                  </label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--white);cursor:pointer">
+                    <input type="checkbox" id="al-type-circumference" onchange="alUpdateTypes()" style="accent-color:var(--gold-mid)"> Circumference
+                  </label>
+                </div>
               </div>
             </div>
+
+            <!-- DEXA Fields -->
+            <div id="al-dexa-section" style="display:none;margin-bottom:14px">
+              <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--borderw)">DEXA Scan Data</div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+                <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Total Mass (lbs)</div><input type="number" id="al-bw" placeholder="185.2" step="0.1" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none"></div>
+                <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Body Fat %</div><input type="number" id="al-bf" placeholder="18.5" step="0.01" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none"></div>
+                <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Lean Mass (lbs)</div><input type="number" id="al-lm" placeholder="151.0" step="0.1" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none"></div>
+                <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Fat Mass (lbs)</div><input type="number" id="al-fm" placeholder="34.2" step="0.1" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none"></div>
+                <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">BMC (lbs)</div><input type="number" id="al-bmc" placeholder="5.8" step="0.01" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none"></div>
+                <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Visceral Fat</div><input type="number" id="al-vf" placeholder="8" step="0.1" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none"></div>
+                <div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">RMR (kcal)</div><input type="number" id="al-rmr" placeholder="1820" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none"></div>
+              </div>
+            </div>
+
+            <!-- Caliper Skinfold Fields -->
+            <div id="al-caliper-section" style="display:none;margin-bottom:14px">
+              <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--borderw)">Caliper Skinfolds (mm)</div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+                ${['Pectoral','Triceps','Biceps','Subscapularis','Suprailiac-1','Suprailiac-2','Mid-Axillary','Umbilical','Hamstrings','Quadriceps'].map(s=>`<div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">${s}</div><input type="number" id="al-sk-${s.toLowerCase().replace(/[^a-z0-9]/g,'-')}" placeholder="mm" step="0.1" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none"></div>`).join('')}
+              </div>
+            </div>
+
+            <!-- Circumference Fields -->
+            <div id="al-circ-section" style="display:none;margin-bottom:14px">
+              <div style="font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--borderw)">Circumference Measurements (inches)</div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+                ${['Shoulders','Upper Arm','Umbilical / Waist','Hips','Thigh'].map(s=>`<div><div style="font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">${s}</div><input type="number" id="al-cm-${s.toLowerCase().replace(/[^a-z0-9]/g,'-')}" placeholder='in"' step="0.1" style="width:100%;background:var(--c1);border:1px solid var(--borderw);color:var(--white);padding:7px 10px;font-family:'Montserrat',sans-serif;font-size:11px;outline:none"></div>`).join('')}
+              </div>
+            </div>
+
             <div id="al-form-msg" style="font-size:11px;margin-bottom:10px"></div>
             <div style="display:flex;gap:8px">
               <button onclick="alSaveManual()" style="padding:8px 20px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;font-weight:600">Save Assessment</button>
@@ -5967,14 +5994,25 @@ async function loadAssessmentLogs(){
   }).join('');
 }
 
+function alUpdateTypes(){
+  const dexa = document.getElementById('al-type-dexa')?.checked;
+  const cal  = document.getElementById('al-type-calipers')?.checked;
+  const circ = document.getElementById('al-type-circumference')?.checked;
+  document.getElementById('al-dexa-section').style.display  = dexa ? 'block' : 'none';
+  document.getElementById('al-caliper-section').style.display = cal  ? 'block' : 'none';
+  document.getElementById('al-circ-section').style.display  = circ ? 'block' : 'none';
+}
+
 function alToggleForm(){
   const form = document.getElementById('al-form');
   if(!form) return;
   const open = form.style.display === 'block';
   form.style.display = open ? 'none' : 'block';
   if(!open){
-    // Set today's date as default
     document.getElementById('al-date').value = new Date().toISOString().split('T')[0];
+    // Reset checkboxes and sections
+    ['al-type-dexa','al-type-calipers','al-type-circumference'].forEach(id=>{ const el=document.getElementById(id); if(el) el.checked=false; });
+    ['al-dexa-section','al-caliper-section','al-circ-section'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
   }
 }
 
@@ -5982,41 +6020,64 @@ async function alSaveManual(){
   if(!currentClient) return;
   const msg = document.getElementById('al-form-msg');
   const date = document.getElementById('al-date').value;
-  const bw = parseFloat(document.getElementById('al-bw').value)||null;
-  const bf = parseFloat(document.getElementById('al-bf').value)||null;
-  const lm = parseFloat(document.getElementById('al-lm').value)||null;
-  const fm = parseFloat(document.getElementById('al-fm').value)||null;
-  const vf = parseFloat(document.getElementById('al-vf').value)||null;
+  if(!date){ msg.style.color='#CF6679'; msg.textContent='Please enter a date.'; return; }
 
-  if(!date){ msg.style.color='var(--red)'; msg.textContent='Please enter a date.'; return; }
-  if(!bw && !bf){ msg.style.color='var(--red)'; msg.textContent='Please enter at least body weight or body fat.'; return; }
+  const dexa = document.getElementById('al-type-dexa')?.checked;
+  const cal  = document.getElementById('al-type-calipers')?.checked;
+  const circ = document.getElementById('al-type-circumference')?.checked;
+
+  if(!dexa && !cal && !circ){ msg.style.color='#CF6679'; msg.textContent='Please select at least one assessment type.'; return; }
 
   msg.style.color='var(--muted)'; msg.textContent='Saving...';
 
-  // Save as a protocol entry
-  const{error} = await sb.from('protocols').insert({
-    client_id: currentClient.id,
-    name: 'Manual Assessment',
-    created_at: date,
-    assessment_date: date,
-    body_weight: bw,
-    bc_total_mass: bw,
-    body_fat: bf,
-    bc_bf_pct: bf,
-    lean_mass: lm,
-    bc_lean_mass: lm,
-    bc_fat_mass: fm,
-    bc_visc_fat: vf,
-  });
-
-  if(error){
-    msg.style.color='#CF6679'; msg.textContent='Error: '+error.message;
-    return;
+  // Build skinfold measurements
+  const skSites = ['Pectoral','Triceps','Biceps','Subscapularis','Suprailiac-1','Suprailiac-2','Mid-Axillary','Umbilical','Hamstrings','Quadriceps'];
+  let skMeasurements = null;
+  if(cal){
+    const obj = {};
+    skSites.forEach(s=>{
+      const val = parseFloat(document.getElementById('al-sk-'+s.toLowerCase().replace(/[^a-z0-9]/g,'-'))?.value);
+      if(!isNaN(val)) obj[s] = val;
+    });
+    if(Object.keys(obj).length) skMeasurements = JSON.stringify(obj);
   }
 
+  // Build circumference measurements
+  const cmSites = ['Shoulders','Upper Arm','Umbilical / Waist','Hips','Thigh'];
+  let cmMeasurements = null;
+  if(circ){
+    const obj = {};
+    cmSites.forEach(s=>{
+      const val = parseFloat(document.getElementById('al-cm-'+s.toLowerCase().replace(/[^a-z0-9]/g,'-'))?.value);
+      if(!isNaN(val)) obj[s] = val;
+    });
+    if(Object.keys(obj).length) cmMeasurements = JSON.stringify(obj);
+  }
+
+  const payload = {
+    client_id: currentClient.id,
+    name: [dexa?'DEXA':null, cal?'Calipers':null, circ?'Circumference':null].filter(Boolean).join(' + ') + ' Assessment',
+    created_at: new Date(date).toISOString(),
+    assessment_date: date,
+    body_weight:   dexa ? (parseFloat(document.getElementById('al-bw')?.value)||null) : null,
+    bc_total_mass: dexa ? (parseFloat(document.getElementById('al-bw')?.value)||null) : null,
+    body_fat:      dexa ? (parseFloat(document.getElementById('al-bf')?.value)||null) : null,
+    bc_bf_pct:     dexa ? (parseFloat(document.getElementById('al-bf')?.value)||null) : null,
+    lean_mass:     dexa ? (parseFloat(document.getElementById('al-lm')?.value)||null) : null,
+    bc_lean_mass:  dexa ? (parseFloat(document.getElementById('al-lm')?.value)||null) : null,
+    bc_fat_mass:   dexa ? (parseFloat(document.getElementById('al-fm')?.value)||null) : null,
+    bc_bmc:        dexa ? (parseFloat(document.getElementById('al-bmc')?.value)||null) : null,
+    bc_visc_fat:   dexa ? (parseFloat(document.getElementById('al-vf')?.value)||null) : null,
+    bc_rmr:        dexa ? (parseFloat(document.getElementById('al-rmr')?.value)||null) : null,
+    sk_measurements: skMeasurements,
+    cm_measurements: cmMeasurements,
+  };
+
+  const{error} = await sb.from('protocols').insert(payload);
+
+  if(error){ msg.style.color='#CF6679'; msg.textContent='Error: '+error.message; return; }
+
   msg.style.color='var(--gold)'; msg.textContent='✓ Saved';
-  // Clear fields
-  ['al-bw','al-bf','al-lm','al-fm','al-vf'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   setTimeout(()=>{ alToggleForm(); loadAssessmentLogs(); }, 800);
 }
 
