@@ -1299,54 +1299,82 @@
       <p>We exist to help people build those foundations — through science-driven training, personalized programming, and long-term accountability.</p>
     </div>
     <div style="display:flex;align-items:center;justify-content:center">
-      <svg width="100%" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" role="img" style="max-width:480px;display:block">
+      <svg width="100%" viewBox="0 0 560 560" xmlns="http://www.w3.org/2000/svg" role="img" style="max-width:520px;display:block">
   <title>Circular flow: Activity, Nutrition, Supplementation, Consistency</title>
   <defs>
     <marker id="carr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
       <path d="M2 2L8 5L2 8" fill="none" stroke="#C9A86C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </marker>
+    <!-- White masks to hide circle lines behind boxes -->
+    <mask id="m-top">
+      <rect width="560" height="560" fill="white"/>
+      <rect x="140" y="20" width="280" height="74" fill="black"/>
+    </mask>
+    <mask id="m-right">
+      <rect width="560" height="560" fill="white"/>
+      <rect x="380" y="218" width="160" height="74" fill="black"/>
+    </mask>
+    <mask id="m-bottom">
+      <rect width="560" height="560" fill="white"/>
+      <rect x="140" y="466" width="280" height="74" fill="black"/>
+    </mask>
+    <mask id="m-left">
+      <rect width="560" height="560" fill="white"/>
+      <rect x="20" y="218" width="160" height="74" fill="black"/>
+    </mask>
   </defs>
 
-  <!-- Outer ring -->
-  <circle cx="250" cy="250" r="190" fill="none" stroke="rgba(201,168,108,0.2)" stroke-width="1"/>
-  <!-- Inner ring -->
-  <circle cx="250" cy="250" r="140" fill="none" stroke="rgba(201,168,108,0.1)" stroke-width="1" stroke-dasharray="3 5"/>
+  <!-- Outer ring — masked behind boxes -->
+  <circle cx="280" cy="280" r="210" fill="none" stroke="rgba(201,168,108,0.3)" stroke-width="1.2"
+    mask="url(#m-top)"/>
+  <circle cx="280" cy="280" r="210" fill="none" stroke="rgba(201,168,108,0.3)" stroke-width="1.2"
+    mask="url(#m-right)"/>
+  <circle cx="280" cy="280" r="210" fill="none" stroke="rgba(201,168,108,0.3)" stroke-width="1.2"
+    mask="url(#m-bottom)"/>
+  <circle cx="280" cy="280" r="210" fill="none" stroke="rgba(201,168,108,0.3)" stroke-width="1.2"
+    mask="url(#m-left)"/>
 
-  <!-- Arc arrows (clockwise, sitting on outer ring r=190) -->
-  <!-- Top → Right -->
-  <path d="M 345 95 A 190 190 0 0 1 440 345" fill="none" stroke="rgba(201,168,108,0.55)" stroke-width="1.2" marker-end="url(#carr)"/>
+  <!-- Inner dashed ring -->
+  <circle cx="280" cy="280" r="155" fill="none" stroke="rgba(201,168,108,0.12)" stroke-width="1" stroke-dasharray="3 6"/>
+
+  <!-- Curved arrows clockwise between boxes (on outer ring) -->
+  <!-- Top → Right (arc from ~20° to ~70° of circle, i.e. NE quadrant) -->
+  <path d="M 418 95 A 210 210 0 0 1 490 418" fill="none" stroke="rgba(201,168,108,0.6)" stroke-width="1.3" marker-end="url(#carr)"/>
   <!-- Right → Bottom -->
-  <path d="M 440 368 A 190 190 0 0 1 345 438" fill="none" stroke="rgba(201,168,108,0.55)" stroke-width="1.2" marker-end="url(#carr)"/>
+  <path d="M 490 444 A 210 210 0 0 1 418 465" fill="none" stroke="rgba(201,168,108,0.6)" stroke-width="1.3" marker-end="url(#carr)"/>
   <!-- Bottom → Left -->
-  <path d="M 155 438 A 190 190 0 0 1 60 368" fill="none" stroke="rgba(201,168,108,0.55)" stroke-width="1.2" marker-end="url(#carr)"/>
+  <path d="M 142 465 A 210 210 0 0 1 70 444" fill="none" stroke="rgba(201,168,108,0.6)" stroke-width="1.3" marker-end="url(#carr)"/>
   <!-- Left → Top -->
-  <path d="M 60 345 A 190 190 0 0 1 155 95" fill="none" stroke="rgba(201,168,108,0.55)" stroke-width="1.2" marker-end="url(#carr)"/>
+  <path d="M 70 418 A 210 210 0 0 1 142 95" fill="none" stroke="rgba(201,168,108,0.6)" stroke-width="1.3" marker-end="url(#carr)"/>
 
-  <!-- ACTIVITY — Top, centered at (250, 60) -->
-  <rect x="130" y="28" width="240" height="60" rx="3" fill="rgba(201,168,108,0.07)" stroke="rgba(201,168,108,0.5)" stroke-width="1"/>
-  <text x="250" y="54" text-anchor="middle" dominant-baseline="central" font-family="Bebas Neue,sans-serif" font-size="20" letter-spacing="4" fill="#C9A86C">ACTIVITY</text>
-  <text x="250" y="74" text-anchor="middle" dominant-baseline="central" font-family="Montserrat,sans-serif" font-size="9" letter-spacing="2.5" fill="rgba(201,168,108,0.5)">TRAINING &amp; MOVEMENT</text>
+  <!-- ACTIVITY — Top -->
+  <rect x="140" y="20" width="280" height="74" rx="3" fill="rgba(14,12,10,0.95)" stroke="rgba(201,168,108,0.5)" stroke-width="1"/>
+  <text x="280" y="50" text-anchor="middle" dominant-baseline="central" font-family="Bebas Neue,sans-serif" font-size="22" letter-spacing="4" fill="#C9A86C">ACTIVITY</text>
+  <text x="280" y="74" text-anchor="middle" dominant-baseline="central" font-family="Montserrat,sans-serif" font-size="9" letter-spacing="2.5" fill="rgba(201,168,108,0.5)">TRAINING &amp; MOVEMENT</text>
 
-  <!-- NUTRITION — Right, centered at (440, 250) -->
-  <rect x="370" y="220" width="120" height="60" rx="3" fill="rgba(201,168,108,0.07)" stroke="rgba(201,168,108,0.5)" stroke-width="1"/>
-  <text x="430" y="246" text-anchor="middle" dominant-baseline="central" font-family="Bebas Neue,sans-serif" font-size="20" letter-spacing="4" fill="#C9A86C">NUTRI-</text>
-  <text x="430" y="266" text-anchor="middle" dominant-baseline="central" font-family="Bebas Neue,sans-serif" font-size="20" letter-spacing="4" fill="#C9A86C">TION</text>
+  <!-- NUTRITION — Right -->
+  <rect x="380" y="218" width="160" height="74" rx="3" fill="rgba(14,12,10,0.95)" stroke="rgba(201,168,108,0.5)" stroke-width="1"/>
+  <text x="460" y="248" text-anchor="middle" dominant-baseline="central" font-family="Bebas Neue,sans-serif" font-size="22" letter-spacing="4" fill="#C9A86C">NUTRITION</text>
+  <text x="460" y="272" text-anchor="middle" dominant-baseline="central" font-family="Montserrat,sans-serif" font-size="9" letter-spacing="2.5" fill="rgba(201,168,108,0.5)">DIET &amp; FUELING</text>
 
-  <!-- SUPPLEMENTATION — Bottom, centered at (250, 470) -->
-  <rect x="100" y="438" width="300" height="60" rx="3" fill="rgba(201,168,108,0.07)" stroke="rgba(201,168,108,0.5)" stroke-width="1"/>
-  <text x="250" y="462" text-anchor="middle" dominant-baseline="central" font-family="Bebas Neue,sans-serif" font-size="16" letter-spacing="3" fill="#C9A86C">SUPPLEMENTATION</text>
-  <text x="250" y="482" text-anchor="middle" dominant-baseline="central" font-family="Montserrat,sans-serif" font-size="9" letter-spacing="2.5" fill="rgba(201,168,108,0.5)">TARGETED SUPPORT</text>
+  <!-- SUPPLEMENTATION — Bottom -->
+  <rect x="140" y="466" width="280" height="74" rx="3" fill="rgba(14,12,10,0.95)" stroke="rgba(201,168,108,0.5)" stroke-width="1"/>
+  <text x="280" y="496" text-anchor="middle" dominant-baseline="central" font-family="Bebas Neue,sans-serif" font-size="18" letter-spacing="3" fill="#C9A86C">SUPPLEMENTATION</text>
+  <text x="280" y="520" text-anchor="middle" dominant-baseline="central" font-family="Montserrat,sans-serif" font-size="9" letter-spacing="2.5" fill="rgba(201,168,108,0.5)">TARGETED SUPPORT</text>
 
-  <!-- CONSISTENCY — Left, centered at (60, 250) -->
-  <rect x="10" y="220" width="120" height="60" rx="3" fill="rgba(201,168,108,0.07)" stroke="rgba(201,168,108,0.5)" stroke-width="1"/>
-  <text x="70" y="246" text-anchor="middle" dominant-baseline="central" font-family="Bebas Neue,sans-serif" font-size="17" letter-spacing="3" fill="#C9A86C">CONSIS-</text>
-  <text x="70" y="266" text-anchor="middle" dominant-baseline="central" font-family="Bebas Neue,sans-serif" font-size="17" letter-spacing="3" fill="#C9A86C">TENCY</text>
+  <!-- CONSISTENCY — Left -->
+  <rect x="20" y="218" width="160" height="74" rx="3" fill="rgba(14,12,10,0.95)" stroke="rgba(201,168,108,0.5)" stroke-width="1"/>
+  <text x="100" y="248" text-anchor="middle" dominant-baseline="central" font-family="Bebas Neue,sans-serif" font-size="20" letter-spacing="3" fill="#C9A86C">CONSISTENCY</text>
+  <text x="100" y="272" text-anchor="middle" dominant-baseline="central" font-family="Montserrat,sans-serif" font-size="9" letter-spacing="2.5" fill="rgba(201,168,108,0.5)">HABITS &amp; DISCIPLINE</text>
 
-  <!-- Center logo circle -->
-  <circle cx="250" cy="250" r="72" fill="rgba(10,10,10,0.6)" stroke="rgba(201,168,108,0.4)" stroke-width="1.5"/>
-  <!-- E box inside circle -->
-  <rect x="216" y="213" width="68" height="74" rx="2" fill="none" stroke="rgba(201,168,108,0.8)" stroke-width="1.5"/>
-  <text x="250" y="256" text-anchor="middle" dominant-baseline="central" font-family="Bebas Neue,sans-serif" font-size="50" fill="#C9A86C">E</text>
+  <!-- Center: logo -->
+  <circle cx="280" cy="280" r="78" fill="rgba(10,8,6,0.9)" stroke="rgba(201,168,108,0.25)" stroke-width="1"/>
+  <!-- E box -->
+  <rect x="246" y="240" width="68" height="80" rx="0" fill="none" stroke="#F5F2EE" stroke-width="2"/>
+  <!-- E letter gold gradient -->
+  <text x="280" y="284" text-anchor="middle" dominant-baseline="central" font-family="Bebas Neue,sans-serif" font-size="56" fill="#C9A86C">E</text>
+  <!-- LEMENTS -->
+  <text x="322" y="268" text-anchor="start" dominant-baseline="central" font-family="Bebas Neue,sans-serif" font-size="0" fill="#F5F2EE">LEMENTS</text>
 
 </svg>
     </div>
