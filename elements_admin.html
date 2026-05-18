@@ -4843,7 +4843,11 @@ function editIntraProtocol(){
 
 async function saveIntraThenContinue(){
   await saveIntraDetails();
-  wzSaveAndNext(7,'saveMealPlan',null);
+  // Mark step 6 (supplements) complete and go to step 7 (meal plan)
+  wzCompleted.add(6);
+  const stepEl = document.getElementById('wz-step-6');
+  if(stepEl){ stepEl.classList.add('done'); stepEl.classList.remove('on'); }
+  setTimeout(()=>{ goWizardStep(7); generateMealPlan(); }, 400);
 }
 
 async function saveIntraDetails(){
@@ -4871,6 +4875,10 @@ async function saveIntraDetails(){
   }
   msg.style.color='var(--green)';msg.textContent='✓ Intra workout protocol saved.';
   setTimeout(()=>msg.textContent='',3000);
+  // Reload so meal plan and PDF have fresh supplement data
+  await loadAll();
+  const refreshed=allClients.find(c=>c.id===currentClient?.id);
+  if(refreshed) currentClient=refreshed;
 }
 
 function loadIntraProtocol(supps){
