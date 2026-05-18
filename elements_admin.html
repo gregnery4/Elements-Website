@@ -7201,6 +7201,35 @@ function _buildMealPlanPDF(jsPDF,c,setMsg){
     }
 
     // Add footer to final page
+    // Intra Workout Supplement Protocol
+    const intraSupps = (c.supplements||[]).filter(s=>s.type==='intra');
+    if(intraSupps.length){
+      checkY(14 + intraSupps.length * 7);
+      // Section header
+      doc.setFillColor(...GOLD);doc.rect(M,y,col,7,'F');
+      doc.setFontSize(7);doc.setFont('helvetica','bold');doc.setTextColor(...WHT);
+      doc.text('INTRA WORKOUT SUPPLEMENT PROTOCOL',M+4,y+5);
+      y+=7;
+      // Column headers
+      doc.setFillColor(240,237,232);doc.rect(M,y,col,6,'F');
+      doc.setFontSize(6);doc.setFont('helvetica','bold');doc.setTextColor(100,90,80);
+      doc.text('SUPPLEMENT',M+4,y+4.3);
+      doc.text('DOSE',M+90,y+4.3);
+      doc.text('TIMING',M+140,y+4.3);
+      y+=6;
+      intraSupps.forEach((s,idx)=>{
+        if(idx%2===0){doc.setFillColor(255,255,255);}else{doc.setFillColor(250,248,245);}
+        doc.rect(M,y,col,7,'F');
+        doc.setFontSize(7.5);doc.setFont('helvetica','bold');doc.setTextColor(22,22,22);
+        doc.text(s.name||'',M+4,y+5);
+        doc.setFont('helvetica','normal');doc.setTextColor(70,65,60);
+        doc.text(s.dose||'—',M+90,y+5);
+        doc.text(s.timing||'—',M+140,y+5);
+        y+=7;
+      });
+      y+=4;
+    }
+
     addFooter();
 
     doc.save(`${clientName.replace(/\s+/g,'-')}-Meal-Plan.pdf`);
