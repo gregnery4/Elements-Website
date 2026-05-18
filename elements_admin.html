@@ -2322,6 +2322,23 @@ function generateMealPlan(){
     </div>
   </div>`;
 
+  // Add intra workout supplement protocol at bottom
+  const intraSupps = (currentClient?.supplements||[]).filter(s=>s.type==='intra');
+  if(intraSupps.length){
+    html+=`
+    <div style="background:var(--c1);border:1px solid rgba(201,168,108,.3);padding:20px 24px;margin-top:3px">
+      <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--borderw)">Intra Workout Supplement Protocol</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px">
+        ${intraSupps.map(s=>`
+        <div style="background:var(--c2);border:1px solid var(--borderw);padding:12px 14px">
+          <div style="font-size:11px;font-weight:600;color:var(--white);margin-bottom:4px">${s.name}</div>
+          ${s.dose?`<div style="font-size:9px;color:var(--gold);letter-spacing:1px">${s.dose}</div>`:''}
+          ${s.timing?`<div style="font-size:9px;color:var(--muted);margin-top:2px">${s.timing}</div>`:''}
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }
+
   document.getElementById('meal-plan-output').innerHTML=html||'<div style="font-size:12px;color:var(--muted);padding:20px 0;text-align:center">No meal data found. Fill in the Meal Design tab first.</div>';
 }
 
@@ -4542,6 +4559,30 @@ function _doBuildPDF(jsPDF, c, setMsg){
         doc.setFont('helvetica','normal');doc.setTextColor(...DG);doc.text(s.dose||'—',M+110,y+5);
         y+=7;
       });
+    }
+
+    // Intra Workout Supplement Protocol
+    const intraSupps = (currentClient?.supplements||[]).filter(s=>s.type==='intra');
+    if(intraSupps.length){
+      checkY(10 + intraSupps.length * 7);
+      secBar('Intra Workout Supplement Protocol');
+      doc.setFillColor(245,243,240);doc.rect(M,y,col,6,'F');
+      doc.setFontSize(6);doc.setFont('helvetica','bold');doc.setTextColor(...MG);
+      doc.text('SUPPLEMENT',M+4,y+4.3);
+      doc.text('DOSE',M+80,y+4.3);
+      doc.text('TIMING',M+130,y+4.3);
+      y+=6;
+      intraSupps.forEach((s,idx)=>{
+        if(idx%2===0){doc.setFillColor(255,255,255);}else{doc.setFillColor(250,248,245);}
+        doc.rect(M,y,col,7,'F');
+        doc.setFontSize(7.5);doc.setFont('helvetica','bold');doc.setTextColor(...BLK);
+        doc.text(s.name||'',M+4,y+5);
+        doc.setFont('helvetica','normal');doc.setTextColor(...DG);
+        doc.text(s.dose||'—',M+80,y+5);
+        doc.text(s.timing||'—',M+130,y+5);
+        y+=7;
+      });
+      y+=4;
     }
 
     // Footer on all pages
