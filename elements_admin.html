@@ -1509,6 +1509,10 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
             <button class="save-btn" style="margin-top:12px" onclick="saveIntraDetails()">Save Intra Protocol →</button>
             <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-intra-msg"></div>
           </div>
+          <div class="wz-nav" style="margin-top:20px">
+            <button class="wz-back-btn" onclick="goWizardStep(6)">← Back</button>
+            <button class="wz-next-btn" onclick="saveIntraThenContinue()">Save &amp; Continue →</button>
+          </div>
         </div>
       </div>
 
@@ -4794,6 +4798,11 @@ function editIntraProtocol(){
   document.getElementById('intra-edit-btn').style.display='none';
   document.getElementById('intra-detail-fields').style.display='none';
   document.getElementById('intra-pills-msg').textContent='';
+}
+
+async function saveIntraThenContinue(){
+  await saveIntraDetails();
+  wzSaveAndNext(7,'saveMealPlan',null);
 }
 
 async function saveIntraDetails(){
