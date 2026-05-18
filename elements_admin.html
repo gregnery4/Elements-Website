@@ -1430,7 +1430,7 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
       </div>
       <div id="dptab-t8" style="display:none;padding:0 0 20px">
         <div class="dp-sec">
-          <div class="dp-sec-title">Supplement Protocol</div>
+          <div class="dp-sec-title">Daily Supplement Protocol</div>
           <div style="font-size:11px;color:var(--muted);margin-bottom:14px">Select supplements, save the protocol, then assign each one to meals below. Supplements will appear on the Meal Plan tab and in the PDF.</div>
 
           <!-- Pill grid -->
@@ -1478,6 +1478,55 @@ tbody td{padding:13px 14px;font-size:12px;vertical-align:middle;}
               <button class="wz-next-btn" onclick="wzSaveAndNext(6,'saveSuppDetails')">Save &amp; Continue →</button>
             </div>
             <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-supp-msg"></div>
+          </div>
+        </div>
+
+        <!-- INTRA WORKOUT SUPPLEMENT PROTOCOL -->
+        <div class="dp-sec" style="margin-top:3px">
+          <div class="dp-sec-title">Intra Workout Supplement Protocol</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:14px">Select intra-workout supplements and assign doses. These will appear separately on the client's plan.</div>
+
+          <!-- Pill grid -->
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-bottom:10px" id="intra-pills-wrap">
+            <label class="day-pill" id="intra-lbl-0"><input type="checkbox" id="intra-0" onchange="updateIntraPill(0)"> Alpha-Lipoic Acid</label>
+            <label class="day-pill" id="intra-lbl-1"><input type="checkbox" id="intra-1" onchange="updateIntraPill(1)"> B-Complex</label>
+            <label class="day-pill" id="intra-lbl-2"><input type="checkbox" id="intra-2" onchange="updateIntraPill(2)"> CoQ10 200mg</label>
+            <label class="day-pill" id="intra-lbl-3"><input type="checkbox" id="intra-3" onchange="updateIntraPill(3)"> Curcumin 400x</label>
+            <label class="day-pill" id="intra-lbl-4"><input type="checkbox" id="intra-4" onchange="updateIntraPill(4)"> D3 5000 with K2</label>
+            <label class="day-pill" id="intra-lbl-5"><input type="checkbox" id="intra-5" onchange="updateIntraPill(5)"> Digestive Complex</label>
+            <label class="day-pill" id="intra-lbl-6"><input type="checkbox" id="intra-6" onchange="updateIntraPill(6)"> Dynamic BCAA</label>
+            <label class="day-pill" id="intra-lbl-7"><input type="checkbox" id="intra-7" onchange="updateIntraPill(7)"> Dynamic Hydrate</label>
+            <label class="day-pill" id="intra-lbl-8"><input type="checkbox" id="intra-8" onchange="updateIntraPill(8)"> Dynamic Whey Protein</label>
+            <label class="day-pill" id="intra-lbl-9"><input type="checkbox" id="intra-9" onchange="updateIntraPill(9)"> Essential Multi</label>
+            <label class="day-pill" id="intra-lbl-10"><input type="checkbox" id="intra-10" onchange="updateIntraPill(10)"> L-Glutamine Powder</label>
+            <label class="day-pill" id="intra-lbl-11"><input type="checkbox" id="intra-11" onchange="updateIntraPill(11)"> Liposomal Glutathione</label>
+            <label class="day-pill" id="intra-lbl-12"><input type="checkbox" id="intra-12" onchange="updateIntraPill(12)"> Mag Calm Pro</label>
+            <label class="day-pill" id="intra-lbl-13"><input type="checkbox" id="intra-13" onchange="updateIntraPill(13)"> Magnesium Glycinate</label>
+            <label class="day-pill" id="intra-lbl-14"><input type="checkbox" id="intra-14" onchange="updateIntraPill(14)"> NAC-600</label>
+            <label class="day-pill" id="intra-lbl-15"><input type="checkbox" id="intra-15" onchange="updateIntraPill(15)"> Nutridyn Creatine Powder</label>
+            <label class="day-pill" id="intra-lbl-16"><input type="checkbox" id="intra-16" onchange="updateIntraPill(16)"> Nutridyn Fiber</label>
+            <label class="day-pill" id="intra-lbl-17"><input type="checkbox" id="intra-17" onchange="updateIntraPill(17)"> Omega Pure EPA-DHA 720</label>
+            <label class="day-pill" id="intra-lbl-18"><input type="checkbox" id="intra-18" onchange="updateIntraPill(18)"> Paleo Protein</label>
+            <label class="day-pill" id="intra-lbl-19"><input type="checkbox" id="intra-19" onchange="updateIntraPill(19)"> UltraBiotic Complete</label>
+            <label class="day-pill" id="intra-lbl-20"><input type="checkbox" id="intra-20" onchange="updateIntraPill(20)"> Vitamin C 1000 Complex</label>
+            <label class="day-pill" id="intra-lbl-21"><input type="checkbox" id="intra-21" onchange="updateIntraPill(21)"> Zinc Pro</label>
+          </div>
+
+          <!-- Saved badges -->
+          <div id="intra-pills-saved" style="display:none;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:20px">
+            <button onclick="saveIntraProtocol()" style="padding:8px 20px;background:linear-gradient(135deg,var(--gold-mid),var(--gold-dark));color:var(--white);border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;font-weight:600">Save Protocol</button>
+            <button onclick="editIntraProtocol()" id="intra-edit-btn" style="display:none;padding:8px 16px;background:transparent;color:var(--muted);border:1px solid var(--borderw);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase">Edit</button>
+            <span id="intra-pills-msg" style="font-size:10px;color:var(--green);min-height:16px"></span>
+          </div>
+
+          <!-- Dose fields -->
+          <div id="intra-detail-fields" style="display:none">
+            <div style="font-size:9px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Dose & Timing</div>
+            <div id="intra-detail-grid" class="edit-grid"></div>
+            <button class="save-btn" style="margin-top:12px" onclick="saveIntraDetails()">Save Intra Protocol →</button>
+            <div style="font-size:10px;color:var(--green);margin-top:10px;min-height:16px" id="dp-intra-msg"></div>
           </div>
         </div>
       </div>
@@ -1935,6 +1984,7 @@ function openClient(id, skipWizardReset=false){
 
   // Tab 8 — Supplements
   loadSuppProtocol(c.supplements||[]);
+  loadIntraProtocol(c.supplements||[]);
   loadAlFromMetrics(c.client_metrics||[]);
   loadLabsFromMetrics(c.client_metrics||[]);
   loadAssessmentLogs();
@@ -4704,6 +4754,117 @@ const SUPP_LIST=[
   'Omega Pure EPA-DHA 720','Paleo Protein','UltraBiotic Complete',
   'Vitamin C 1000 Complex','Zinc Pro'
 ];
+
+function updateIntraPill(i){
+  const cb=document.getElementById(`intra-${i}`);
+  const lbl=document.getElementById(`intra-lbl-${i}`);
+  if(cb.checked) lbl.classList.add('selected');
+  else lbl.classList.remove('selected');
+}
+
+function getSelectedIntraSupps(){
+  return SUPP_LIST.filter((_,i)=>document.getElementById(`intra-${i}`)?.checked);
+}
+
+function saveIntraProtocol(){
+  const selected=getSelectedIntraSupps();
+  const msg=document.getElementById('intra-pills-msg');
+  if(!selected.length){
+    msg.style.color='var(--red)';msg.textContent='Select at least one supplement.';
+    setTimeout(()=>msg.textContent='',2500);return;
+  }
+  document.getElementById('intra-pills-wrap').style.display='none';
+  const savedEl=document.getElementById('intra-pills-saved');
+  savedEl.style.display='flex';
+  savedEl.innerHTML=selected.map(s=>`<span class="day-saved-badge">${s}</span>`).join('');
+  document.getElementById('intra-edit-btn').style.display='inline-block';
+
+  const grid=document.getElementById('intra-detail-grid');
+  grid.innerHTML=selected.map(s=>{
+    const key='iw-'+s.replace(/[^a-z0-9]/gi,'').toLowerCase();
+    return `
+      <div style="grid-column:1/-1;background:var(--c2);border:1px solid var(--border);padding:14px;margin-bottom:2px">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px">${s}</div>
+        <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+          <div class="edit-field" style="margin:0;flex:0 0 160px">
+            <label>Dose</label>
+            <input type="text" id="id-dose-${key}" placeholder="e.g. 1 scoop">
+          </div>
+          <div class="edit-field" style="margin:0;flex:0 0 200px">
+            <label>Timing</label>
+            <input type="text" id="id-timing-${key}" placeholder="e.g. Pre / During / Post">
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('intra-detail-fields').style.display='block';
+  msg.style.color='var(--green)';msg.textContent='✓ Protocol saved — add dose & timing below';
+  setTimeout(()=>msg.textContent='',3000);
+}
+
+function editIntraProtocol(){
+  document.getElementById('intra-pills-wrap').style.display='grid';
+  document.getElementById('intra-pills-saved').style.display='none';
+  document.getElementById('intra-edit-btn').style.display='none';
+  document.getElementById('intra-detail-fields').style.display='none';
+  document.getElementById('intra-pills-msg').textContent='';
+}
+
+async function saveIntraDetails(){
+  if(!currentClient)return;
+  const msg=document.getElementById('dp-intra-msg');
+  msg.textContent='Saving...';msg.style.color='var(--gold)';
+  const selected=getSelectedIntraSupps();
+
+  // Save as supplements with type='intra'
+  await sb.from('supplements').delete().eq('client_id',currentClient.id).eq('type','intra');
+  const rows=selected.map(s=>{
+    const key='iw-'+s.replace(/[^a-z0-9]/gi,'').toLowerCase();
+    return{
+      client_id:currentClient.id,
+      name:s,
+      dose:document.getElementById(`id-dose-${key}`)?.value||'',
+      timing:document.getElementById(`id-timing-${key}`)?.value||'',
+      type:'intra',
+      active:true,
+    };
+  });
+  if(rows.length){
+    const{error}=await sb.from('supplements').insert(rows);
+    if(error){msg.style.color='var(--red)';msg.textContent='Error: '+error.message;return;}
+  }
+  msg.style.color='var(--green)';msg.textContent='✓ Intra workout protocol saved.';
+  setTimeout(()=>msg.textContent='',3000);
+}
+
+function loadIntraProtocol(supps){
+  const intraSupps=(supps||[]).filter(s=>s.type==='intra');
+  SUPP_LIST.forEach((_,i)=>{
+    const cb=document.getElementById(`intra-${i}`);
+    const lbl=document.getElementById(`intra-lbl-${i}`);
+    if(cb) cb.checked=false;
+    if(lbl) lbl.classList.remove('selected');
+  });
+  if(!intraSupps.length) return;
+  intraSupps.forEach(s=>{
+    const i=SUPP_LIST.findIndex(n=>n.toLowerCase()===s.name.toLowerCase());
+    if(i>=0){
+      const cb=document.getElementById(`intra-${i}`);
+      const lbl=document.getElementById(`intra-lbl-${i}`);
+      if(cb) cb.checked=true;
+      if(lbl) lbl.classList.add('selected');
+    }
+  });
+  saveIntraProtocol();
+  intraSupps.forEach(s=>{
+    const key='iw-'+s.name.replace(/[^a-z0-9]/gi,'').toLowerCase();
+    const doseEl=document.getElementById(`id-dose-${key}`);
+    const timingEl=document.getElementById(`id-timing-${key}`);
+    if(doseEl) doseEl.value=s.dose||'';
+    if(timingEl) timingEl.value=s.timing||'';
+  });
+}
 
 function updateSuppPill(i){
   const cb=document.getElementById(`supp-${i}`);
