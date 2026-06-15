@@ -616,6 +616,132 @@
     text-align: center;
   }
 
+  /* foundations */
+
+  .foundations {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 100px repeat(4, 1fr);
+  background: var(--black);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.foundation-side-label {
+  background: var(--gold-dark);
+  color: var(--white);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(48px, 5vw, 78px);
+  letter-spacing: 4px;
+  padding: 24px 0;
+}
+
+.foundation-card {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: flex-end;
+  padding: 44px;
+}
+
+.foundation-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  background-size: cover;
+  background-position: center;
+  transform: scale(1.02);
+  transition: transform 0.5s ease;
+}
+
+.foundation-card:hover::before {
+  transform: scale(1.08);
+}
+
+.foundation-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.9) 0%,
+    rgba(0,0,0,0.55) 45%,
+    rgba(0,0,0,0.18) 100%
+  );
+  z-index: 1;
+}
+
+.foundation-content {
+  position: relative;
+  z-index: 2;
+  max-width: 340px;
+}
+
+.foundation-content span {
+  color: var(--gold-light);
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.foundation-content h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(44px, 4.8vw, 78px);
+  line-height: 0.9;
+  margin: 16px 0;
+  color: var(--white);
+}
+
+.foundation-content p {
+  font-size: 12px;
+  line-height: 1.8;
+  color: rgba(245,242,238,0.82);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+/* temporary placeholder images */
+.activity-card {
+  background-image: url('https://images.squarespace-cdn.com/content/v1/67f522a5f1bb3e0f265d1a65/f029196e-49bd-458e-808a-4efbc1f9d1db/DSC01284+2.JPG');
+}
+
+.consistency-card {
+  background-image: url('https://images.squarespace-cdn.com/content/v1/67f522a5f1bb3e0f265d1a65/f029196e-49bd-458e-808a-4efbc1f9d1db/DSC01284+2.JPG');
+}
+
+.nutrition-card {
+  background-image: url('https://images.squarespace-cdn.com/content/v1/67f522a5f1bb3e0f265d1a65/f029196e-49bd-458e-808a-4efbc1f9d1db/DSC01284+2.JPG');
+}
+
+.supplementation-card {
+  background-image: url('https://images.squarespace-cdn.com/content/v1/67f522a5f1bb3e0f265d1a65/f029196e-49bd-458e-808a-4efbc1f9d1db/DSC01284+2.JPG');
+}
+
+@media (max-width: 900px) {
+  .foundations-yard {
+    grid-template-columns: 1fr;
+  }
+
+  .foundation-side-label {
+    writing-mode: initial;
+    transform: none;
+    min-height: 90px;
+    font-size: 42px;
+  }
+
+  .foundation-card {
+    min-height: 70vh;
+    padding: 32px;
+  }
+}
   /* ─── PILLARS ─── */
   .pillars {
     background: var(--black);
@@ -1307,66 +1433,45 @@
 <!-- PHILOSOPHY -->
 <section class="philosophy" id="philosophy" style="position:relative;overflow:hidden">
 
-  <!-- Decorative periodic table outline -->
+  <!-- Foundation Pillars -->
   
 
-  <div class="philosophy-inner" style="position:relative;z-index:1">
-    <div class="philosophy-text">
-      <div class="section-label">Our Mission</div>
-      <h2 class="section-title">Health Is Built<br><span class="gold-text">On Fundamentals</span></h2>
-      <p>Most people chase fitness trends. But health is built on mastering the fundamentals — strength, movement, recovery, nutrition, and consistency.</p>
-      <p>At ELEMENTS, we believe optimal performance is not a destination but a foundation. When these elements are precisely optimized, everything improves: energy, productivity, longevity, mental clarity, and resilience.</p>
-      <p>We exist to help people build those foundations — through science-driven training, personalized programming, and long-term accountability.</p>
+ <section class="foundations" id="philosophy">
+  <div class="foundation-side-label">THE FOUNDATIONS</div>
+
+  <div class="foundation-card activity-card">
+    <div class="foundation-overlay"></div>
+    <div class="foundation-content">
+      <span>01</span>
+      <h2>Activity</h2>
+      <p>Strategic training built around strength, movement, performance, and your real lifestyle.</p>
     </div>
-    <div style="display:flex;align-items:center;justify-content:center">
-      <svg width="100%" viewBox="0 0 560 560" xmlns="http://www.w3.org/2000/svg" role="img" style="max-width:520px;display:block">
-  <title>Circular flow: Activity, Nutrition, Supplementation, Consistency</title>
-  <defs>
-    <marker id="carr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-      <path d="M2 2L8 5L2 8" fill="none" stroke="#C9A86C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </marker>
-    <mask id="m-top"><rect width="560" height="560" fill="white"/><rect x="150.0" y="52" width="260" height="56" fill="black"/></mask>
-    <mask id="m-right"><rect width="560" height="560" fill="white"/><rect x="405" y="252" width="150" height="56" fill="black"/></mask>
-    <mask id="m-bottom"><rect width="560" height="560" fill="white"/><rect x="150.0" y="452.0" width="260" height="56" fill="black"/></mask>
-    <mask id="m-left"><rect width="560" height="560" fill="white"/><rect x="10" y="252.0" width="150" height="56" fill="black"/></mask>
-  </defs>
+  </div>
 
-  <!-- Perfect circle, masked behind each box -->
-  <circle cx="280" cy="280" r="200" fill="none" stroke="rgba(201,168,108,0.35)" stroke-width="1.2" mask="url(#m-top)"/>
-  <circle cx="280" cy="280" r="200" fill="none" stroke="rgba(201,168,108,0.35)" stroke-width="1.2" mask="url(#m-right)"/>
-  <circle cx="280" cy="280" r="200" fill="none" stroke="rgba(201,168,108,0.35)" stroke-width="1.2" mask="url(#m-bottom)"/>
-  <circle cx="280" cy="280" r="200" fill="none" stroke="rgba(201,168,108,0.35)" stroke-width="1.2" mask="url(#m-left)"/>
+  <div class="foundation-card consistency-card">
+    <div class="foundation-overlay"></div>
+    <div class="foundation-content">
+      <span>02</span>
+      <h2>Consistency</h2>
+      <p>Structure and accountability that make progress sustainable beyond motivation.</p>
+    </div>
+  </div>
 
-  <!-- Inner dashed ring -->
-  <circle cx="280" cy="280" r="145" fill="none" stroke="rgba(201,168,108,0.12)" stroke-width="1" stroke-dasharray="3 6"/>
+  <div class="foundation-card nutrition-card">
+    <div class="foundation-overlay"></div>
+    <div class="foundation-content">
+      <span>03</span>
+      <h2>Nutrition</h2>
+      <p>Personalized nutrition guidance designed to support energy, recovery, and long-term health.</p>
+    </div>
+  </div>
 
-  <!-- Clockwise arrows on circle -->
-  <path d="M 420.3 137.5 A 200 200 0 0 1 475.6 238.3" fill="none" stroke="rgba(201,168,108,0.7)" stroke-width="1.4" marker-end="url(#carr)"/>
-  <path d="M 475.6 321.7 A 200 200 0 0 1 420.3 422.5" fill="none" stroke="rgba(201,168,108,0.7)" stroke-width="1.4" marker-end="url(#carr)"/>
-  <path d="M 139.7 422.5 A 200 200 0 0 1 84.4 321.7" fill="none" stroke="rgba(201,168,108,0.7)" stroke-width="1.4" marker-end="url(#carr)"/>
-  <path d="M 84.4 238.3 A 200 200 0 0 1 139.7 137.5" fill="none" stroke="rgba(201,168,108,0.7)" stroke-width="1.4" marker-end="url(#carr)"/>
-
-  <!-- ACTIVITY — Top, centered at (280,80) -->
-  <rect x="150.0" y="52" width="260" height="56" rx="3" fill="rgba(14,12,10,0.97)" stroke="rgba(201,168,108,0.55)" stroke-width="1"/>
-  <text x="280" y="80.0" text-anchor="middle" dominant-baseline="central" font-family="Bebas Neue,sans-serif" font-size="18" letter-spacing="3" fill="#C9A86C">ACTIVITY</text>
-
-  <!-- NUTRITION — Right, centered at circle right point (480,280) -->
-  <rect x="405" y="252" width="150" height="56" rx="3" fill="rgba(14,12,10,0.97)" stroke="rgba(201,168,108,0.55)" stroke-width="1"/>
-  <text x="480" y="280" text-anchor="middle" dominant-baseline="central" font-family="Bebas Neue,sans-serif" font-size="18" letter-spacing="3" fill="#C9A86C">NUTRITION</text>
-
-  <!-- SUPPLEMENTATION — Bottom, centered at (280,480) -->
-  <rect x="150.0" y="452.0" width="260" height="56" rx="3" fill="rgba(14,12,10,0.97)" stroke="rgba(201,168,108,0.55)" stroke-width="1"/>
-  <text x="280" y="480" text-anchor="middle" dominant-baseline="central" font-family="Bebas Neue,sans-serif" font-size="18" letter-spacing="3" fill="#C9A86C">SUPPLEMENTATION</text>
-
-  <!-- CONSISTENCY — Left, centered at (80,280) -->
-  <rect x="10" y="252.0" width="150" height="56" rx="3" fill="rgba(14,12,10,0.97)" stroke="rgba(201,168,108,0.55)" stroke-width="1"/>
-  <text x="85.0" y="280" text-anchor="middle" dominant-baseline="central" font-family="Bebas Neue,sans-serif" font-size="18" letter-spacing="3" fill="#C9A86C">CONSISTENCY</text>
-
-  <!-- Center logo -->
-  <circle cx="280" cy="280" r="75" fill="rgba(10,8,6,0.94)" stroke="rgba(201,168,108,0.3)" stroke-width="1"/>
-  <rect x="246" y="238" width="68" height="84" rx="0" fill="none" stroke="#F5F2EE" stroke-width="2"/>
-  <text x="280" y="280" text-anchor="middle" dominant-baseline="central" font-family="Bebas Neue,sans-serif" font-size="58" fill="#C9A86C">E</text>
-</svg>
+  <div class="foundation-card supplementation-card">
+    <div class="foundation-overlay"></div>
+    <div class="foundation-content">
+      <span>04</span>
+      <h2>Supplementation</h2>
+      <p>Targeted support informed by goals, lifestyle, and measurable health markers.</p>
     </div>
   </div>
 </section>
